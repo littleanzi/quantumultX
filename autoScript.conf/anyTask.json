@@ -1,0 +1,19 @@
+{
+  "name": "anyのTasks",
+  "description": "收集一些自用的定时任务，更新日期：2026-04-25 00:12:00",
+  "raw": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/autoScript.conf/anyTask.json",
+  "task": [
+    "0 7,11,17 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克wx小程序签到, enabled=true",
+    "0 7,11,17 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/historyToday.js, tag=历史上的今天, enabled=true",
+    "0 7,11,17 * * * https://gist.githubusercontent.com/Sliverkiss/33800a98dcd029ba09f8b6fc6f0f5162/raw/aliyun.js, tag=阿里云盘签到, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/AliYunDrive.png, enabled=true",
+    "30 1,7,12,18,22 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/pdd_guoyuan.js, tag=拼多多果园, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/pinduoduo.png, enabled=true",
+    "17 7 * * * https://raw.githubusercontent.com/FoKit/Scripts/main/scripts/jhsh_checkIn.js, tag=建行生活签到, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/ccbLife.jpg, enabled=true",
+    "15 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/weibo_signin.js, tag=新浪微博签到, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/Weibo-00.png, enabled=true",
+    "25 7-12/1 * * * https://raw.githubusercontent.com/WowYiJiu/Personal/main/Script/qqMusic.js, tag=QQ音乐任务, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/QQMusic_01.png, enabled=true",
+    "0 0/2 * * * https://github.com/ChinaTelecomOperators/ChinaTelecom/releases/download/Prerelease-Alpha/Tele_Cellular_Auto.js, tag=电信余量, img-url=https://raw.githubusercontent.com/LikeGEM/TuBiao/main/Icons/zhongguodianxin.png, enabled=false",
+    "30 8 * * * https://raw.githubusercontent.com/Yuheng0101/X/main/Tasks/60s.js, tag=每天60s读懂世界, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/friDay.png, enabled=true",
+    "0 8 * * * https://raw.githubusercontent.com/fmz200/wool_scripts/main/QuantumultX/scripts/oil_price.js, tag=今日油价, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/oil.png, enabled=true",
+    "2 8 * * * https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/freeAppsToday.js, tag=今日限免APP, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/chxm1023/AppStore.png, enabled=true",
+    "0 0 * * * https://github.com/sub-store-org/Sub-Store/releases/latest/download/cron-sync-artifacts.min.js, tag=Sub-Store Sync, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/SubStore.png, enabled=true"
+  ]
+}
