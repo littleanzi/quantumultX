@@ -12,7 +12,7 @@
       "settings": [
         {
           "id": "erkeInput",
-          "name": "鸿星尔克URL",
+          "name": "鸿星尔克url",
           "val": "",
           "type": "text",
           "placeholder": "",
