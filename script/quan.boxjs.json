@@ -28,30 +28,6 @@
         "https://raw.githubusercontent.com/Former-Years/icon/master/erke.png",
         "https://raw.githubusercontent.com/Former-Years/icon/master/erke.png"
       ]
-    },
-    {
-      "id": "oil_price",
-      "name": "今日油价",
-      "keys": ["region"],
-      "settings": [
-        {
-          "id": "youjiaInput",
-          "name": "今日油价",
-          "val": "",
-          "type": "text",
-          "placeholder": "",
-          "autoGrow": true,
-          "rows": 2,
-          "desc": ""
-        }
-      ],
-      "author": "@any",
-      "repo": "https://github.com/littleanzi/quantumultX",
-      "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js",
-      "icons": [
-        "https://raw.githubusercontent.com/Former-Years/icon/master/erke.png",
-        "https://raw.githubusercontent.com/Former-Years/icon/master/erke.png"
-      ]
     }
   ]
 }
