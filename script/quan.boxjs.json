@@ -6,27 +6,20 @@
   "repo": "https://github.com/littleanzi/quantumultX",
   "apps": [
     {
-      "id": "erke",
-      "name": "鸿星尔克",
-      "keys": ["target_data"],
-      "settings": [
+      "id": "erke_sign",
+      "name": "鸿星尔克签到",
+      "apps": [
         {
-          "id": "erkeInput",
-          "name": "鸿星尔克url",
-          "val": "",
-          "type": "text",
-          "placeholder": "",
-          "autoGrow": true,
-          "rows": 2,
-          "desc": ""
+          "id": "erke",
+          "name": "签到配置",
+          "keys": [
+            {
+              "name": "sign_body",
+              "val": "",
+              "desc": "🔥 自动抓取签到请求体，无需手动填写"
+            }
+          ]
         }
-      ],
-      "author": "@any",
-      "repo": "https://github.com/littleanzi/quantumultX",
-      "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js",
-      "icons": [
-        "https://raw.githubusercontent.com/Former-Years/icon/master/erke.png",
-        "https://raw.githubusercontent.com/Former-Years/icon/master/erke.png"
       ]
     }
   ]
