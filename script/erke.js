@@ -20,7 +20,7 @@ if (typeof $request !== 'undefined') {
             setBox(BODY_KEY, body);
             console.log(`📦 已捕获签到请求体，长度 ${body.length}`);
             $.msg($.name, '✅ 参数已更新', '请求体已保存');
-        } catch(e) {}
+        } catch (e) { }
     }
     $.done();
     return;
@@ -69,7 +69,7 @@ function doSign(body) {
             body: body
         }, (err, resp, data) => {
             if (err) { resolve(null); return; }
-            try { resolve(JSON.parse(data)); } catch(e) { resolve(null); }
+            try { resolve(JSON.parse(data)); } catch (e) { resolve(null); }
         });
     });
 }
