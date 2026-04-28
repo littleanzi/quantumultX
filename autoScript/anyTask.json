@@ -3,7 +3,7 @@
   "description": "收集一些自用的定时任务，更新日期：2026-04-25 00:12:00",
   "raw": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/autoScript.conf/anyTask.json",
   "task": [
-    "0 7,11,17 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke_auto.js, tag=鸿星尔克wx小程序签到, enabled=true",
+    "0 7,11,17 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克wx小程序签到, enabled=true",
     "15 9 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/coca_cola_auto.js, tag=可口可乐吧签到, enabled=true",
     "0 7,11,17 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/historyToday.js, tag=历史上的今天, enabled=true",
     "0 8 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/oil_price.js, tag=今日油价, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/oil.png, enabled=true",
