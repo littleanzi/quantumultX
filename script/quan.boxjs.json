@@ -8,7 +8,7 @@
     {
       "name": "鸿星尔克签到",
       "id": "erke_sign",
-      "author": "Former-Years",
+      "author": "@any",
       "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
       "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js",
       "descriptions": {
@@ -34,7 +34,7 @@
           "key": "erke_data",
           "type": "text",
           "title": "账号URL数据",
-          "placeholder": "请先配置MITM抓包，或手动填入URL"
+          "placeholder": "请先配置MITM抓包,或手动填入URL"
         }
       ]
     }
