@@ -6,7 +6,7 @@
   "repo": "https://github.com/littleanzi/quantumultX",
   "apps": [
     {
-      "id": "erke_sign",
+      "id": "erke_auto",
       "name": "鸿星尔克签到",
       "apps": [
         {
@@ -16,7 +16,7 @@
             {
               "name": "sign_body",
               "val": "",
-              "desc": "🔥 自动抓取签到请求体，无需手动填写"
+              "desc": "脚本1自动抓取，无需手动填写"
             }
           ]
         }
