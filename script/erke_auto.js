@@ -1,6 +1,6 @@
 /*
 鸿星尔克签到 - 自动抓取请求体 + 自动签到
-完全不依赖 Cookie，只依赖请求体中的动态参数
+完全依赖重写规则捕获的请求体，无需 Cookie
 */
 
 const $ = new Env('鸿星尔克');
@@ -11,28 +11,31 @@ const SIGN_URL = 'https://hope.demogic.com/gic-wx-app/sign/member_sign.json';
 function getBox(key) { return $.getdata(`@${BOXJS_APP}.${key}`) || ''; }
 function setBox(key, val) { $.setdata(val, `@${BOXJS_APP}.${key}`); }
 
-// ========== 抓取阶段（打开小程序手动签到一次触发） ==========
+// 抓取阶段（重写规则触发）
 if (typeof $request !== 'undefined') {
     let body = $request.body;
     if (body) {
-        try { JSON.parse(body); setBox(BODY_KEY, body); } catch(e) {}
-        console.log(`📦 已捕获签到请求体，长度 ${body.length}`);
-        $.msg($.name, '✅ 签到参数已更新', '请求体已保存');
+        try {
+            JSON.parse(body);
+            setBox(BODY_KEY, body);
+            console.log(`📦 已捕获签到请求体，长度 ${body.length}`);
+            $.msg($.name, '✅ 参数已更新', '请求体已保存');
+        } catch (e) { }
     }
     $.done();
     return;
 }
 
-// ========== 签到阶段 ==========
+// 签到阶段（定时任务触发）
 !(async () => {
     let body = getBox(BODY_KEY);
     if (!body) {
-        console.log('❌ 请先打开鸿星尔克小程序并手动签到一次');
+        console.log('❌ 未找到请求体，请先打开鸿星尔克小程序并手动签到一次');
         $.msg($.name, '提示', '请打开小程序并手动签到');
         $.done();
         return;
     }
-    const result = await postRequest(SIGN_URL, body);
+    const result = await doSign(body);
     if (result && (result.code === '0' || result.code === 0)) {
         console.log(`✅ 签到成功`);
         let award = 0;
@@ -54,10 +57,10 @@ if (typeof $request !== 'undefined') {
     $.done();
 })();
 
-function postRequest(url, body) {
+function doSign(body) {
     return new Promise(resolve => {
         $.post({
-            url: url,
+            url: SIGN_URL,
             headers: {
                 'Content-Type': 'application/json;charset=UTF-8',
                 'channelEntrance': 'wx_app',
@@ -66,20 +69,19 @@ function postRequest(url, body) {
             body: body
         }, (err, resp, data) => {
             if (err) { resolve(null); return; }
-            try { resolve(JSON.parse(data)); } catch(e) { resolve(null); }
+            try { resolve(JSON.parse(data)); } catch (e) { resolve(null); }
         });
     });
 }
 
-// Env 兼容层（精简版，支持 $task 和 $prefs）
+// Env 兼容层（Quantumult X 精简版）
 function Env(name) {
     return {
         name: name,
         getdata: (key) => $prefs.valueForKey(key),
         setdata: (val, key) => $prefs.setValueForKey(val, key),
         msg: (t, s, b) => $notify(t, s, b),
-        get: (o, cb) => $task.fetch({method:'GET',...o}).then(r=>cb(null,r,r.body), e=>cb(e,null,null)),
-        post: (o, cb) => $task.fetch({method:'POST',...o}).then(r=>cb(null,r,r.body), e=>cb(e,null,null)),
+        post: (opt, cb) => $task.fetch({ method: 'POST', ...opt }).then(r => cb(null, r, r.body), e => cb(e, null, null)),
         done: $done
     };
 }
