@@ -6,13 +6,35 @@
   "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
   "apps": [
     {
-      "id": "erke",
       "name": "鸿星尔克签到",
+      "id": "erke_sign",
+      "author": "Former-Years",
+      "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
+      "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js",
+      "descriptions": {
+        "zh": "鸿星尔克微信小程序每日签到获取积分",
+        "en": "Erke mini-program daily check-in for points"
+      },
       "keys": [
         {
-          "name": "sign_body",
-          "val": "",
-          "desc": "脚本自动抓取，无需手动填写"
+          "key": "erke_data",
+          "name": "账号URL数据",
+          "type": "string",
+          "tips": "多账号用 @ 隔开，由脚本自动抓取",
+          "platforms": [
+            "Surge",
+            "Quantumult X",
+            "Loon",
+            "Node"
+          ]
+        }
+      ],
+      "settings": [
+        {
+          "key": "erke_data",
+          "type": "text",
+          "title": "账号URL数据",
+          "placeholder": "请先配置MITM抓包，或手动填入URL"
         }
       ]
     }
