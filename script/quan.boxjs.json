@@ -3,7 +3,7 @@
   "name": "Any自用订阅",
   "author": "@any",
   "icon": "https://raw.githubusercontent.com/Former-Years/icon/master/xinian.png",
-  "repo": "https://github.com/littleanzi/quantumultX",
+  "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
   "apps": [
     {
       "id": "erke",
