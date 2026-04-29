@@ -37,6 +37,32 @@
           "placeholder": "请先配置MITM抓包,或手动填入URL"
         }
       ]
-    }
+    },
+    {
+      "id": "erke",
+      "name": "鸿星尔克",
+      "keys": [
+        "erke_data"
+      ],
+      "settings": [
+        {
+          "id": "erke_data",
+          "name": "鸿星尔克URL",
+          "val": "",
+          "type": "text",
+          "placeholder": "",
+          "autoGrow": true,
+          "rows": 2,
+          "desc": ""
+        }
+      ],
+      "author": "@xinian",
+      "repo": "https://raw.githubusercontent.com/Former-Years/Surge/refs/heads/main/Script/erke.js",
+      "script": "https://raw.githubusercontent.com/Former-Years/Surge/refs/heads/main/Script/erke.js",
+      "icons": [
+        "https://raw.githubusercontent.com/Former-Years/icon/master/erke.png",
+        "https://raw.githubusercontent.com/Former-Years/icon/master/erke.png"
+      ]
+    },
   ]
 }
