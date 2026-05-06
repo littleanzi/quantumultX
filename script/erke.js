@@ -63,7 +63,17 @@ if (typeof $request !== 'undefined') {
                     signMsg = '⚠️ 未找到今日签到数据';
                 }
             } else {
-                signMsg = `❌ 签到失败: ${signRes.message}`;
+                // 如果服务器返回空对象或空响应，基本上是签名过期
+                if (!signRes || Object.keys(signRes).length === 0) {
+                    signMsg = `⚠️ 签名已过期，请重新打开小程序刷新`;
+                } else {
+                    const msg = signRes.message || signRes.msg || signRes.errmsg || '';
+                    if (msg.includes('已经签到')) {
+                        signMsg = `⚠️ ${msg}`;
+                    } else {
+                        signMsg = `❌ 签到失败: ${msg || JSON.stringify(signRes)}`;
+                    }
+                }
             }
             // 积分查询
             const pointsRes = await getPoints(url);
