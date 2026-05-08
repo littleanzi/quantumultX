@@ -2,7 +2,7 @@
 油价查询 - 武汉市（无标题）
 */
 
-const $ = new Env('油价查询');
+const $ = new Env('武汉油价查询');
 
 const API_KEY = 'b090b6db8d34af372136a5cddb91d069';
 const PROVINCE = '湖北';
