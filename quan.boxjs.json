@@ -1,0 +1,34 @@
+{
+  "id": "hisense_checkin",
+  "name": "海信爱家签到",
+  "keys": ["hisense_customerId", "hisense_sign_key"],
+  "settings": [
+    {
+      "id": "hisense_customerId",
+      "name": "customerId",
+      "val": "",
+      "type": "text",
+      "placeholder": "98149762（多账号用@隔开）",
+      "autoGrow": true,
+      "rows": 2,
+      "desc": ""
+    },
+    {
+      "id": "hisense_sign_key",
+      "name": "签名密钥",
+      "val": "",
+      "type": "text",
+      "placeholder": "从 get_commonweb_key.js 获取",
+      "autoGrow": true,
+      "rows": 2,
+      "desc": "commonweb 密钥"
+    }
+  ],
+  "author": "@any",
+  "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
+  "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
+  "icons": [
+    "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png",
+    "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png"
+  ]
+}
