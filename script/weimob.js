@@ -95,7 +95,7 @@ if (typeof $request !== 'undefined') {
         const res = await doPost('/api3/onecrm/mactivity/sign/misc/sign/activity/core/c/sign', body, token);
         console.log('签到响应: ' + JSON.stringify(res));
 
-        let msg = '';
+        let signMsg = '';
         if (res.errcode === 0 || res.errcode === "0") {
             signMsg = '✅ 签到成功';
         } else if (res.errmsg && (res.errmsg.includes('重复签到') || res.errmsg.includes('已经签到'))) {
@@ -103,7 +103,7 @@ if (typeof $request !== 'undefined') {
         } else {
             signMsg = '❌ 失败: ' + (res.errmsg || JSON.stringify(res));
         }
-        $.msg($.name, '', msg);
+        $.msg($.name, '', signMsg);
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
     }
