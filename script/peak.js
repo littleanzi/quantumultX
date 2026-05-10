@@ -135,7 +135,11 @@ if (typeof $request !== 'undefined') {
         let msg = '';
         if (res.code === '0' || res.errcode === 0 || res.success) {
             msg = '✅ 签到成功';
-        } else if ((res.msg || '').includes('重复') || (res.msg || '').includes('已签')) {
+        } else if (
+            (res.msg || '').includes('重复') ||
+            (res.msg || '').includes('已签') ||
+            (res.msg || '').includes('已达到最大参与次数')
+        ) {
             msg = '⚠️ 今天已签到';
         } else {
             msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
