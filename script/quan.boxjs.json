@@ -64,8 +64,8 @@
             "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
             "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
             "icons": [
-                "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png",
-                "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png"
+                "https://github.com/littleanzi/quantumultX/blob/main/icon/apps/haixin.png",
+                "https://github.com/littleanzi/quantumultX/blob/main/icon/apps/haixin.png"
             ]
         }
     ]
