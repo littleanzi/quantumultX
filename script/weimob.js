@@ -95,13 +95,12 @@ if (typeof $request !== 'undefined') {
         const res = await doPost('/api3/onecrm/mactivity/sign/misc/sign/activity/core/c/sign', body, token);
         console.log('签到响应: ' + JSON.stringify(res));
 
-        let msg = '';
-        if (res.code === 0 || res.errcode === 0) {
-            msg = '✅ 签到成功';
-        } else if (res.message?.includes('已签到') || res.msg?.includes('已签到')) {
-            msg = '⚠️ 今天已签到';
+        let msg = ''; if (res.errcode === 0 || res.errcode === "0") {
+            signMsg = '✅ 签到成功';
+        } else if (res.errmsg && (res.errmsg.includes('重复签到') || res.errmsg.includes('已经签到'))) {
+            signMsg = '⚠️ 今天已签到';
         } else {
-            msg = '❌ 失败: ' + (res.message || res.msg || JSON.stringify(res));
+            signMsg = '❌ 失败: ' + JSON.stringify(res);
         }
         $.msg($.name, '', msg);
     } catch (e) {
