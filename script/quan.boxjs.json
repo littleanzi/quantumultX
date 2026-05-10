@@ -32,48 +32,32 @@
             ]
         },
         {
-            "id": "hisense_sign_safe",
-            "name": "海信爱家签到(安全版)",
-            "author": "@any",
-            "icon": "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-            "apps": [
+            "id": "hisense_sign",
+            "name": "海信爱家签到",
+            "keys": [
+                "hisense_data",
+                "hisense_sign_key"
+            ],
+            "settings": [
                 {
-                    "id": "hisense_sign",
-                    "name": "海信爱家签到",
-                    "keys": [
-                        "hisense_data",
-                        "hisense_sign_key"
-                    ],
-                    "settings": [
-                        {
-                            "id": "hisense_data",
-                            "name": "账号数据",
-                            "val": "",
-                            "type": "text",
-                            "placeholder": "自动抓取，无需手动填写",
-                            "autoGrow": true,
-                            "rows": 2,
-                            "desc": ""
-                        },
-                        {
-                            "id": "hisense_sign_key",
-                            "name": "签名密钥",
-                            "val": "",
-                            "type": "password",
-                            "placeholder": "请填入 commonweb 密钥（不会公开显示）",
-                            "autoGrow": false,
-                            "rows": 1,
-                            "desc": "commonweb 签名密钥"
-                        }
-                    ],
-                    "author": "@any",
-                    "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-                    "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
-                    "icons": [
-                        "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png",
-                        "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png"
-                    ]
+                    "id": "hisense_data",
+                    "name": "账号数据",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "自动抓取，无需手动填写",
+                    "autoGrow": true,
+                    "rows": 2,
+                    "desc": ""
+                },
+                {
+                    "id": "hisense_sign_key",
+                    "name": "签名密钥",
+                    "val": "",
+                    "type": "password",
+                    "placeholder": "请填入 commonweb 密钥",
+                    "autoGrow": false,
+                    "rows": 1,
+                    "desc": "不会明文显示，请放心填入"
                 }
             ]
         }
