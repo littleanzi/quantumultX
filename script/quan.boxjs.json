@@ -32,19 +32,19 @@
             ]
         },
         {
-            "id": "hisense_checkin",
-            "name": "海信爱家签到",
+            "id": "hisense_sign_safe",
+            "name": "海信爱家签到(安全版)",
             "keys": [
-                "hisense_customerId",
+                "hisense_data",
                 "hisense_sign_key"
             ],
             "settings": [
                 {
-                    "id": "hisense_customerId",
-                    "name": "customerId",
+                    "id": "hisense_data",
+                    "name": "账号数据",
                     "val": "",
                     "type": "text",
-                    "placeholder": "98149762（多账号用@隔开）",
+                    "placeholder": "自动抓取，无需手动填写",
                     "autoGrow": true,
                     "rows": 2,
                     "desc": ""
@@ -53,20 +53,15 @@
                     "id": "hisense_sign_key",
                     "name": "签名密钥",
                     "val": "",
-                    "type": "text",
-                    "placeholder": "从 get_commonweb_key.js 获取",
-                    "autoGrow": true,
-                    "rows": 2,
-                    "desc": "commonweb 密钥"
+                    "type": "password",
+                    "placeholder": "请填入密钥（不会公开）",
+                    "autoGrow": false,
+                    "rows": 1,
+                    "desc": "commonweb 签名密钥"
                 }
             ],
             "author": "@any",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
-            "icons": [
-                "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png",
-                "https://raw.githubusercontent.com/FoKit/Scripts/main/images/hisense.png"
-            ]
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js"
         }
     ]
 }
