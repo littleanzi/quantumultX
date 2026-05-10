@@ -89,7 +89,7 @@ if (typeof $request !== 'undefined') {
     }
 
     let data = {};
-    try { data = JSON.parse(raw); } catch (e) {}
+    try { data = JSON.parse(raw); } catch (e) { }
     const token = data.token || '';
     const appid = data.appid || 'wxb0c076d58ce4a1dd';
 
