@@ -93,6 +93,27 @@
                 "https://raw.githubusercontent.com/Former-Years/icon/master/xtep.png",
                 "https://raw.githubusercontent.com/Former-Years/icon/master/xtep.png"
             ]
+        },
+        {
+            "id": "peak_sign",
+            "name": "匹克签到",
+            "keys": [
+                "peak_data"
+            ],
+            "settings": [
+                {
+                    "id": "peak_data",
+                    "name": "账号数据",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "{\"token\":\"...\",\"appid\":\"...\",\"bodyTemplate\":\"...\"}",
+                    "autoGrow": true,
+                    "rows": 3,
+                    "desc": "自动抓取或手动填入"
+                }
+            ],
+            "author": "@any",
+            "script": "https://你的地址/peak.js"
         }
     ]
 }
