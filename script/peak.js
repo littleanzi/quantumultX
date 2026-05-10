@@ -1,18 +1,14 @@
 /**
- * 匹克签到 (Peak) - 完整调试版
- * 接口: /mobile/activity/sign/querySignInfoList (或真实签到接口)
- * 签名算法: SHA1(请求体JSON + startTime + token前8字符)  可调整
+ * 匹克签到 (Peak) - 最终完整版
+ * 接口: /mobile/activity/sign/sign
+ * 签名算法: SHA1(请求体JSON + startTime + token前8字符)
  * MITM: scrmipg.peaksport.com
- * 重写: 抓取 querySignInfoList 获取 token / appid / 请求体
- * 定时: 0 8 * * *
+ * 重写: 抓取 /mobile/activity/sign/sign 获取 token / appid
+ * 定时: 建议 0 8 * * *
  */
-
 const $ = new Env('匹克签到');
 const DATA_KEY = 'peak_data';
 const API = 'https://scrmipg.peaksport.com';
-
-// 如果你抓到了真正的签到接口路径，请修改这里
-const SIGN_PATH = '/mobile/activity/sign/querySignInfoList';
 
 // ==================== SHA1 ====================
 function sha1(str) {
@@ -71,59 +67,54 @@ function sha1(str) {
     return (cvtHex(H0) + cvtHex(H1) + cvtHex(H2) + cvtHex(H3) + cvtHex(H4)).toLowerCase();
 }
 
-// ==================== 抓取 token/appid/请求体 ====================
+// ==================== 抓取 token ====================
 if (typeof $request !== 'undefined') {
     const headers = $request.headers;
     const token = headers['token'] || '';
     const appid = headers['appid'] || 'wxb0c076d58ce4a1dd';
-    const bodyStr = $request.body || '';
-    if (token && bodyStr) {
-        let saved = $.getdata(DATA_KEY) || '{}';
-        let data = {};
-        try { data = JSON.parse(saved); } catch (e) { data = {}; }
-        data.token = token;
-        data.appid = appid;
-        data.bodyTemplate = bodyStr;
-        $.setdata(JSON.stringify(data), DATA_KEY);
-        $.msg($.name, '', '🎉 Token 和请求体已保存');
+    if (token) {
+        $.setdata(JSON.stringify({ token, appid }), DATA_KEY);
+        $.msg($.name, '', '🎉 Token 已保存');
     }
     $.done();
 }
 
 // ==================== 定时签到 ====================
 (async () => {
-    const raw = $.getdata(DATA_KEY) || '{}';
-    let data = {};
-    try { data = JSON.parse(raw); } catch (e) { data = {}; }
-
-    const token = data.token || '';
-    const appid = data.appid || 'wxb0c076d58ce4a1dd';
-    let bodyTemplate = data.bodyTemplate || '{"activityId":"d9e2bfd6-ee3b-42d2-b513-e70b5aaa37ad","source":"","shopId":"10000182"}';
-
-    if (!token) {
-        $.msg($.name, '❌ Token 缺失', '请重新进入匹克小程序抓取');
+    const raw = $.getdata(DATA_KEY) || '';
+    if (!raw) {
+        $.msg($.name, '❌ 未配置', '请进入匹克小程序签到页面抓取 Token');
         $.done();
         return;
     }
 
-    let body = {};
-    try { body = JSON.parse(bodyTemplate); } catch (e) { body = {}; }
+    let data = {};
+    try { data = JSON.parse(raw); } catch (e) {}
+    const token = data.token || '';
+    const appid = data.appid || 'wxb0c076d58ce4a1dd';
 
-    // 补全必要字段，防止 null
-    if (!body.activityId) body.activityId = 'd9e2bfd6-ee3b-42d2-b513-e70b5aaa37ad';
-    if (body.source === undefined || body.source === null) body.source = '';
-    if (!body.shopId) body.shopId = '10000182';
+    if (!token) {
+        $.msg($.name, '❌ Token 缺失', '请重新抓取');
+        $.done();
+        return;
+    }
+
+    // 构造签到请求体（从抓包确认）
+    const today = new Date();
+    const signDate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    const body = {
+        signDate: signDate,
+        shopId: "10000182",
+        activityId: "d9e2bfd6-ee3b-42d2-b513-e70b5aaa37ad"
+    };
 
     const startTime = Date.now().toString();
     const signStr = JSON.stringify(body) + startTime + token.substring(0, 8);
     const sign = sha1(signStr);
 
     console.log('=== 签到请求详情 ===');
-    console.log('URL: ' + API + SIGN_PATH);
     console.log('请求体: ' + JSON.stringify(body));
     console.log('startTime: ' + startTime);
-    console.log('token 前8位: ' + token.substring(0, 8));
-    console.log('签名字符串: ' + signStr);
     console.log('签名: ' + sign);
 
     const headers = {
@@ -135,20 +126,23 @@ if (typeof $request !== 'undefined') {
         'appid': appid,
         'X-TracedId': generateUUID(),
         'Referer': 'https://servicewechat.com/' + appid + '/243/page-frame.html',
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.73',
-        'Host': 'scrmipg.peaksport.com'
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.73'
     };
 
     try {
-        const res = await doPost(SIGN_PATH, body, headers);
-        console.log('响应: ' + JSON.stringify(res));
+        const res = await doPost('/mobile/activity/sign/sign', body, headers);
+        console.log('签到响应: ' + JSON.stringify(res));
         let msg = '';
-        if (res.code === '0' || res.errcode === 0) msg = '✅ 签到成功';
-        else if ((res.msg || '').includes('重复') || (res.msg || '').includes('已签')) msg = '⚠️ 今天已签到';
-        else msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
+        if (res.code === '0' || res.errcode === 0 || res.success) {
+            msg = '✅ 签到成功';
+        } else if ((res.msg || '').includes('重复') || (res.msg || '').includes('已签')) {
+            msg = '⚠️ 今天已签到';
+        } else {
+            msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
+        }
         $.msg($.name, '', msg);
     } catch (e) {
-        $.msg($.name, '❌ 网络异常', e.message);
+        $.msg($.name, '❌ 异常', e.message);
     }
     $.done();
 })();
@@ -158,9 +152,8 @@ function doPost(path, body, headers) {
     const url = API + path;
     return new Promise((resolve, reject) => {
         const opts = {
-            url,
-            method: 'POST',
-            headers,
+            url, method: 'POST',
+            headers: headers,
             body: JSON.stringify(body),
             timeout: 30000
         };
@@ -171,9 +164,7 @@ function doPost(path, body, headers) {
         } else {
             $httpClient.post(opts, (err, resp, data) => {
                 if (err) reject(err);
-                else {
-                    try { resolve(JSON.parse(data)); } catch (e) { reject(new Error('解析失败')); }
-                }
+                else { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } }
             });
         }
     });
@@ -181,8 +172,7 @@ function doPost(path, body, headers) {
 
 function generateUUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-        const r = Math.random() * 16 | 0;
-        const v = c == 'x' ? r : (r & 0x3 | 0x8);
+        const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
 }

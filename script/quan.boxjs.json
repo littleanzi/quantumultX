@@ -106,10 +106,10 @@
                     "name": "账号数据",
                     "val": "",
                     "type": "text",
-                    "placeholder": "{\"token\":\"...\",\"appid\":\"...\",\"bodyTemplate\":\"...\"}",
+                    "placeholder": "{\"token\":\"...\",\"appid\":\"...\"}",
                     "autoGrow": true,
-                    "rows": 3,
-                    "desc": "自动抓取或手动填入"
+                    "rows": 2,
+                    "desc": "由重写自动抓取或手动填入"
                 }
             ],
             "author": "@any",
