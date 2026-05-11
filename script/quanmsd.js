@@ -5,7 +5,7 @@
  * 重写: 抓取 fixSign 请求获取 token、code、signInId
  */
 
-const $ = new Env('PureH2B签到');
+const $ = new Env('全棉时代微信小程序签到');
 const DATA_KEY = 'pureh2b_data';
 const API = 'https://nmp.pureh2b.com';
 
