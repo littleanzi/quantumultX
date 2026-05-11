@@ -69,32 +69,6 @@
             ]
         },
         {
-            "id": "weimob_sign",
-            "name": "特步签到",
-            "keys": [
-                "weimob_data"
-            ],
-            "settings": [
-                {
-                    "id": "weimob_data",
-                    "name": "账号数据",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "格式：{\"token\":\"...\",\"pid\":\"...\",\"bosId\":\"...\",\"vid\":\"...\"}",
-                    "autoGrow": true,
-                    "rows": 3,
-                    "desc": "由重写自动抓取或手动填入 JSON"
-                }
-            ],
-            "author": "@any",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/weimob.js",
-            "icons": [
-                "https://raw.githubusercontent.com/Former-Years/icon/master/xtep.png",
-                "https://raw.githubusercontent.com/Former-Years/icon/master/xtep.png"
-            ]
-        },
-        {
             "id": "peak_sign",
             "name": "匹克签到",
             "keys": [

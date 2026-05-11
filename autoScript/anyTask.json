@@ -5,7 +5,6 @@
   "task": [
     "21 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克wx小程序签到, enabled=true",
     "22 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js, tag=海信爱家wx小程序签到, enabled=true",
-    "23 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/weimob.js, tag=特步wx小程序签到, enabled=true",
     "24 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/peak.js, tag=匹克wx小程序签到, enabled=true",
     "24 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/quanmsd.js, tag=全棉时代wx小程序签到, enabled=true",
 
