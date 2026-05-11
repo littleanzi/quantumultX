@@ -47,16 +47,13 @@ if (typeof $request !== 'undefined') {
     try {
         const res = await doPost('/api/new/member/sign/signIn/fixSign', signBody, headers);
         console.log('签到响应: ' + JSON.stringify(res));
-        let msg = '';
         if (res && res.memberCode !== undefined) {
-            const point = res.points ?? res.point ?? res.pointSign ?? res.integral ?? 0;
-            msg = `✅ 签到成功 (卡:${res.cardSign ?? 0}, 积分:${point})`;
+            $.msg($.name, '', '✅ 签到成功');
         } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
-            msg = '⚠️ 今天已签到';
+            $.msg($.name, '', '⚠️ 今天已签到');
         } else {
-            msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
+            $.msg($.name, '', '❌ 失败: ' + (res.msg || JSON.stringify(res)));
         }
-        $.msg($.name, '', msg);
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
     }
