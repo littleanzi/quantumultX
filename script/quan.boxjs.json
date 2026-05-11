@@ -134,7 +134,7 @@
                 }
             ],
             "author": "@any",
-            "script": "https://你的脚本地址/pureh2b.js"
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/quanmsd.js"
         }
     ]
 }
