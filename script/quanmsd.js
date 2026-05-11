@@ -5,7 +5,7 @@
  * 重写: 抓取 fixSign 请求获取 token、code、signInId
  * 定时: 建议 0 8 * * *
  */
-const $ = new Env('PureH2B签到');
+const $ = new Env('全棉时代小程序签到');
 const DATA_KEY = 'pureh2b_data';
 const API = 'https://nmp.pureh2b.com';
 
@@ -15,7 +15,7 @@ if (typeof $request !== 'undefined') {
     const token = headers['token'] || '';
     const code = headers['code'] || '';
     let body = {};
-    try { body = JSON.parse($request.body || '{}'); } catch (e) {}
+    try { body = JSON.parse($request.body || '{}'); } catch (e) { }
     const signInId = body.signInId || '';
 
     console.log('[抓取] token: ' + token);
@@ -74,10 +74,14 @@ if (typeof $request !== 'undefined') {
         const res = await doPost('/api/new/member/sign/signIn/fixSign', signBody, headers);
         console.log('签到响应: ' + JSON.stringify(res));
         let msg = '';
-        if (res.code === 0 || res.success) msg = '✅ 签到成功';
-        else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) msg = '⚠️ 今天已签到';
-        else msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
-        $.msg($.name, '', msg);
+        if (res && res.memberCode !== undefined) {
+            // 只要有 memberCode 就代表签到成功
+            msg = `✅ 签到成功 (卡:${res.cardSign || 0}, 积分:${res.pointSign || 0})`;
+        } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
+            msg = '⚠️ 今天已签到';
+        } else {
+            msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
+        } $.msg($.name, '', msg);
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
     }
