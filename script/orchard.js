@@ -1,5 +1,5 @@
 /**
- * 多多果园自动任务 (修复版 - 补全请求体参数)
+ * 多多果园自动任务 (修复版 - 正确解析响应)
  */
 const $ = new Env('多多果园');
 const DATA_KEY = 'orchard_data';
@@ -54,7 +54,6 @@ if (typeof $request !== 'undefined') {
 
         console.log(`\n===== 账号 ${i + 1} (${uid}) =====`);
 
-        // 请求头 (与你的截图一致)
         const headers = {
             'Accept': 'application/json, text/plain, */*',
             'Accept-Language': 'zh-Hans-CN;q=1',
@@ -68,44 +67,42 @@ if (typeof $request !== 'undefined') {
         };
 
         try {
-            // 查询水分 (补全请求体)
+            // 查询水分
             const waterBody = {
                 "fun_pl": 11,
                 "tubetoken": "G%2FnqHzajeywRPN8qQiQGteKMGYvIoE%2FBX0zhOiSk3z51%2BzFJQ5q7ZMfBXsvwfPPbo5wv1CXtnLHKwQLjnEKWZ3H8BdhX0gesZcs40acrwaCnRh2%2FSvM4gaOEjK4YfLoXezVlLGA9M3DHw3dPkIIKfe7tYaU4yQFEdFL9qmjcihbrqeu%2FND%2Bj464ykCpk9NxBpow%2F12tkbhaa0MPG%2BkFmYHVrGCFjMA%2FPasnmsS%2FDcFQ8eB7OceIAhgHyaTQD7po9D4i7d8cY4AISQ7tPPcmdI6bplghQi38GAXzBwkM%2Bca4%3D"
             };
-            
-            console.log('请求体预览: ' + JSON.stringify(waterBody).substring(0, 100) + '...');
             const waterRes = await doPost(
                 `/api/manor-gateway/manor/query/user/water?pdduid=${uid}`,
                 waterBody,
                 headers
             );
-            console.log('水分查询完整响应: ' + JSON.stringify(waterRes));
+            console.log('水分查询响应: ' + JSON.stringify(waterRes));
+
+            // 🔧 修复：正确判断水分值
+            let waterAmount = 0;
+            if (waterRes && waterRes.water_amount !== undefined) {
+                waterAmount = waterRes.water_amount;
+            }
 
             // 查询果树状态
             const treeBody = {
                 "part_id_list": [102],
                 "source": "",
                 "fun_pl": 11,
-                "tubetoken": waterBody.tubetoken
+                "tubetoken": "G%2FnqHzajeywRPN8qQiQGteKMGYvIoE%2FBX0zhOiSk3z51%2BzFJQ5q7ZMfBXsvwfPPbo5wv1CXtnLHKwQLjnEKWZ3H8BdhX0gesZcs40acrwaCnRh2%2FSvM4gaOEjK4YfLoXezVlLGA9M3DHw3dPkIIKfe7tYaU4yQFEdFL9qmjcihbrqeu%2FND%2Bj464ykCpk9NxBpow%2F12tkbhaa0MPG%2BkFmYHVrGCFjMA%2FPasnmsS%2FDcFQ8eB7OceIAhgHyaTQD7po9D4i7d8cY4AISQ7tPPcmdI6bplghQi38GAXzBwkM%2Bca4%3D"
             };
             const treeRes = await doPost(
                 `/api/manor-query/tree/part/get?pdduid=${uid}`,
                 treeBody,
                 headers
             );
-            console.log('果树查询完整响应: ' + JSON.stringify(treeRes));
+            // 🔧 修复：果树查询成功判断
+            const treeOk = treeRes && treeRes.error_code === null && treeRes.error_msg === null;
+            console.log(`果树查询: ${treeOk ? '✅ 成功' : '❌ 失败'}`);
 
-            let accMsg = `账号${i + 1}: `;
-            if (waterRes.success) {
-                accMsg += `水分 ${waterRes.data?.water || 0}💧 `;
-            } else {
-                accMsg += '水分查询失败 ';
-            }
-            if (treeRes.success) {
-                accMsg += '果树查询成功';
-            }
-
+            let accMsg = `账号${i + 1}: 💧 水分 ${waterAmount}`;
+            if (treeOk) accMsg += ` | 🌳 果树状态正常`;
             totalMsg += accMsg + '\n';
         } catch (e) {
             totalMsg += `账号${i + 1}: 异常 ${e.message}\n`;
@@ -122,7 +119,6 @@ if (typeof $request !== 'undefined') {
 // ========== 工具函数 ==========
 function doPost(path, body, headers) {
     const url = API + path;
-    console.log('请求 URL: ' + url);
     return new Promise((resolve, reject) => {
         const opts = {
             url, method: 'POST',
@@ -132,16 +128,12 @@ function doPost(path, body, headers) {
         };
         if (typeof $task !== 'undefined') {
             $task.fetch(opts).then(res => {
-                console.log('响应状态码: ' + res.statusCode);
                 try { resolve(JSON.parse(res.body)); } catch (e) { reject(e); }
             }).catch(reject);
         } else {
             $httpClient.post(opts, (err, resp, data) => {
                 if (err) reject(err);
-                else {
-                    console.log('响应状态码: ' + (resp ? resp.statusCode : 'unknown'));
-                    try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
-                }
+                else { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } }
             });
         }
     });
