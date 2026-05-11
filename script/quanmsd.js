@@ -2,6 +2,7 @@
 
 const $ = new Env('全棉时代微信小程序签到');
 const DATA_KEY = 'pureh2b_data';
+const LAST_SIGN_KEY = 'pureh2b_last_sign_date';  // 新增：存储上次签到日期
 const API = 'https://nmp.pureh2b.com';
 
 if (typeof $request !== 'undefined') {
@@ -9,7 +10,7 @@ if (typeof $request !== 'undefined') {
     const token = headers['token'] || '';
     const code = headers['code'] || '';
     let body = {};
-    try { body = JSON.parse($request.body || '{}'); } catch (e) { }
+    try { body = JSON.parse($request.body || '{}'); } catch (e) {}
     const signInId = body.signInId || '';
 
     if (token && code && signInId) {
@@ -36,6 +37,14 @@ if (typeof $request !== 'undefined') {
 
     const today = new Date();
     const signDay = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // 检查今天是否已经签到过
+    const lastSignDate = $.getdata(LAST_SIGN_KEY) || '';
+    if (lastSignDate === signDay) {
+        $.msg($.name, '', '⚠️ 今天已签到');
+        return $.done();
+    }
+
     const signBody = { signInId, signDay };
     const headers = {
         'Content-Type': 'application/json;charset=UTF-8',
@@ -47,16 +56,14 @@ if (typeof $request !== 'undefined') {
     try {
         const res = await doPost('/api/new/member/sign/signIn/fixSign', signBody, headers);
         console.log('签到响应: ' + JSON.stringify(res));
-        // 在成功签到后存储日期
         if (res && res.memberCode !== undefined) {
-            const lastSignDate = $.getdata('pureh2b_last_sign_date') || '';
-            const todayStr = signDay;
-            if (lastSignDate === todayStr) {
-                msg = '⚠️ 今天已签到';
-            } else {
-                $.setdata(todayStr, 'pureh2b_last_sign_date');
-                msg = '✅ 签到成功';
-            }
+            // 签到成功，记录今天的日期
+            $.setdata(signDay, LAST_SIGN_KEY);
+            $.msg($.name, '', '✅ 签到成功');
+        } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
+            $.msg($.name, '', '⚠️ 今天已签到');
+        } else {
+            $.msg($.name, '', '❌ 失败: ' + (res.msg || JSON.stringify(res)));
         }
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
