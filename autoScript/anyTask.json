@@ -7,6 +7,7 @@
     "22 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js, tag=海信爱家wx小程序签到, enabled=true",
     "23 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/weimob.js, tag=特步wx小程序签到, enabled=true",
     "24 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/peak.js, tag=匹克wx小程序签到, enabled=true",
+    "24 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/quanmsd.js, tag=全棉时代wx小程序签到, enabled=true",
 
     "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/historyToday.js, tag=历史上的今天, enabled=true",
     "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/oil_price.js, tag=今日油价, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/oil.png, enabled=true",

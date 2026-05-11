@@ -114,6 +114,27 @@
             ],
             "author": "@any",
             "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/peak.js"
+        },
+        {
+            "id": "pureh2b_sign",
+            "name": "PureH2B签到",
+            "keys": [
+                "pureh2b_data"
+            ],
+            "settings": [
+                {
+                    "id": "pureh2b_data",
+                    "name": "账号数据",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "格式：{\"token\":\"...\",\"code\":\"...\",\"signInId\":\"...\"}",
+                    "autoGrow": true,
+                    "rows": 3,
+                    "desc": ""
+                }
+            ],
+            "author": "@any",
+            "script": "https://你的脚本地址/pureh2b.js"
         }
     ]
 }
