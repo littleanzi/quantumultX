@@ -1,45 +1,35 @@
 /**
- * PureH2B 签到 (增强调试版)
- * 数据存储: pureh2b_data
- * MITM: nmp.pureh2b.com
+ * PureH2B 签到 (最终修正版)
+ * 更新时间: 2026-05-11 23:59:59
+ * 接口: nmp.pureh2b.com
  * 重写: 抓取 fixSign 请求获取 token、code、signInId
- * 定时: 建议 0 8 * * *
  */
-const $ = new Env('全棉时代小程序签到');
+
+const $ = new Env('PureH2B签到');
 const DATA_KEY = 'pureh2b_data';
 const API = 'https://nmp.pureh2b.com';
 
-// 抓取凭证
+// ========== 抓取凭证 ==========
 if (typeof $request !== 'undefined') {
     const headers = $request.headers;
     const token = headers['token'] || '';
     const code = headers['code'] || '';
     let body = {};
-    try { body = JSON.parse($request.body || '{}'); } catch (e) { }
+    try { body = JSON.parse($request.body || '{}'); } catch (e) {}
     const signInId = body.signInId || '';
-
-    console.log('[抓取] token: ' + token);
-    console.log('[抓取] code: ' + code);
-    console.log('[抓取] signInId: ' + signInId);
 
     if (token && code && signInId) {
         const data = { token, code, signInId };
         $.setdata(JSON.stringify(data), DATA_KEY);
         $.msg($.name, '', '🎉 凭证已保存');
-    } else {
-        $.msg($.name, '⚠️ 抓取不完整', '请确认已点击签到按钮');
     }
     $.done();
 }
 
-// 定时签到
+// ========== 定时签到 ==========
 (async () => {
     const raw = $.getdata(DATA_KEY) || '';
-    if (!raw) {
-        $.msg($.name, '❌ 未配置', '请先进入小程序签到页面抓取凭证，或手动填入 pureh2b_data');
-        $.done();
-        return;
-    }
+    if (!raw) { $.msg($.name, '❌ 未配置', '请先手动签到一次抓取凭证，或手动填入 pureh2b_data'); return $.done(); }
 
     let data = {};
     try { data = JSON.parse(raw); } catch (e) { data = {}; }
@@ -53,10 +43,11 @@ if (typeof $request !== 'undefined') {
         return $.done();
     }
 
+    // 当天日期
     const today = new Date();
-    const signDay = today.getFullYear() + '-' +
-        String(today.getMonth() + 1).padStart(2, '0') + '-' +
-        String(today.getDate()).padStart(2, '0');
+    const signDay = today.getFullYear() + '-' + 
+                    String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                    String(today.getDate()).padStart(2, '0');
 
     const signBody = {
         signInId: signInId,
@@ -75,19 +66,20 @@ if (typeof $request !== 'undefined') {
         console.log('签到响应: ' + JSON.stringify(res));
         let msg = '';
         if (res && res.memberCode !== undefined) {
-            // 只要有 memberCode 就代表签到成功
             msg = `✅ 签到成功 (卡:${res.cardSign || 0}, 积分:${res.pointSign || 0})`;
         } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
             msg = '⚠️ 今天已签到';
         } else {
             msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
-        } $.msg($.name, '', msg);
+        }
+        $.msg($.name, '', msg);
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
     }
     $.done();
 })();
 
+// ========== 工具函数 ==========
 function doPost(path, body, headers) {
     const url = API + path;
     return new Promise((resolve, reject) => {
@@ -102,6 +94,7 @@ function doPost(path, body, headers) {
     });
 }
 
+// ========== 环境适配 ==========
 function Env(name) {
     const isQX = typeof $task !== 'undefined';
     const isSurge = typeof $httpClient !== 'undefined' && !isQX;
