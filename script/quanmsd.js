@@ -9,7 +9,7 @@ if (typeof $request !== 'undefined') {
     const token = headers['token'] || '';
     const code = headers['code'] || '';
     let body = {};
-    try { body = JSON.parse($request.body || '{}'); } catch (e) {}
+    try { body = JSON.parse($request.body || '{}'); } catch (e) { }
     const signInId = body.signInId || '';
 
     if (token && code && signInId) {
@@ -47,12 +47,16 @@ if (typeof $request !== 'undefined') {
     try {
         const res = await doPost('/api/new/member/sign/signIn/fixSign', signBody, headers);
         console.log('签到响应: ' + JSON.stringify(res));
+        // 在成功签到后存储日期
         if (res && res.memberCode !== undefined) {
-            $.msg($.name, '', '✅ 签到成功');
-        } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
-            $.msg($.name, '', '⚠️ 今天已签到');
-        } else {
-            $.msg($.name, '', '❌ 失败: ' + (res.msg || JSON.stringify(res)));
+            const lastSignDate = $.getdata('pureh2b_last_sign_date') || '';
+            const todayStr = signDay;
+            if (lastSignDate === todayStr) {
+                msg = '⚠️ 今天已签到';
+            } else {
+                $.setdata(todayStr, 'pureh2b_last_sign_date');
+                msg = '✅ 签到成功';
+            }
         }
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
