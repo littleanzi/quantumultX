@@ -118,30 +118,27 @@
         {
             "id": "youzan_sign",
             "name": "有赞签到",
+            "keys": [
+                "youzan_data"
+            ],
+            "settings": [
+                {
+                    "id": "youzan_data",
+                    "name": "账号数据",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "格式：{\"token\":\"...\",\"kdtId\":\"...\",\"appId\":\"...\",\"checkinId\":\"...\"}",
+                    "autoGrow": true,
+                    "rows": 3,
+                    "desc": ""
+                }
+            ],
             "author": "@any",
             "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-            "apps": [
-                {
-                    "id": "youzan_sign_app",
-                    "name": "有赞签到",
-                    "keys": [
-                        "youzan_data"
-                    ],
-                    "settings": [
-                        {
-                            "id": "youzan_data",
-                            "name": "账号数据",
-                            "val": "",
-                            "type": "text",
-                            "placeholder": "格式：{\"token\":\"...\",\"kdtId\":\"...\",\"appId\":\"...\",\"checkinId\":\"...\"}",
-                            "autoGrow": true,
-                            "rows": 3,
-                            "desc": "由重写自动抓取或手动填入 JSON"
-                        }
-                    ],
-                    "author": "@any",
-                    "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/youzan.js"
-                }
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/youzan.js",
+            "icons": [
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/youzan.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/youzan.png"
             ]
         }
     ]
