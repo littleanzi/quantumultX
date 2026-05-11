@@ -1,17 +1,15 @@
 /**
- * 脚本名称：PureH2B 签到
- * 接口：nmp.pureh2b.com
- * 数据存储：pureh2b_data (自动抓取 token, code)
+ * PureH2B 签到 (增强调试版)
+ * 数据存储: pureh2b_data
  * MITM: nmp.pureh2b.com
- * 重写: 抓取 fixSign 请求获取 token, code, signInId
+ * 重写: 抓取 fixSign 请求获取 token、code、signInId
  * 定时: 建议 0 8 * * *
  */
-
 const $ = new Env('PureH2B签到');
 const DATA_KEY = 'pureh2b_data';
 const API = 'https://nmp.pureh2b.com';
 
-// ========== 抓取凭证 ==========
+// 抓取凭证
 if (typeof $request !== 'undefined') {
     const headers = $request.headers;
     const token = headers['token'] || '';
@@ -20,18 +18,28 @@ if (typeof $request !== 'undefined') {
     try { body = JSON.parse($request.body || '{}'); } catch (e) {}
     const signInId = body.signInId || '';
 
+    console.log('[抓取] token: ' + token);
+    console.log('[抓取] code: ' + code);
+    console.log('[抓取] signInId: ' + signInId);
+
     if (token && code && signInId) {
         const data = { token, code, signInId };
         $.setdata(JSON.stringify(data), DATA_KEY);
         $.msg($.name, '', '🎉 凭证已保存');
+    } else {
+        $.msg($.name, '⚠️ 抓取不完整', '请确认已点击签到按钮');
     }
     $.done();
 }
 
-// ========== 定时签到 ==========
+// 定时签到
 (async () => {
     const raw = $.getdata(DATA_KEY) || '';
-    if (!raw) { $.msg($.name, '❌ 未配置', '请先进入小程序签到页面抓取凭证'); return $.done(); }
+    if (!raw) {
+        $.msg($.name, '❌ 未配置', '请先进入小程序签到页面抓取凭证，或手动填入 pureh2b_data');
+        $.done();
+        return;
+    }
 
     let data = {};
     try { data = JSON.parse(raw); } catch (e) { data = {}; }
@@ -41,15 +49,14 @@ if (typeof $request !== 'undefined') {
     const signInId = data.signInId || 'QD26040001';
 
     if (!token || !code) {
-        $.msg($.name, '❌ 凭证不完整', '请重新进入小程序抓取');
+        $.msg($.name, '❌ 凭证不完整', '请重新抓取或检查 pureh2b_data');
         return $.done();
     }
 
-    // 当天日期
     const today = new Date();
-    const signDay = today.getFullYear() + '-' + 
-                    String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                    String(today.getDate()).padStart(2, '0');
+    const signDay = today.getFullYear() + '-' +
+        String(today.getMonth() + 1).padStart(2, '0') + '-' +
+        String(today.getDate()).padStart(2, '0');
 
     const signBody = {
         signInId: signInId,
