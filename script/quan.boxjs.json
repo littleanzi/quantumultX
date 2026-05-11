@@ -136,7 +136,7 @@
                             "placeholder": "格式：{\"token\":\"...\",\"kdtId\":\"...\",\"appId\":\"...\",\"checkinId\":\"...\"}",
                             "autoGrow": true,
                             "rows": 3,
-                            "desc": "{"token":"33fd6a760892be89515dd913edbb7a","kdtId":"44490814","appId":"wx666346d460a6a3f9","checkinId":"1876007"}"
+                            "desc": "由重写自动抓取或手动填入 JSON"
                         }
                     ],
                     "author": "@any",
