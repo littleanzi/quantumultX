@@ -1,28 +1,38 @@
 /**
- * 多多果园自动任务 (修复版 - 正确解析响应)
+ * 多多果园自动任务 (最终版 - 自动更新 tubetoken)
+ * 域名: api.pinduoduo.com
+ * 重写: 抓取请求中的 AccessToken、anti-token、Cookie、tubetoken
+ * 数据存储: orchard_data (多账号用 @ 分隔)
  */
+
 const $ = new Env('多多果园');
 const DATA_KEY = 'orchard_data';
 const API = 'https://api.pinduoduo.com';
 
-// ========== 1. 抓取凭证 ==========
+// ========== 1. 抓取凭证 (自动更新 tubetoken) ==========
 if (typeof $request !== 'undefined') {
     const headers = $request.headers;
     const token = headers['AccessToken'] || headers['accesstoken'] || '';
     const antiToken = headers['anti-token'] || '';
     const cookie = headers['Cookie'] || '';
+    let body = {};
+    try { body = JSON.parse($request.body || '{}'); } catch (e) { body = {}; }
+    const tubetoken = body.tubetoken || '';
 
     if (token && antiToken) {
         const uidMatch = cookie.match(/api_uid=([^;]+)/);
         const uid = uidMatch ? uidMatch[1] : '';
-        const line = `${token}|${antiToken}|${cookie}|${uid}`;
+        // 格式: token|antiToken|cookie|uid|tubetoken
+        const line = `${token}|${antiToken}|${cookie}|${uid}|${tubetoken}`;
         let saved = $.getdata(DATA_KEY) || '';
         let accounts = saved ? saved.split('@') : [];
         const idx = accounts.findIndex(acc => {
             const parts = acc.split('|');
+            // 按 uid 去重
             return parts[3] === uid;
         });
         if (idx !== -1) {
+            // 更新旧账号（保留最新的 tubetoken）
             accounts[idx] = line;
         } else {
             accounts.push(line);
@@ -51,9 +61,11 @@ if (typeof $request !== 'undefined') {
         const antiToken = parts[1];
         const cookie = parts[2];
         const uid = parts[3];
+        const tubetoken = parts[4] || '';
 
         console.log(`\n===== 账号 ${i + 1} (${uid}) =====`);
 
+        // 请求头 (与抓包完全一致)
         const headers = {
             'Accept': 'application/json, text/plain, */*',
             'Accept-Language': 'zh-Hans-CN;q=1',
@@ -70,7 +82,7 @@ if (typeof $request !== 'undefined') {
             // 查询水分
             const waterBody = {
                 "fun_pl": 11,
-                "tubetoken": "G%2FnqHzajeywRPN8qQiQGteKMGYvIoE%2FBX0zhOiSk3z51%2BzFJQ5q7ZMfBXsvwfPPbo5wv1CXtnLHKwQLjnEKWZ3H8BdhX0gesZcs40acrwaCnRh2%2FSvM4gaOEjK4YfLoXezVlLGA9M3DHw3dPkIIKfe7tYaU4yQFEdFL9qmjcihbrqeu%2FND%2Bj464ykCpk9NxBpow%2F12tkbhaa0MPG%2BkFmYHVrGCFjMA%2FPasnmsS%2FDcFQ8eB7OceIAhgHyaTQD7po9D4i7d8cY4AISQ7tPPcmdI6bplghQi38GAXzBwkM%2Bca4%3D"
+                "tubetoken": tubetoken
             };
             const waterRes = await doPost(
                 `/api/manor-gateway/manor/query/user/water?pdduid=${uid}`,
@@ -79,7 +91,6 @@ if (typeof $request !== 'undefined') {
             );
             console.log('水分查询响应: ' + JSON.stringify(waterRes));
 
-            // 🔧 修复：正确判断水分值
             let waterAmount = 0;
             if (waterRes && waterRes.water_amount !== undefined) {
                 waterAmount = waterRes.water_amount;
@@ -90,14 +101,13 @@ if (typeof $request !== 'undefined') {
                 "part_id_list": [102],
                 "source": "",
                 "fun_pl": 11,
-                "tubetoken": "G%2FnqHzajeywRPN8qQiQGteKMGYvIoE%2FBX0zhOiSk3z51%2BzFJQ5q7ZMfBXsvwfPPbo5wv1CXtnLHKwQLjnEKWZ3H8BdhX0gesZcs40acrwaCnRh2%2FSvM4gaOEjK4YfLoXezVlLGA9M3DHw3dPkIIKfe7tYaU4yQFEdFL9qmjcihbrqeu%2FND%2Bj464ykCpk9NxBpow%2F12tkbhaa0MPG%2BkFmYHVrGCFjMA%2FPasnmsS%2FDcFQ8eB7OceIAhgHyaTQD7po9D4i7d8cY4AISQ7tPPcmdI6bplghQi38GAXzBwkM%2Bca4%3D"
+                "tubetoken": tubetoken
             };
             const treeRes = await doPost(
                 `/api/manor-query/tree/part/get?pdduid=${uid}`,
                 treeBody,
                 headers
             );
-            // 🔧 修复：果树查询成功判断
             const treeOk = treeRes && treeRes.error_code === null && treeRes.error_msg === null;
             console.log(`果树查询: ${treeOk ? '✅ 成功' : '❌ 失败'}`);
 
