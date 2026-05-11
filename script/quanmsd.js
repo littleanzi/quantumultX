@@ -1,5 +1,5 @@
 /**
- * PureH2B 签到 (最终修正版)
+ * 全棉时代微信小程序签到 (PureH2B)
  * 更新时间: 2026-05-11 23:59:59
  * 接口: nmp.pureh2b.com
  * 重写: 抓取 fixSign 请求获取 token、code、signInId
@@ -29,7 +29,10 @@ if (typeof $request !== 'undefined') {
 // ========== 定时签到 ==========
 (async () => {
     const raw = $.getdata(DATA_KEY) || '';
-    if (!raw) { $.msg($.name, '❌ 未配置', '请先手动签到一次抓取凭证，或手动填入 pureh2b_data'); return $.done(); }
+    if (!raw) {
+        $.msg($.name, '❌ 未配置', '请先手动签到一次抓取凭证，或手动填入 pureh2b_data');
+        return $.done();
+    }
 
     let data = {};
     try { data = JSON.parse(raw); } catch (e) { data = {}; }
@@ -43,16 +46,12 @@ if (typeof $request !== 'undefined') {
         return $.done();
     }
 
-    // 当天日期
     const today = new Date();
-    const signDay = today.getFullYear() + '-' + 
-                    String(today.getMonth() + 1).padStart(2, '0') + '-' + 
-                    String(today.getDate()).padStart(2, '0');
+    const signDay = today.getFullYear() + '-' +
+        String(today.getMonth() + 1).padStart(2, '0') + '-' +
+        String(today.getDate()).padStart(2, '0');
 
-    const signBody = {
-        signInId: signInId,
-        signDay: signDay
-    };
+    const signBody = { signInId, signDay };
 
     const headers = {
         'Content-Type': 'application/json;charset=UTF-8',
@@ -64,14 +63,18 @@ if (typeof $request !== 'undefined') {
     try {
         const res = await doPost('/api/new/member/sign/signIn/fixSign', signBody, headers);
         console.log('签到响应: ' + JSON.stringify(res));
+
         let msg = '';
         if (res && res.memberCode !== undefined) {
-            msg = `✅ 签到成功 (卡:${res.cardSign || 0}, 积分:${res.pointSign || 0})`;
+            // 自动匹配可能的积分字段
+            const point = res.points ?? res.point ?? res.pointSign ?? res.integral ?? 0;
+            msg = `✅ 签到成功 (卡:${res.cardSign ?? 0}, 积分:${point})`;
         } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
             msg = '⚠️ 今天已签到';
         } else {
             msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
         }
+
         $.msg($.name, '', msg);
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
