@@ -76,18 +76,25 @@ let $XiaoMao = new Env("MiYuVIP");
 
       // ----- 伪造 VIP 数据（根据常见字段修改，可自行调整）-----
       // 情况1：data 对象内包含 vip 相关字段
+      // 更全面的修改逻辑，替换你脚本里对应的部分
       if (body.data) {
+        // 遍历并修改常见字段
         body.data.is_vip = true;
-        body.data.vip = 1;
-        body.data.vip_level = "premium";
-        body.data.vip_expire_time = 4070880000;  // 2099-01-01 时间戳
-        body.data.vip_end_time = "2099-12-31";
-        if (body.data.vip_status !== undefined) body.data.vip_status = 1;
+        body.data.vip = true;
+        body.data.vip_level = 99;
+        body.data.vip_expire_time = 4070880000;
+        body.data.vip_end_time = "2099-12-31 23:59:59";
+        body.data.user_type = "vip";
+        body.data.role = "premium";
+        body.data.member_type = "premium";
+        body.data.is_premium = true;
+        body.data.subscription_status = "active";
       }
-      // 情况2：根节点直接包含 vip 字段
-      if (body.is_vip !== undefined) body.is_vip = true;
-      if (body.vip !== undefined) body.vip = 1;
-      if (body.vip_expired !== undefined) body.vip_expired = false;
+
+      // 根节点也直接修改
+      body.is_vip = true;
+      body.vip = true;
+      body.user_type = "vip";
       // 情况3：可能存在 member 或 subscription 对象
       if (body.member) {
         body.member.is_active = true;
