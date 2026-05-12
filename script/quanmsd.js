@@ -12,7 +12,7 @@ if (typeof $request !== 'undefined') {
     const token = headers['token'] || '';
     const code = headers['code'] || '';
     let body = {};
-    try { body = JSON.parse($request.body || '{}'); } catch (e) {}
+    try { body = JSON.parse($request.body || '{}'); } catch (e) { }
     const signInId = body.signInId || '';
 
     if (token && code && signInId) {
@@ -90,8 +90,7 @@ if (typeof $request !== 'undefined') {
     }
     $.done();
 })();
-
-// ========== 积分查询函数 ==========
+// ========== 积分查询函数（修正版） ==========
 async function getPoints(token, code) {
     const headers = {
         'token': token,
@@ -99,13 +98,23 @@ async function getPoints(token, code) {
         'tag': 'v3.0'
     };
     const url = `${API}/api/member/get/point/list?pageNum=1&pageSize=15`;
-    const res = await doGet(url, headers);
-    console.log('积分接口响应: ' + JSON.stringify(res));
-    // 尝试从多种可能的字段中提取总积分
-    if (res && res.data) {
-        return res.data.totalPoint ?? res.data.totalPoints ?? res.data.total ?? 0;
+    try {
+        const res = await doGet(url, headers);
+        console.log('积分接口响应: ' + JSON.stringify(res));
+
+        // 修正：遍历 list 累加 point 值
+        if (res && res.list && Array.isArray(res.list)) {
+            let total = 0;
+            for (const item of res.list) {
+                total += item.point || 0;
+            }
+            return total;
+        }
+        return 0;
+    } catch (e) {
+        console.log('积分查询失败: ' + e.message);
+        return 0;
     }
-    return 0;
 }
 
 // ========== 工具函数 ==========
