@@ -42,10 +42,16 @@ if (typeof $request !== 'undefined') {
     const today = new Date();
     const signDay = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
-    // 检查今天是否已签到
+    // 检查今天是否已签到（本地记录）
     const lastSignDate = $.getdata(LAST_SIGN_KEY) || '';
     if (lastSignDate === signDay) {
-        $.msg($.name, '', '⚠️ 今天已签到');
+        // 已签到，但仍然可以查询一次积分
+        try {
+            const points = await getPoints(token, code);
+            $.msg($.name, '', `⚠️ 今天已签到，当前积分：${points}`);
+        } catch (e) {
+            $.msg($.name, '', '⚠️ 今天已签到');
+        }
         return $.done();
     }
 
@@ -63,9 +69,18 @@ if (typeof $request !== 'undefined') {
         let msg = '';
         if (res && res.memberCode !== undefined) {
             $.setdata(signDay, LAST_SIGN_KEY);
-            msg = '✅ 签到成功';
+            // 签到成功，查询积分
+            try {
+                const points = await getPoints(token, code);
+                msg = `✅ 签到成功，当前积分：${points}`;
+            } catch (e) {
+                msg = '✅ 签到成功';
+            }
         } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
-            msg = '⚠️ 今天已签到';
+            // 服务器返回已签到，但本地未记录，更新记录
+            $.setdata(signDay, LAST_SIGN_KEY);
+            const points = await getPoints(token, code).catch(() => '?');
+            msg = `⚠️ 今天已签到，当前积分：${points}`;
         } else {
             msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
         }
@@ -76,6 +91,23 @@ if (typeof $request !== 'undefined') {
     $.done();
 })();
 
+// ========== 积分查询函数 ==========
+async function getPoints(token, code) {
+    const headers = {
+        'token': token,
+        'code': code,
+        'tag': 'v3.0'
+    };
+    const url = `${API}/api/member/get/point/list?pageNum=1&pageSize=15`;
+    const res = await doGet(url, headers);
+    console.log('积分接口响应: ' + JSON.stringify(res));
+    // 尝试从多种可能的字段中提取总积分
+    if (res && res.data) {
+        return res.data.totalPoint ?? res.data.totalPoints ?? res.data.total ?? 0;
+    }
+    return 0;
+}
+
 // ========== 工具函数 ==========
 function doPost(path, body, headers) {
     const url = API + path;
@@ -85,6 +117,19 @@ function doPost(path, body, headers) {
             $task.fetch(opts).then(res => resolve(JSON.parse(res.body))).catch(reject);
         } else {
             $httpClient.post(opts, (err, resp, data) => {
+                if (err) reject(err); else resolve(JSON.parse(data));
+            });
+        }
+    });
+}
+
+function doGet(url, headers) {
+    return new Promise((resolve, reject) => {
+        const opts = { url, method: 'GET', headers, timeout: 30000 };
+        if (typeof $task !== 'undefined') {
+            $task.fetch(opts).then(res => resolve(JSON.parse(res.body))).catch(reject);
+        } else {
+            $httpClient.get(opts, (err, resp, data) => {
                 if (err) reject(err); else resolve(JSON.parse(data));
             });
         }
