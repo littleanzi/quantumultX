@@ -18,7 +18,6 @@ if ($response && $response.body) {
 } else {
     $done({});
 }
-// Env 部分与之前相同，这里省略
 
 function Env(name) {
     const isQX = typeof $task !== 'undefined';
