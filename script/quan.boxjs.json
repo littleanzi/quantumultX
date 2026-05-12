@@ -72,7 +72,9 @@
             "id": "peak_sign",
             "name": "匹克签到",
             "keys": [
-                "peak_data"
+                "peak_data",
+                "peak_sign_cache",
+                "peak_body_cache"
             ],
             "settings": [
                 {
@@ -83,11 +85,36 @@
                     "placeholder": "{\"token\":\"...\",\"appid\":\"...\"}",
                     "autoGrow": true,
                     "rows": 2,
-                    "desc": "由重写自动抓取或手动填入"
+                    "desc": "自动抓取或手动填入"
+                },
+                {
+                    "id": "peak_sign_cache",
+                    "name": "备用签名",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "手动填入签名（电脑生成）",
+                    "autoGrow": false,
+                    "rows": 1,
+                    "desc": "当 iCloud 不可用时使用"
+                },
+                {
+                    "id": "peak_body_cache",
+                    "name": "备用请求体",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "手动填入请求体 JSON",
+                    "autoGrow": true,
+                    "rows": 2,
+                    "desc": "当 iCloud 不可用时使用"
                 }
             ],
             "author": "@any",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/peak.js"
+            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/peak.js",
+            "icons": [
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/peak.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/peak.png"
+            ]
         },
         {
             "id": "pureh2b_sign",
