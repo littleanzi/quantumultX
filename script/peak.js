@@ -61,7 +61,7 @@ function sha1(str) {
     return (cvtHex(H0) + cvtHex(H1) + cvtHex(H2) + cvtHex(H3) + cvtHex(H4)).toLowerCase();
 }
 
-// ==================== 签名生成（修复键顺序） ====================
+// ==================== 签名生成 ====================
 function generateSign(bodyObj) {
     const secretKey = "R6WbJ830wNsEdjH9GumwKYiYxHz0K9QD";
     const ts = Date.now().toString();
@@ -135,10 +135,19 @@ if (typeof $request !== 'undefined') {
     try {
         const res = await doPost('/mobile/activity/sign/sign', body, headers);
         console.log('签到响应: ' + JSON.stringify(res));
+
         let msg = '';
-        if (res.success || res.code === '0') msg = '✅ 签到成功';
-        else if ((res.msg || '').includes('重复') || (res.msg || '').includes('已签')) msg = '⚠️ 今天已签到';
-        else msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
+        if (res.success || res.code === '0') {
+            msg = '✅ 签到成功';
+        } else if (
+            (res.msg || '').includes('重复') ||
+            (res.msg || '').includes('已签') ||
+            (res.msg || '').includes('已达到最大参与次数')
+        ) {
+            msg = '⚠️ 今天已签到';
+        } else {
+            msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
+        }
         $.msg($.name, '', msg);
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
