@@ -1,10 +1,10 @@
-// 抓取参数: token, appid
-// 算法: SHA1( body{signDate,shopId,activityId} + secretKey + ts ) 排序拼接
+// 2026-05-12 抓取参数: token, appid
+// 算法: SHA1( body{shopId,activityId,signDate} + secretKey + ts ) 排序拼接
 
 const $ = new Env('匹克签到');
 const API = 'https://scrmipg.peaksport.com';
 
-// SHA1 实现
+// ==================== SHA1 完整实现 ====================
 function sha1(str) {
     function rotateLeft(n, s) { return (n << s) | (n >>> (32 - s)); }
     function cvtHex(val) {
@@ -61,14 +61,24 @@ function sha1(str) {
     return (cvtHex(H0) + cvtHex(H1) + cvtHex(H2) + cvtHex(H3) + cvtHex(H4)).toLowerCase();
 }
 
-// 签名生成
+// ==================== 签名生成（修复键顺序） ====================
 function generateSign(bodyObj) {
     const secretKey = "R6WbJ830wNsEdjH9GumwKYiYxHz0K9QD";
     const ts = Date.now().toString();
-    const d = {};
-    d.body = JSON.stringify(bodyObj);
-    d.secretKey = secretKey;
-    d.ts = ts;
+    
+    // 必须按 shopId、activityId、signDate 的顺序构造对象
+    const orderedBody = {
+        shopId: bodyObj.shopId,
+        activityId: bodyObj.activityId,
+        signDate: bodyObj.signDate
+    };
+    
+    const d = {
+        body: JSON.stringify(orderedBody),
+        secretKey: secretKey,
+        ts: ts
+    };
+    
     const pairs = [];
     for (let key in d) pairs.push(key + d[key]);
     pairs.sort();
@@ -76,7 +86,7 @@ function generateSign(bodyObj) {
     return { sign: sha1(signStr), ts: ts };
 }
 
-// 抓取 token/appid
+// ==================== 抓取 token/appid ====================
 if (typeof $request !== 'undefined') {
     const headers = $request.headers;
     const token = headers['token'] || '';
@@ -88,7 +98,7 @@ if (typeof $request !== 'undefined') {
     $.done();
 }
 
-// 定时签到
+// ==================== 定时签到 ====================
 (async () => {
     const raw = $.getdata('peak_data') || '';
     if (!raw) { $.msg($.name, '❌ 未配置', '请先进入匹克小程序抓取 token'); return $.done(); }
@@ -100,10 +110,12 @@ if (typeof $request !== 'undefined') {
 
     const today = new Date();
     const signDate = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    
+    // 对象定义顺序：shopId, activityId, signDate
     const body = {
-        signDate: signDate,
         shopId: "10000182",
-        activityId: "d9e2bfd6-ee3b-42d2-b513-e70b5aaa37ad"
+        activityId: "d9e2bfd6-ee3b-42d2-b513-e70b5aaa37ad",
+        signDate: signDate
     };
 
     const { sign, ts } = generateSign(body);
@@ -134,6 +146,7 @@ if (typeof $request !== 'undefined') {
     $.done();
 })();
 
+// ==================== 工具函数 ====================
 function doPost(path, body, headers) {
     const url = API + path;
     return new Promise((resolve, reject) => {
