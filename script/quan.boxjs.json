@@ -118,7 +118,7 @@
         },
         {
             "id": "pureh2b_sign",
-            "name": "PureH2B签到",
+            "name": "全棉时代签到",
             "keys": [
                 "pureh2b_data"
             ],
@@ -131,11 +131,16 @@
                     "placeholder": "格式：{\"token\":\"...\",\"code\":\"...\",\"signInId\":\"...\"}",
                     "autoGrow": true,
                     "rows": 3,
-                    "desc": ""
+                    "desc": "自动抓取或手动填入 JSON"
                 }
             ],
             "author": "@any",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/quanmsd.js"
+            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/pureh2b.js",
+            "icons": [
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/pureh2b.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/pureh2b.png"
+            ]
         }
     ]
 }

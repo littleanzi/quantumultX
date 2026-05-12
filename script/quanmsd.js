@@ -1,10 +1,12 @@
-// 2026-05-11 23:59:59 抓取参数: token, code, signInId
+// v1 2026-05-12 抓取参数: token, code, signInId
+// 接口: /api/new/member/sign/signIn/fixSign
 
 const $ = new Env('全棉时代微信小程序签到');
 const DATA_KEY = 'pureh2b_data';
 const LAST_SIGN_KEY = 'pureh2b_last_sign_date';
 const API = 'https://nmp.pureh2b.com';
 
+// ========== 抓取凭证 ==========
 if (typeof $request !== 'undefined') {
     const headers = $request.headers;
     const token = headers['token'] || '';
@@ -14,12 +16,14 @@ if (typeof $request !== 'undefined') {
     const signInId = body.signInId || '';
 
     if (token && code && signInId) {
-        $.setdata(JSON.stringify({ token, code, signInId }), DATA_KEY);
+        const data = { token, code, signInId };
+        $.setdata(JSON.stringify(data), DATA_KEY);
         $.msg($.name, '', '🎉 凭证已保存');
     }
     $.done();
 }
 
+// ========== 定时签到 ==========
 (async () => {
     const raw = $.getdata(DATA_KEY) || '';
     if (!raw) { $.msg($.name, '❌ 未配置', '请先手动签到一次抓取凭证，或手动填入 pureh2b_data'); return $.done(); }
@@ -38,6 +42,7 @@ if (typeof $request !== 'undefined') {
     const today = new Date();
     const signDay = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
+    // 检查今天是否已签到
     const lastSignDate = $.getdata(LAST_SIGN_KEY) || '';
     if (lastSignDate === signDay) {
         $.msg($.name, '', '⚠️ 今天已签到');
@@ -55,20 +60,23 @@ if (typeof $request !== 'undefined') {
     try {
         const res = await doPost('/api/new/member/sign/signIn/fixSign', signBody, headers);
         console.log('签到响应: ' + JSON.stringify(res));
+        let msg = '';
         if (res && res.memberCode !== undefined) {
             $.setdata(signDay, LAST_SIGN_KEY);
-            $.msg($.name, '', '✅ 签到成功');
+            msg = '✅ 签到成功';
         } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
-            $.msg($.name, '', '⚠️ 今天已签到');
+            msg = '⚠️ 今天已签到';
         } else {
-            $.msg($.name, '', '❌ 失败: ' + (res.msg || JSON.stringify(res)));
+            msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
         }
+        $.msg($.name, '', msg);
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
     }
     $.done();
 })();
 
+// ========== 工具函数 ==========
 function doPost(path, body, headers) {
     const url = API + path;
     return new Promise((resolve, reject) => {
