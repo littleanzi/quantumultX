@@ -70,48 +70,22 @@ let $XiaoMao = new Env("MiYuVIP");
 
   if (targetRegex.test(requestUrl)) {
     try {
-      // 解析原始响应
       let body = JSON.parse($response.body);
-      $XiaoMao.log("✅ 拦截到 user_info 接口，原始数据: " + JSON.stringify(body));
-
-      // ----- 伪造 VIP 数据（根据常见字段修改，可自行调整）-----
-      // 情况1：data 对象内包含 vip 相关字段
-      // 更全面的修改逻辑，替换你脚本里对应的部分
-      if (body.data) {
-        // 遍历并修改常见字段
-        body.data.is_vip = true;
-        body.data.vip = true;
-        body.data.vip_level = 99;
-        body.data.vip_expire_time = 4070880000;
-        body.data.vip_end_time = "2099-12-31 23:59:59";
-        body.data.user_type = "vip";
-        body.data.role = "premium";
-        body.data.member_type = "premium";
-        body.data.is_premium = true;
-        body.data.subscription_status = "active";
+      // 递归修改所有可能表示VIP状态的字段
+      function deepModify(obj) {
+        if (typeof obj !== 'object' || obj === null) return;
+        for (let key in obj) {
+          if (typeof obj[key] === 'object') deepModify(obj[key]);
+          // 匹配常见 VIP 字段
+          if (/is_vip|vip|isVip|isPremium|is_member/i.test(key)) obj[key] = true;
+          if (/vip_level|user_level|level/i.test(key)) obj[key] = 99;
+          if (/expire_time|expire_date|end_time|deadline/i.test(key)) obj[key] = 4070880000;
+          if (/user_type|role|member_type/i.test(key)) obj[key] = "vip";
+        }
       }
-
-      // 根节点也直接修改
-      body.is_vip = true;
-      body.vip = true;
-      body.user_type = "vip";
-      // 情况3：可能存在 member 或 subscription 对象
-      if (body.member) {
-        body.member.is_active = true;
-        body.member.expire = "2099-12-31";
-      }
-      if (body.subscription) {
-        body.subscription.status = "active";
-      }
-
-      // 可选：强制修改用户等级或积分 (有些 app 会判断积分)
-      if (body.user_level !== undefined) body.user_level = 99;
-      if (body.points !== undefined) body.points = 999999;
-
-      $XiaoMao.log("🎉 VIP 已解锁，修改后数据: " + JSON.stringify(body));
+      deepModify(body);
       $done({ body: JSON.stringify(body) });
     } catch (e) {
-      $XiaoMao.log("❌ 解析失败: " + e);
       $done({});
     }
   } else {
