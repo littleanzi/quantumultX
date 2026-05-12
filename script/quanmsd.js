@@ -1,4 +1,4 @@
-// v1 2026-05-12 抓取参数: token, code, signInId
+// 2026-05-12 抓取参数: token, code, signInId
 // 接口: /api/new/member/sign/signIn/fixSign
 
 const $ = new Env('全棉时代微信小程序签到');
