@@ -1,4 +1,5 @@
-// 2026-05-12 抓取参数: access_token, kdt_id, app_id
+// 抓取参数: access_token, kdt_id, app_id
+// 接口: /wscump/checkin/checkinV2.json
 
 const $ = new Env('松鲜鲜签到');
 const DATA_KEY = 'youzan_sxx_data';
@@ -40,7 +41,7 @@ if (typeof $request !== 'undefined') {
         return $.done();
     }
 
-    // 使用有赞标准签到接口
+    // 尝试签到（使用有赞标准签到接口，checkinId 可以省略，服务器会根据 token 自动匹配）
     const signPath = `/wscump/checkin/checkinV2.json?app_id=${appId}&kdt_id=${kdtId}&access_token=${token}`;
 
     const headers = {
