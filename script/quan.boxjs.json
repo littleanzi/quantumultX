@@ -4,6 +4,7 @@
     "author": "@any",
     "icon": "",
     "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
+    "icons":["https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/anboy.png"],
     "apps": [
         {
             "id": "sxx_sign",
