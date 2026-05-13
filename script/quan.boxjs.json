@@ -93,32 +93,6 @@
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/peak.png",
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/peak.png"
             ]
-        },
-        {
-            "id": "pureh2b_sign",
-            "name": "全棉时代签到",
-            "keys": [
-                "pureh2b_data"
-            ],
-            "settings": [
-                {
-                    "id": "pureh2b_data",
-                    "name": "账号数据",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "格式：{\"token\":\"...\",\"code\":\"...\",\"signInId\":\"...\"}",
-                    "autoGrow": true,
-                    "rows": 3,
-                    "desc": "自动抓取或手动填入 JSON"
-                }
-            ],
-            "author": "@any",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/pureh2b.js",
-            "icons": [
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/pureh2b.png",
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/pureh2b.png"
-            ]
         }
     ]
 }
