@@ -1,6 +1,6 @@
 {
   "name": "any_myself",
-  "description": "一些自用的脚本任务,生成日期:2026-04-25",
+  "description": "生成日期:2026-04-25",
   "raw": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/autoScript.conf/anyTask.json",
   "task": [
     "21 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克wx小程序签到,    img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hxek.png,enabled=true",
