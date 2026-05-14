@@ -20,7 +20,6 @@ if (typeof $request !== 'undefined') {
     }
     $.done();
 }
-
 // ========== 定时签到 ==========
 (async () => {
     const raw = $.getdata(DATA_KEY) || '';
