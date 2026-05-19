@@ -4,7 +4,7 @@
 const $ = new Env('良品铺子签到');
 const DATA_KEY = 'lppz_sign_data';
 const API = 'https://api-cic-gateway.lppz.com';
-const SIGN_KEY = 'apoli9pjydaxd156nu839by4t17h2iva'; // 从反编译源码提取的固定签名密钥
+const SIGN_KEY = 'apoli9pjydaxd156nu839by4t17h2iva';
 const TENANT = 'cic';
 const TENANT_STORE = '1397';
 const ACTIVITY_ID = '59';
@@ -113,14 +113,13 @@ function generateSign(payload, timestamp) {
     return md5(raw);
 }
 
-// ==================== 重写：抓取 openId, memberNo ====================
+// ==================== 抓取凭证 ====================
 if (typeof $request !== 'undefined') {
     const body = $request.body ? JSON.parse($request.body) : {};
     const openId = body.openId || '';
     const memberNo = body.memberNo || '';
     if (openId && memberNo) {
-        const data = { openId, memberNo };
-        $.setdata(JSON.stringify(data), DATA_KEY);
+        $.setdata(JSON.stringify({ openId, memberNo }), DATA_KEY);
         $.msg($.name, '', '🎉 用户凭证已保存');
     }
     $.done();
