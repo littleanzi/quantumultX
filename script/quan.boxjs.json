@@ -119,32 +119,6 @@
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png",
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png"
             ]
-        },
-        {
-            "id": "peak_sign",
-            "name": "匹克签到",
-            "keys": [
-                "peak_data"
-            ],
-            "settings": [
-                {
-                    "id": "peak_data",
-                    "name": "账号数据",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "{\"token\":\"...\",\"appid\":\"...\"}",
-                    "autoGrow": true,
-                    "rows": 2,
-                    "desc": "自动抓取或手动填入"
-                }
-            ],
-            "author": "@any",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/peak.js",
-            "icons": [
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/pk.png",
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/pk.png"
-            ]
         }
     ]
 }
