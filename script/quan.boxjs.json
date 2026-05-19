@@ -6,6 +6,32 @@
     "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
     "apps": [
         {
+            "id": "lppz_sign",
+            "name": "良品铺子签到",
+            "keys": [
+                "lppz_sign_data"
+            ],
+            "settings": [
+                {
+                    "id": "lppz_sign_data",
+                    "name": "用户凭证",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "{\"openId\":\"...\",\"memberNo\":\"...\"}",
+                    "autoGrow": true,
+                    "rows": 2,
+                    "desc": "自动抓取或手动填入"
+                }
+            ],
+            "author": "@any",
+            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/lppz.js",
+            "icons": [
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/lppz.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/lppz.png"
+            ]
+        },
+        {
             "id": "sxx_sign",
             "name": "松鲜鲜签到",
             "keys": [
