@@ -1,6 +1,6 @@
 /**
- * App Store 限免监控 (多数据源 + 去重)
- * 数据源: RSSHub (主), IT之家 (备用)
+ * App Store 限免监控 (多源 + 去重 + 全部当前限免)
+ * 数据源: RSSHub, IT之家, 鲜柚应用
  * 适用: Quantumult X / Surge / Loon / Node.js
  * 定时: 建议每天 8:00, 12:00, 18:00 各一次
  */
@@ -17,7 +17,7 @@ function Env(name) {
         if (isSurge || isLoon) return $persistentStore.read(key) || "";
         if (isNode) {
             let data = {};
-            try { data = JSON.parse(require("fs").readFileSync("./box.dat", "utf8")); } catch (e) { }
+            try { data = JSON.parse(require("fs").readFileSync("./box.dat", "utf8")); } catch (e) {}
             return data[key] || "";
         }
         return "";
@@ -27,7 +27,7 @@ function Env(name) {
         else if (isSurge || isLoon) $persistentStore.write(val, key);
         else if (isNode) {
             let data = {};
-            try { data = JSON.parse(require("fs").readFileSync("./box.dat", "utf8")); } catch (e) { }
+            try { data = JSON.parse(require("fs").readFileSync("./box.dat", "utf8")); } catch (e) {}
             data[key] = val;
             require("fs").writeFileSync("./box.dat", JSON.stringify(data));
         }
@@ -70,7 +70,6 @@ function Env(name) {
 const $ = new Env("AppStore限免监控");
 const STORAGE_KEY = "free_apps_last_ids";
 
-// 尝试多个数据源
 const DATA_SOURCES = [
     {
         name: "RSSHub",
@@ -81,12 +80,17 @@ const DATA_SOURCES = [
         name: "IT之家",
         url: "https://napi.ithome.com/api/appdiscount/getdiscountapps",
         parser: parseITH
+    },
+    {
+        name: "鲜柚应用",
+        url: "https://api.ixiaoyou.com/appstore/free",
+        parser: parseXianYou
     }
 ];
 
 function fetchFreeApps(index = 0) {
     if (index >= DATA_SOURCES.length) {
-        $.notify("限免监控", "所有数据源均失败", "请稍后重试");
+        $.notify("限免监控", "所有数据源均失败", "请检查网络连接");
         $.done();
         return;
     }
@@ -98,7 +102,7 @@ function fetchFreeApps(index = 0) {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15"
     }, (err, resp, data) => {
         if (err) {
-            console.log(`${source.name} 请求失败，错误码: ${err.statusCode}, 错误信息: ${err.message}`);
+            console.log(`${source.name} 请求失败，状态: ${err.statusCode || '未知'}, 信息: ${err.message || JSON.stringify(err)}`);
             fetchFreeApps(index + 1);
             return;
         }
@@ -106,36 +110,37 @@ function fetchFreeApps(index = 0) {
         try {
             const apps = source.parser(data);
             if (apps.length === 0) {
-                console.log(`${source.name}: 暂无新限免应用`);
-                $.done();
+                console.log(`${source.name}: 暂无限免应用`);
+                fetchFreeApps(index + 1);
                 return;
             }
 
-            // 去重：读取上次推送的应用ID
+            // 去重
             const lastIds = ($.getdata(STORAGE_KEY) || "").split(",").filter(Boolean);
             const newApps = apps.filter(app => !lastIds.includes(app.id));
 
-            if (newApps.length === 0) {
-                console.log("没有新的限免应用");
-                $.done();
-                return;
+            let message = '';
+            if (newApps.length > 0) {
+                message = `📱 新限免 (${newApps.length}款):\n`;
+                newApps.forEach((app, idx) => {
+                    message += `\n${idx + 1}. ${app.title}`;
+                    if (app.price) message += ` (原价: ${app.price})`;
+                    if (app.link) message += `\n   🔗 ${app.link}`;
+                });
+                // 更新已推送ID
+                const allIds = lastIds.concat(newApps.map(app => app.id));
+                $.setdata(allIds.slice(-100).join(","), STORAGE_KEY);
+            } else {
+                // 没有新App，但仍然显示所有当前限免
+                message = `📱 当前限免 (${apps.length}款):\n`;
+                apps.forEach((app, idx) => {
+                    message += `\n${idx + 1}. ${app.title}`;
+                    if (app.price) message += ` (原价: ${app.price})`;
+                    if (app.link) message += `\n   🔗 ${app.link}`;
+                });
             }
 
-            // 格式化推送消息
-            let message = `📱 新限免 (${newApps.length}款):\n`;
-            newApps.forEach((app, idx) => {
-                message += `\n${idx + 1}. ${app.title}`;
-                if (app.price) message += ` (原价: ${app.price})`;
-                if (app.link) message += `\n   🔗 ${app.link}`;
-            });
-
             $.notify("App Store 限时免费", "", message);
-
-            // 更新已推送的应用ID
-            const allIds = lastIds.concat(newApps.map(app => app.id));
-            // 只保留最近100个ID，避免无限增长
-            const trimmedIds = allIds.slice(-100);
-            $.setdata(trimmedIds.join(","), STORAGE_KEY);
         } catch (e) {
             console.log(`${source.name} 解析失败: ${e}`);
             fetchFreeApps(index + 1);
@@ -145,7 +150,7 @@ function fetchFreeApps(index = 0) {
     });
 }
 
-// RSS 解析器 (适用于 RSSHub)
+// RSS解析器
 function parseRSS(xmlString) {
     const apps = [];
     const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
@@ -156,26 +161,23 @@ function parseRSS(xmlString) {
         const linkMatch = content.match(/<link>(.*?)<\/link>/);
         if (titleMatch && linkMatch) {
             apps.push({
-                id: linkMatch[1].split("/id").pop().split("?")[0], // 提取Apple App ID作为唯一标识
+                id: linkMatch[1].split("/id").pop().split("?")[0],
                 title: titleMatch[1],
                 link: linkMatch[1],
-                price: "" // RSSHub 可能不包含价格
+                price: ""
             });
         }
     }
     return apps;
 }
 
-// IT之家 API 解析器
+// IT之家解析器 (显示所有当前限免)
 function parseITH(jsonString) {
     const apps = [];
     try {
         const json = JSON.parse(jsonString);
         if (json.status !== 1 || !json.data) return apps;
-
-        // 不再只筛选今天，而是显示所有限免数据（API 返回的就是当前有效限免）
         json.data.forEach(app => {
-            // 有些应用没有 appId，用 appUrl 作为唯一标识
             apps.push({
                 id: app.appUrl || app.appName,
                 title: app.appName,
@@ -185,6 +187,26 @@ function parseITH(jsonString) {
         });
     } catch (e) {
         console.log("IT之家JSON解析错误: " + e);
+    }
+    return apps;
+}
+
+// 鲜柚应用解析器
+function parseXianYou(jsonString) {
+    const apps = [];
+    try {
+        const json = JSON.parse(jsonString);
+        if (json.code !== 0 || !json.data) return apps;
+        json.data.forEach(app => {
+            apps.push({
+                id: app.appId,
+                title: app.appName,
+                link: app.appUrl,
+                price: app.originalPrice
+            });
+        });
+    } catch (e) {
+        console.log("鲜柚应用解析错误: " + e);
     }
     return apps;
 }
