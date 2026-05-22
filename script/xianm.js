@@ -17,7 +17,7 @@ function Env(name) {
         if (isSurge || isLoon) return $persistentStore.read(key) || "";
         if (isNode) {
             let data = {};
-            try { data = JSON.parse(require("fs").readFileSync("./box.dat", "utf8")); } catch (e) {}
+            try { data = JSON.parse(require("fs").readFileSync("./box.dat", "utf8")); } catch (e) { }
             return data[key] || "";
         }
         return "";
@@ -27,7 +27,7 @@ function Env(name) {
         else if (isSurge || isLoon) $persistentStore.write(val, key);
         else if (isNode) {
             let data = {};
-            try { data = JSON.parse(require("fs").readFileSync("./box.dat", "utf8")); } catch (e) {}
+            try { data = JSON.parse(require("fs").readFileSync("./box.dat", "utf8")); } catch (e) { }
             data[key] = val;
             require("fs").writeFileSync("./box.dat", JSON.stringify(data));
         }
@@ -98,8 +98,8 @@ function fetchFreeApps(index = 0) {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15"
     }, (err, resp, data) => {
         if (err) {
-            console.log(`${source.name} 请求失败: ${err}`);
-            fetchFreeApps(index + 1);  // 尝试下一个
+            console.log(`${source.name} 请求失败，错误码: ${err.statusCode}, 错误信息: ${err.message}`);
+            fetchFreeApps(index + 1);
             return;
         }
 
