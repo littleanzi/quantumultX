@@ -1,6 +1,6 @@
 /**
- * App Store 限时免费监控 (备用RSSHub数据源)
- * 数据来源: RSSHub
+ * App Store 限免监控 (多数据源 + 去重)
+ * 数据源: RSSHub (主), IT之家 (备用)
  * 适用: Quantumult X / Surge / Loon / Node.js
  * 定时: 建议每天 8:00, 12:00, 18:00 各一次
  */
@@ -68,51 +68,86 @@ function Env(name) {
 
 // ==================== 主逻辑 ====================
 const $ = new Env("AppStore限免监控");
+const STORAGE_KEY = "free_apps_last_ids";
 
-function fetchFreeApps() {
-    // RSSHub 接口，返回 RSS 格式的限免信息
-    const apiUrl = "https://rsshub.app/appstore/free";
+// 尝试多个数据源
+const DATA_SOURCES = [
+    {
+        name: "RSSHub",
+        url: "https://rsshub.app/appstore/free",
+        parser: parseRSS
+    },
+    {
+        name: "IT之家",
+        url: "https://napi.ithome.com/api/appdiscount/getdiscountapps",
+        parser: parseITH
+    }
+];
 
-    $.get(apiUrl, {
+function fetchFreeApps(index = 0) {
+    if (index >= DATA_SOURCES.length) {
+        $.notify("限免监控", "所有数据源均失败", "请稍后重试");
+        $.done();
+        return;
+    }
+
+    const source = DATA_SOURCES[index];
+    console.log(`正在尝试数据源: ${source.name}`);
+
+    $.get(source.url, {
         "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15"
     }, (err, resp, data) => {
         if (err) {
-            console.log(`请求失败: ${err}`);
-            $.notify("限免监控", "请求失败", err.message || err);
-            $.done();
+            console.log(`${source.name} 请求失败: ${err}`);
+            fetchFreeApps(index + 1);  // 尝试下一个
             return;
         }
 
         try {
-            // RSSHub 返回的是 RSS 格式，我们需要解析 XML
-            const items = parseRSSItems(data);
-            if (items.length === 0) {
-                console.log("今日暂无新的限免应用");
+            const apps = source.parser(data);
+            if (apps.length === 0) {
+                console.log(`${source.name}: 暂无新限免应用`);
                 $.done();
                 return;
             }
 
-            let message = `📱 今日限免 (共${items.length}款):\n`;
-            items.forEach((item, index) => {
-                message += `\n${index + 1}. ${item.title}`;
-                if (item.price) message += ` (原价: ${item.price})`;
-                if (item.link) message += `\n   🔗 ${item.link}`;
+            // 去重：读取上次推送的应用ID
+            const lastIds = ($.getdata(STORAGE_KEY) || "").split(",").filter(Boolean);
+            const newApps = apps.filter(app => !lastIds.includes(app.id));
+
+            if (newApps.length === 0) {
+                console.log("没有新的限免应用");
+                $.done();
+                return;
+            }
+
+            // 格式化推送消息
+            let message = `📱 新限免 (${newApps.length}款):\n`;
+            newApps.forEach((app, idx) => {
+                message += `\n${idx + 1}. ${app.title}`;
+                if (app.price) message += ` (原价: ${app.price})`;
+                if (app.link) message += `\n   🔗 ${app.link}`;
             });
 
             $.notify("App Store 限时免费", "", message);
+
+            // 更新已推送的应用ID
+            const allIds = lastIds.concat(newApps.map(app => app.id));
+            // 只保留最近100个ID，避免无限增长
+            const trimmedIds = allIds.slice(-100);
+            $.setdata(trimmedIds.join(","), STORAGE_KEY);
         } catch (e) {
-            console.log(`解析失败: ${e}`);
-            $.notify("限免监控", "解析错误", e.message);
-        } finally {
-            $.done();
+            console.log(`${source.name} 解析失败: ${e}`);
+            fetchFreeApps(index + 1);
+            return;
         }
+        $.done();
     });
 }
 
-// 简易 RSS XML 解析器（提取 <item> 中的 <title> 和 <link>）
-function parseRSSItems(xmlString) {
-    const items = [];
-    // 匹配 <item>...</item> 块
+// RSS 解析器 (适用于 RSSHub)
+function parseRSS(xmlString) {
+    const apps = [];
     const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
     let match;
     while ((match = itemRegex.exec(xmlString)) !== null) {
@@ -120,13 +155,44 @@ function parseRSSItems(xmlString) {
         const titleMatch = content.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/);
         const linkMatch = content.match(/<link>(.*?)<\/link>/);
         if (titleMatch && linkMatch) {
-            items.push({
+            apps.push({
+                id: linkMatch[1].split("/id").pop().split("?")[0], // 提取Apple App ID作为唯一标识
                 title: titleMatch[1],
-                link: linkMatch[1]
+                link: linkMatch[1],
+                price: "" // RSSHub 可能不包含价格
             });
         }
     }
-    return items;
+    return apps;
+}
+
+// IT之家 API 解析器
+function parseITH(jsonString) {
+    const apps = [];
+    try {
+        const json = JSON.parse(jsonString);
+        if (json.status !== 1 || !json.data) return apps;
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
+        const todayStr = `${year}-${month}-${day}`;
+
+        json.data
+            .filter(app => app.dateStr === todayStr)
+            .forEach(app => {
+                apps.push({
+                    id: app.appId || app.appUrl,
+                    title: app.appName,
+                    link: app.appUrl,
+                    price: app.originalPrice
+                });
+            });
+    } catch (e) {
+        console.log("IT之家JSON解析错误: " + e);
+    }
+    return apps;
 }
 
 fetchFreeApps();
