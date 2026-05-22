@@ -1,4 +1,4 @@
-// 2026-05-19 抓取参数: openId, memberNo, tenant, tenantStore
+// 2026-05-23 抓取参数: openId, memberNo
 // 算法: MD5( JSON.stringify(payload) + "&timestamp=" + timestamp + "&tenant=" + tenant + "&tenantStore=" + tenantStore + signKey )
 
 const $ = new Env('良品铺子签到');
@@ -106,14 +106,14 @@ function md5(string) {
 // ==================== 签名生成 ====================
 function generateSign(payload, timestamp) {
     var raw = JSON.stringify(payload) +
-        "&timestamp=" + timestamp +
-        "&tenant=" + TENANT +
-        "&tenantStore=" + TENANT_STORE +
-        SIGN_KEY;
+              "&timestamp=" + timestamp +
+              "&tenant=" + TENANT +
+              "&tenantStore=" + TENANT_STORE +
+              SIGN_KEY;
     return md5(raw);
 }
 
-// ==================== 抓取凭证 ====================
+// ==================== 重写：抓取 openId, memberNo ====================
 if (typeof $request !== 'undefined') {
     const body = $request.body ? JSON.parse($request.body) : {};
     const openId = body.openId || '';
@@ -168,18 +168,25 @@ if (typeof $request !== 'undefined') {
     try {
         const res = await doPost('/api/customer/consumer/signIn/userSignIn', payload, headers);
         console.log('签到响应: ' + JSON.stringify(res));
+
+        // 修复后的状态判断
         let msg = '';
-        if (res.code === 0 || res.code === "0" || res.success) {
+        const resCode = String(res.code || '');
+        const resMsg = res.message || res.msg || '';
+
+        if (resCode === '0' || res.success) {
             msg = '✅ 签到成功';
         } else if (
-            (res.message || res.msg || '').includes('已签到') ||
-            (res.message || res.msg || '').includes('重复') ||
-            res.code === "5304"  // 良品铺子专有：已签到
+            resCode === '5304' ||
+            resMsg.includes('已签到') ||
+            resMsg.includes('重复') ||
+            resMsg.includes('已经签到')
         ) {
             msg = '⚠️ 今天已签到';
         } else {
-            msg = '❌ 失败: ' + (res.message || res.msg || JSON.stringify(res));
+            msg = '❌ 失败: ' + (resMsg || JSON.stringify(res));
         }
+
         $.msg($.name, '', msg);
     } catch (e) {
         $.msg($.name, '❌ 异常', e.message);
