@@ -106,10 +106,10 @@ function md5(string) {
 // ==================== 签名生成 ====================
 function generateSign(payload, timestamp) {
     var raw = JSON.stringify(payload) +
-              "&timestamp=" + timestamp +
-              "&tenant=" + TENANT +
-              "&tenantStore=" + TENANT_STORE +
-              SIGN_KEY;
+        "&timestamp=" + timestamp +
+        "&tenant=" + TENANT +
+        "&tenantStore=" + TENANT_STORE +
+        SIGN_KEY;
     return md5(raw);
 }
 
@@ -169,12 +169,16 @@ if (typeof $request !== 'undefined') {
         const res = await doPost('/api/customer/consumer/signIn/userSignIn', payload, headers);
         console.log('签到响应: ' + JSON.stringify(res));
         let msg = '';
-        if (res.code === 0 || res.success) {
+        if (res.code === 0 || res.code === "0" || res.success) {
             msg = '✅ 签到成功';
-        } else if ((res.msg || '').includes('已签到') || (res.msg || '').includes('重复')) {
+        } else if (
+            (res.message || res.msg || '').includes('已签到') ||
+            (res.message || res.msg || '').includes('重复') ||
+            res.code === "5304"  // 良品铺子专有：已签到
+        ) {
             msg = '⚠️ 今天已签到';
         } else {
-            msg = '❌ 失败: ' + (res.msg || JSON.stringify(res));
+            msg = '❌ 失败: ' + (res.message || res.msg || JSON.stringify(res));
         }
         $.msg($.name, '', msg);
     } catch (e) {
