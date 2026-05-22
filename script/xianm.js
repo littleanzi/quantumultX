@@ -173,22 +173,16 @@ function parseITH(jsonString) {
         const json = JSON.parse(jsonString);
         if (json.status !== 1 || !json.data) return apps;
 
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = String(today.getMonth() + 1).padStart(2, "0");
-        const day = String(today.getDate()).padStart(2, "0");
-        const todayStr = `${year}-${month}-${day}`;
-
-        json.data
-            .filter(app => app.dateStr === todayStr)
-            .forEach(app => {
-                apps.push({
-                    id: app.appId || app.appUrl,
-                    title: app.appName,
-                    link: app.appUrl,
-                    price: app.originalPrice
-                });
+        // 不再只筛选今天，而是显示所有限免数据（API 返回的就是当前有效限免）
+        json.data.forEach(app => {
+            // 有些应用没有 appId，用 appUrl 作为唯一标识
+            apps.push({
+                id: app.appUrl || app.appName,
+                title: app.appName,
+                link: app.appUrl,
+                price: app.originalPrice || "未知"
             });
+        });
     } catch (e) {
         console.log("IT之家JSON解析错误: " + e);
     }
