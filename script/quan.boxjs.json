@@ -32,32 +32,6 @@
             ]
         },
         {
-            "id": "sxx_sign",
-            "name": "松鲜鲜签到",
-            "keys": [
-                "youzan_sxx_data"
-            ],
-            "settings": [
-                {
-                    "id": "youzan_sxx_data",
-                    "name": "账号数据",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "{\"token\":\"...\",\"kdtId\":\"...\",\"appId\":\"...\"}",
-                    "autoGrow": true,
-                    "rows": 2,
-                    "desc": "自动抓取或手动填入"
-                }
-            ],
-            "author": "@any",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/sxx.js",
-            "icons": [
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/sxx.png",
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/sxx.png"
-            ]
-        },
-        {
             "id": "erke_sign",
             "name": "鸿星尔克签到",
             "keys": [
