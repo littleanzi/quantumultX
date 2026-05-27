@@ -11,7 +11,6 @@ const ACTIVITY_ID = '59';
 const CHANNEL_TYPE = '4';
 const CHANNEL_ID = '552';
 const SIGN_TYPE = 1;
-
 // ==================== MD5 实现 ====================
 function md5(string) {
     function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)); }
