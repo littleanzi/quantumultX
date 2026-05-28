@@ -58,35 +58,36 @@
             ]
         },
         {
-            "id": "hisense_sign",
+            "id": "hisense_checkin",
             "name": "海信爱家签到",
             "keys": [
-                "hisense_data",
-                "hisense_tc3_secret"
+                "hisense_customerId",
+                "hisense_sign_key"
             ],
             "settings": [
                 {
-                    "id": "hisense_data",
-                    "name": "账号数据",
+                    "id": "hisense_customerId",
+                    "name": "customerId",
                     "val": "",
                     "type": "text",
-                    "placeholder": "自动抓取，无需手动填写",
+                    "placeholder": "98149762（多账号用@隔开）",
                     "autoGrow": true,
                     "rows": 2,
                     "desc": ""
                 },
                 {
-                    "id": "hisense_tc3_secret",
-                    "name": "腾讯云密钥",
+                    "id": "hisense_sign_key",
+                    "name": "签名密钥",
                     "val": "",
-                    "type": "password",
-                    "placeholder": "格式：SecretId:SecretKey",
-                    "autoGrow": false,
-                    "rows": 1,
-                    "desc": "腾讯云 TC3 签名密钥"
+                    "type": "text",
+                    "placeholder": "从 get_commonweb_key.js 获取",
+                    "autoGrow": true,
+                    "rows": 2,
+                    "desc": "commonweb 密钥"
                 }
             ],
             "author": "@any",
+            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
             "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
             "icons": [
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png",
