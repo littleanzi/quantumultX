@@ -59,20 +59,20 @@
         },
         {
             "id": "hisense_replay",
-            "name": "海信爱家签到(请求回放)",
+            "name": "海信爱家签到",
             "keys": [
-                "hisense_sign_data"
+                "hisense_sign_request"
             ],
             "settings": [
                 {
-                    "id": "hisense_sign_data",
+                    "id": "hisense_sign_request",
                     "name": "签到请求数据",
                     "val": "",
                     "type": "text",
                     "placeholder": "自动抓取，无需手动填写",
                     "autoGrow": true,
-                    "rows": 3,
-                    "desc": ""
+                    "rows": 4,
+                    "desc": "完整的请求头、请求体和URL，由重写规则自动抓取"
                 }
             ],
             "author": "@any",

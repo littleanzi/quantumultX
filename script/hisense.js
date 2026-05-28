@@ -1,100 +1,25 @@
 /**
- * 海信爱家签到 - 请求回放版 (Quantumult X / Surge / Loon / Node)
+ * 海信爱家签到 - 请求重放版
  * 
- * 原理：通过重写规则抓取小程序发出的完整签到请求（含签名），
- *       定时任务回放该请求实现签到，无需自行计算签名。
+ * 原理：
+ * 1. 重写规则拦截小程序发出的真实签到请求（含已生成的签名）
+ * 2. 将完整的请求头、请求体、URL 保存到 QX 本地存储
+ * 3. 定时任务读取存储的数据，原封不动地重新发送该请求
  * 
  * 使用步骤：
- * 1. 添加 [MITM] hostname = mobile-aiot.hismarttv.com
- * 2. 添加重写规则：
- *    ^https:\/\/mobile-aiot\.hismarttv\.com\/AIoTPointsMall\/gw\/svc\/HiVip\/1\.0\/checkIn url script-request-header https://你的脚本地址/hisense_replay.js
- * 3. 打开海信爱家小程序，进入会员中心，点击签到按钮，QX 会弹出“🎉 签到请求已保存”通知
- * 4. 定时任务会在设定时间自动回放该请求
- * 
- * 密钥安全：本脚本不包含任何密钥，所有敏感数据存储在 QX 本地 / BoxJs 中
+ * 1. 配置 MITM 和重写规则（见下方）
+ * 2. 打开海信爱家小程序 → 会员中心 → 点击签到按钮
+ * 3. QX 弹出 "🎉 签到请求已保存" 通知
+ * 4. 每天定时任务会自动回放该请求
  */
 
-const isQX = typeof $task !== 'undefined';
-const isSurge = typeof $httpClient !== 'undefined' && !isQX;
-const isNode = typeof require === 'function' && typeof module !== 'undefined';
+const $ = new Env('海信爱家签到');
+const STORE_KEY = 'hisense_sign_request';
 
-// ========== 持久化存储读取 ==========
-function readFromStore(key) {
-  try {
-    if (isQX) return $prefs.valueForKey(key);          // QX 推荐使用 $prefs
-    if (isSurge) return $persistentStore.read(key);
-    if (isNode) {
-      const fs = require('fs');
-      const p = require('path').join(__dirname, key + '.json');
-      return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
-    }
-  } catch (e) {
-    console.error('readFromStore failed', e);
-    return null;
-  }
-}
-
-// ========== 持久化存储写入 ==========
-function writeToStore(key, value) {
-  try {
-    if (isQX) return $prefs.setValueForKey(value, key);
-    if (isSurge) return $persistentStore.write(value, key);
-    if (isNode) {
-      const fs = require('fs');
-      const p = require('path').join(__dirname, key + '.json');
-      fs.writeFileSync(p, value, 'utf8');
-      return true;
-    }
-  } catch (e) {
-    console.error('writeToStore failed', e);
-    return false;
-  }
-}
-
-// ========== BoxJs 远程读取 (可选) ==========
-function getBoxJSValue(boxUrl, boxToken) {
-  if (!boxUrl || !boxToken) return Promise.resolve(null);
-  if (isQX) {
-    return $task.fetch({ url: boxUrl + '/get?key=hisense_sign_data', headers: { 'Authorization': boxToken } })
-      .then(r => r.body ? JSON.parse(r.body) : null);
-  }
-  if (isNode) {
-    const fetch = require('node-fetch');
-    return fetch(boxUrl + '/get?key=hisense_sign_data', { headers: { 'Authorization': boxToken } })
-      .then(r => r.json()).catch(() => null);
-  }
-  return Promise.resolve(null);
-}
-
-// ========== 环境变量读取 (Node) ==========
-function readEnv(key) {
-  if (isNode && process.env) return process.env[key];
-  if (typeof $environment !== 'undefined' && $environment)
-    return $environment[key] || ($environment.value && $environment.value[key]) || null;
-  if (typeof __ENV !== 'undefined' && __ENV) return __ENV[key] || null;
-  return undefined;
-}
-
-// ========== 通用 HTTP 请求 ==========
-function requestFetch(options) {
-  const { url, method, headers, body } = options;
-  if (isQX) return $task.fetch({ url, method, headers, body });
-  if (isSurge) return new Promise((resolve, reject) => {
-    $httpClient.post({ url, headers, body }, (err, resp, respBody) => {
-      err ? reject(err) : resolve({ status: resp && resp.status, body: respBody });
-    });
-  });
-  if (isNode) {
-    const fetch = require('node-fetch');
-    return fetch(url, { method, headers, body })
-      .then(async res => ({ statusCode: res.status, body: await res.text() }));
-  }
-  return Promise.reject(new Error('unsupported'));
-}
-
-// ========== 重写：抓取签到请求 ==========
+// ==================== 抓取模式：保存完整请求 ====================
 if (typeof $request !== 'undefined') {
   const url = $request.url;
+
   // 只抓取 checkIn 请求
   if (url.includes('/checkIn')) {
     const headers = $request.headers;
@@ -109,57 +34,120 @@ if (typeof $request !== 'undefined') {
       timestamp: Date.now()
     });
 
-    writeToStore('hisense_sign_data', data);
-    $notify('Hisense 签到', '抓取成功', '签到请求已保存，可用于定时回放');
+    $.setdata(data, STORE_KEY);
+    $.msg($.name, '抓取成功', '🎉 签到请求已保存，可用于定时回放');
   }
-  $done({});
+  $.done();
 }
 
-// ========== 定时签到（回放请求）==========
-async function main() {
-  // 1. 尝试从 BoxJs 读取
-  const boxUrl = readEnv('HISENSE_BOXJS_URL');
-  const boxToken = readEnv('HISENSE_BOXJS_TOKEN');
-  let saved = null;
-  if (boxUrl && boxToken) {
-    try { saved = await getBoxJSValue(boxUrl, boxToken); } catch (e) { }
-  }
+// ==================== 定时签到模式：回放请求 ====================
+(async () => {
+  const raw = $.getdata(STORE_KEY) || '';
 
-  // 2. 从本地存储读取
-  if (!saved) {
-    const raw = readFromStore('hisense_sign_data');
-    if (raw) {
-      try { saved = JSON.parse(raw); } catch (e) { saved = null; }
-    }
-  }
-
-  // 3. 无数据时提示
-  if (!saved) {
-    console.error('no saved sign data found');
-    if (isQX) $notify('Hisense 签到', '失败', '未找到抓取的请求数据，请先按 README 配置 rewrite');
+  if (!raw) {
+    $.msg($.name, '❌ 未找到请求数据', '请先进入海信爱家小程序，点击签到按钮抓取请求');
+    $.done();
     return;
   }
 
-  // 4. 构造请求
-  const targetHost = saved.url || `https://mobile-aiot.hismarttv.com/AIoTPointsMall/gw/svc/HiVip/1.0/checkIn?customerId=${saved.customerId}`;
+  let saved;
+  try {
+    saved = JSON.parse(raw);
+  } catch (e) {
+    $.msg($.name, '❌ 数据解析失败', '请重新抓取签到请求');
+    $.done();
+    return;
+  }
+
+  // 提取完整的请求信息
+  const url = saved.url || `https://mobile-aiot.hismarttv.com/AIoTPointsMall/gw/svc/HiVip/1.0/checkIn?customerId=${saved.customerId}`;
   const reqBody = typeof saved.body === 'string' ? saved.body : JSON.stringify(saved.body);
   const reqHeaders = Object.assign(
-    { 'Content-Type': 'application/json', Host: 'mobile-aiot.hismarttv.com' },
+    {
+      'Content-Type': 'application/json',
+      'Host': 'mobile-aiot.hismarttv.com'
+    },
     saved.headers || {}
   );
 
-  // 5. 发送请求
-  const res = await requestFetch({ url: targetHost, method: 'POST', headers: reqHeaders, body: reqBody });
-  let bodyText = res.body;
-  try { bodyText = typeof bodyText === 'string' ? bodyText : JSON.stringify(bodyText); } catch (e) { }
+  console.log('回放请求 URL: ' + url);
+  console.log('回放请求体: ' + reqBody.substring(0, 200) + '...');
 
-  // 6. 判断结果并通知
-  const success = bodyText && (bodyText.includes('SUCCESS') || bodyText.includes('"code":0') || bodyText.includes('"resultCode":0'));
-  if (isQX) $notify('Hisense 签到', success ? '成功' : '失败', bodyText.slice(0, 300));
-  if (isNode) console.log('签到返回', bodyText);
+  try {
+    const res = await doPost(url, reqBody, reqHeaders);
+    console.log('签到响应: ' + JSON.stringify(res));
+
+    let msg = '';
+    if (res.resultCode === 0 || res.code === 0) {
+      msg = '✅ 签到成功';
+    } else if (res.errorDesc && res.errorDesc.includes('已签到')) {
+      msg = '⚠️ 今天已签到';
+    } else if (res.errorDesc && res.errorDesc.includes('Wrong Signature')) {
+      msg = '⚠️ 签名已过期，请重新进入小程序签到页面抓取请求';
+    } else {
+      msg = '❌ 失败: ' + (res.errorDesc || res.msg || JSON.stringify(res));
+    }
+
+    $.msg($.name, '', msg);
+  } catch (e) {
+    $.msg($.name, '❌ 网络异常', e.message);
+  }
+  $.done();
+})();
+
+// ==================== 网络请求 ====================
+function doPost(url, body, headers) {
+  return new Promise((resolve, reject) => {
+    $.post({
+      url: url,
+      headers: headers,
+      body: body,
+      timeout: 30000
+    }, (err, resp, data) => {
+      if (err) return reject(err);
+      try {
+        resolve(JSON.parse(data));
+      } catch (e) {
+        reject(new Error('解析失败: ' + data));
+      }
+    });
+  });
 }
 
-main().catch(e => {
-  console.error(e);
-  if (typeof $notify !== 'undefined') $notify('Hisense 签到', '运行异常', e.message);
-});
+// ==================== 环境适配 ====================
+function Env(name) {
+  const isQX = typeof $task !== 'undefined';
+  const isSurge = typeof $httpClient !== 'undefined' && !isQX;
+
+  const getdata = (key) => {
+    if (isQX) return $prefs.valueForKey(key) || '';
+    if (isSurge) return $persistentStore.read(key) || '';
+    return '';
+  };
+
+  const setdata = (val, key) => {
+    if (isQX) $prefs.setValueForKey(val, key);
+    else if (isSurge) $persistentStore.write(val, key);
+  };
+
+  const msg = (t, s, m) => {
+    if (isQX) $notify(t, s, m);
+    else if (isSurge) $notification.post(t, s, m);
+    console.log(t + '\n' + s + '\n' + m);
+  };
+
+  const post = (opt, cb) => {
+    if (isQX) {
+      opt.method = 'POST';
+      $task.fetch(opt).then(res => cb(null, res, res.body)).catch(err => cb(err));
+    } else if (isSurge) {
+      $httpClient.post(opt, cb);
+    }
+  };
+
+  const done = (v) => {
+    if (typeof $done !== 'undefined') $done(v);
+  };
+
+  return { name, getdata, setdata, msg, post, done };
+}
