@@ -87,7 +87,11 @@
                 }
             ],
             "author": "@any",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js"
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
+            "icons": [
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png"
+            ]
         }
     ]
 }
