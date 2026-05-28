@@ -12,6 +12,7 @@ const DATA_KEY = 'hisense_data';
 const SIGN_KEY_KEY = 'hisense_sign_key';
 const API = 'https://mobile-aiot.hismarttv.com';
 
+
 // ==================== MD5 返回 16 字节数组 ====================
 function md5Binary(string) {
     function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)); }
