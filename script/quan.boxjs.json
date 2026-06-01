@@ -58,51 +58,211 @@
             ]
         },
         {
-            "name": "签到任务配置",
-            "settings": [
-                {
-                    "id": "sign_task_config",
-                    "name": "签到配置",
-                    "type": "object",
-                    "fields": [
-                        {
-                            "id": "cookie",
-                            "name": "Cookie",
-                            "type": "text",
-                            "desc": "登录后的 Cookie 字符串，用于身份验证",
-                            "required": true
-                        },
-                        {
-                            "id": "token",
-                            "name": "Token",
-                            "type": "text",
-                            "desc": "可选，Bearer Token",
-                            "required": false
-                        },
-                        {
-                            "id": "appKey",
-                            "name": "App Key",
-                            "type": "text",
-                            "desc": "签名用的 appKey，例如 anti-leech-wangsu",
-                            "required": false
-                        },
-                        {
-                            "id": "secret",
-                            "name": "Secret",
-                            "type": "text",
-                            "desc": "签名用的密钥",
-                            "required": false
-                        },
-                        {
-                            "id": "videoUrl",
-                            "name": "视频链接",
-                            "type": "text",
-                            "desc": "需要添加防盗链的视频 URL（测试用）",
-                            "required": false
-                        }
-                    ]
-                }
-            ]
+            "id": "hisense_token",
+            "name": "用户Token",
+            "desc": "海信应用的登录Token（自动保存，无需手动填写）",
+            "icon": "lock.fill",
+            "type": "text",
+            "placeholder": "自动获取",
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_device_id",
+            "name": "设备ID",
+            "desc": "设备标识符（自动生成）",
+            "icon": "iphone.rear",
+            "type": "text",
+            "placeholder": "自动生成",
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_user_info",
+            "name": "用户信息",
+            "desc": "保存的用户账号和积分信息",
+            "icon": "person.fill",
+            "type": "textarea",
+            "placeholder": "自动保存",
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_notify_enable",
+            "name": "启用通知",
+            "desc": "签到成功时发送通知",
+            "icon": "bell.fill",
+            "type": "boolean",
+            "default": true,
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_auto_claim_rewards",
+            "name": "自动领取奖励",
+            "desc": "自动领取可用的奖励",
+            "icon": "gift.fill",
+            "type": "boolean",
+            "default": true,
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_checkin_time_morning",
+            "name": "早晨签到时间",
+            "desc": "早晨自动签到的时间 (HH:mm格式)",
+            "icon": "sunrise.fill",
+            "type": "text",
+            "default": "08:00",
+            "placeholder": "08:00",
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_checkin_time_noon",
+            "name": "中午签到时间",
+            "desc": "中午自动签到的时间 (HH:mm格式)",
+            "icon": "sun.max.fill",
+            "type": "text",
+            "default": "12:00",
+            "placeholder": "12:00",
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_checkin_time_evening",
+            "name": "晚上签到时间",
+            "desc": "晚上自动签到的时间 (HH:mm格式)",
+            "icon": "sunset.fill",
+            "type": "text",
+            "default": "18:00",
+            "placeholder": "18:00",
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_retry_count",
+            "name": "重试次数",
+            "desc": "签到失败后重试的次数",
+            "icon": "arrow.clockwise",
+            "type": "number",
+            "default": 3,
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_debug_mode",
+            "name": "调试模式",
+            "desc": "启用调试模式查看详细日志",
+            "icon": "hammer.fill",
+            "type": "boolean",
+            "default": false,
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_custom_header_ua",
+            "name": "自定义User-Agent",
+            "desc": "自定义请求头User-Agent",
+            "icon": "globe",
+            "type": "text",
+            "placeholder": "默认: iPhone客户端",
+            "persistentStore": true
+        },
+        {
+            "id": "hisense_proxy_url",
+            "name": "代理地址(可选)",
+            "desc": "用于代理海信API请求",
+            "icon": "network",
+            "type": "text",
+            "placeholder": "https://proxy.example.com",
+            "persistentStore": true
         }
-    ]
+    ],
+    "datas": [
+        {
+            "key": "hisense_last_check_time",
+            "val": null,
+            "type": "text",
+            "desc": "上次签到时间",
+            "icon": "clock.fill"
+        },
+        {
+            "key": "hisense_last_check_points",
+            "val": 0,
+            "type": "number",
+            "desc": "上次签到获得的积分",
+            "icon": "star.fill"
+        },
+        {
+            "key": "hisense_total_points",
+            "val": 0,
+            "type": "number",
+            "desc": "累计获得的积分",
+            "icon": "sum"
+        },
+        {
+            "key": "hisense_continue_days",
+            "val": 0,
+            "type": "number",
+            "desc": "连续签到天数",
+            "icon": "calendar"
+        },
+        {
+            "key": "hisense_monthly_points",
+            "val": 0,
+            "type": "number",
+            "desc": "本月获得的积分",
+            "icon": "calendar.circle.fill"
+        },
+        {
+            "key": "hisense_checkin_count",
+            "val": 0,
+            "type": "number",
+            "desc": "累计签到次数",
+            "icon": "checkmark.seal.fill"
+        },
+        {
+            "key": "hisense_error_log",
+            "val": [],
+            "type": "array",
+            "desc": "错误日志记录",
+            "icon": "exclamationmark.circle.fill"
+        },
+        {
+            "key": "hisense_checkin_history",
+            "val": [],
+            "type": "array",
+            "desc": "签到历史记录",
+            "icon": "list.bullet.rectangle.fill"
+        }
+    ],
+    "scripts": [
+        {
+            "name": "🔄 立即签到",
+            "script": "https://raw.githubusercontent.com/yourname/scripts/main/hisense_checkin.js",
+            "icon": "play.circle.fill",
+            "desc": "立即执行签到任务"
+        },
+        {
+            "name": "📊 查看统计",
+            "script": "https://raw.githubusercontent.com/yourname/scripts/main/hisense_stats.js",
+            "icon": "chart.bar.fill",
+            "desc": "查看签到统计数据"
+        },
+        {
+            "name": "🎁 领取奖励",
+            "script": "https://raw.githubusercontent.com/yourname/scripts/main/hisense_claim_rewards.js",
+            "icon": "gift.fill",
+            "desc": "领取所有可用奖励"
+        },
+        {
+            "name": "🗑️ 清除数据",
+            "script": "https://raw.githubusercontent.com/yourname/scripts/main/hisense_clear_data.js",
+            "icon": "trash.fill",
+            "desc": "清除所有保存的数据"
+        },
+        {
+            "name": "🔐 重新授权",
+            "script": "https://raw.githubusercontent.com/yourname/scripts/main/hisense_reauth.js",
+            "icon": "lock.rotation.open",
+            "desc": "重新登录获取新Token"
+        }
+    ],
+    "help": {
+        "title": "使用帮助",
+        "content": "## 功能说明\n\n### 自动签到\n- 每天8点、12点、18点自动执行签到\n- 自动领取签到奖励\n- 异常时自动重试\n\n### 数据管理\n- 所有数据保存在BoxJS本地存储\n- Token自动从API响应中提取\n- 支持数据备份和恢复\n\n### 安全设置\n- 敏感信息加密存储\n- 支持设备指纹防护\n- 自动清除过期Token\n\n## 快速开始\n\n1. **安装脚本**\n   - 在QuantumultX中导入规则\n   - 设置重写规则\n   - 启用定时任务\n\n2. **首次使用**\n   - 打开海信应用\n   - 脚本自动保存Token\n   - 查看BoxJS确认数据\n\n3. **自定义设置**\n   - 在BoxJS中修改时间\n   - 启用/禁用通知\n   - 调整重试策略\n\n## 常见问题\n\n### Q: 为什么没有收到通知？\nA: 检查BoxJS设置中\"启用通知\"是否打开\n\n### Q: Token如何更新？\nA: 打开海信应用任意一次，脚本自动更新\n\n### Q: 如何查看签到日志？\nA: 在BoxJS中查看数据面板或检查脚本日志\n\n### Q: 支持多账户吗？\nA: 暂不支持，可创建多个脚本副本\n\n## 更新日志\n\n### v1.0.0 (2024-01-01)\n- ✨ 初始版本\n- 🎯 支持自动签到\n- 🎁 支持自动领取奖励\n- 📊 支持数据统计\n- 🔐 安全存储用户数据",
+        "icon": "questionmark.circle.fill"
+    }
+]
 }
