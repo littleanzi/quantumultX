@@ -58,29 +58,50 @@
             ]
         },
         {
-            "id": "hisense_replay",
-            "name": "海信爱家签到",
-            "keys": [
-                "hisense_sign_request"
-            ],
+            "name": "签到任务配置",
             "settings": [
                 {
-                    "id": "hisense_sign_request",
-                    "name": "签到请求数据",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "自动抓取，无需手动填写",
-                    "autoGrow": true,
-                    "rows": 4,
-                    "desc": "完整的请求头、请求体和URL，由重写规则自动抓取"
+                    "id": "sign_task_config",
+                    "name": "签到配置",
+                    "type": "object",
+                    "fields": [
+                        {
+                            "id": "cookie",
+                            "name": "Cookie",
+                            "type": "text",
+                            "desc": "登录后的 Cookie 字符串，用于身份验证",
+                            "required": true
+                        },
+                        {
+                            "id": "token",
+                            "name": "Token",
+                            "type": "text",
+                            "desc": "可选，Bearer Token",
+                            "required": false
+                        },
+                        {
+                            "id": "appKey",
+                            "name": "App Key",
+                            "type": "text",
+                            "desc": "签名用的 appKey，例如 anti-leech-wangsu",
+                            "required": false
+                        },
+                        {
+                            "id": "secret",
+                            "name": "Secret",
+                            "type": "text",
+                            "desc": "签名用的密钥",
+                            "required": false
+                        },
+                        {
+                            "id": "videoUrl",
+                            "name": "视频链接",
+                            "type": "text",
+                            "desc": "需要添加防盗链的视频 URL（测试用）",
+                            "required": false
+                        }
+                    ]
                 }
-            ],
-            "author": "@any",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
-            "icons": [
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png",
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png"
             ]
         }
     ]
