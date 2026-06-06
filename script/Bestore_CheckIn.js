@@ -13,7 +13,7 @@
  *
  * BoxJS 订阅: https://raw.githubusercontent.com/littleanzi/quantumultX/main/quantumultX/script/quan.boxjs.json
  *
- * 更新: 2026-06-07
+ * 更新: 2026-06-07 16:30
  *
  * 首次使用：
  * 1. 启用 rewrite 规则
@@ -21,7 +21,6 @@
 */
 
 const VERSION = '1.1.0'
-const UPDATED = '2026-06-07'
 const ENV_KEY = 'Bestore_CheckIn_Data'
 
 // ====== 运行模式判断 ======
