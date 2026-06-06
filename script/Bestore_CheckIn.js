@@ -14,6 +14,7 @@
  * hostname = exter-sp.lppz.com, api-cic-gateway.lppz.com
  */
 
+const VERSION = '1.1.0'
 const ENV_KEY = 'Bestore_CheckIn_Data'
 const TENANT = 'cic'
 const STORE = '1397'
@@ -37,7 +38,7 @@ function save(store) {
 }
 
 // ====== MD5 (from erke.js) ======
-const MD5 = function (string) {
+var MD5 = function (string) {
   function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)) }
   function AddUnsigned(lX, lY) {
     var lX4, lY4, lX8, lY8, lResult
@@ -152,10 +153,19 @@ function request(opts) {
     }
     console.log('[Bestore] REQ: ' + opts.url + (o.body ? ' | Body: ' + o.body.substring(0, 300) : ''))
     if (typeof $httpClient !== 'undefined') {
-      $httpClient[o.method.toLowerCase()](o, function (e, r, d) { return e ? reject(e) : (console.log('[Bestore] RSP: ' + d), resolve({ status: r.status, body: d })) })
+      $httpClient[o.method.toLowerCase()](o, function (e, r, d) {
+        return e ? reject(e) : (console.log('[Bestore] RSP: ' + d), resolve({ status: r.status, body: d }))
+      })
     } else if (typeof $task !== 'undefined') {
-      o.opts = o.opts || {}; o.opts.timeout = 30
-      $task.fetch(o).then(function (r) { console.log('[Bestore] RSP: ' + r.body); return resolve({ status: r.statusCode, body: r.body }) }, function (e) { console.log('[Bestore] ERR: ' + JSON.stringify(e)); reject(e) })
+      o.opts = o.opts || {}
+      o.opts.timeout = 30
+      $task.fetch(o).then(function (r) {
+        console.log('[Bestore] RSP: ' + r.body)
+        resolve({ status: r.statusCode, body: r.body })
+      }, function (e) {
+        console.log('[Bestore] ERR: ' + JSON.stringify(e))
+        reject(e)
+      })
     } else reject(new Error('no http client'))
   })
 }
@@ -169,12 +179,11 @@ function notify(title, sub, msg) {
 // ====== 完成 ======
 function done() { if (typeof $done !== 'undefined') $done({}) }
 
-// ====== Mall API 签名 ======
+// ====== Mall API ======
 function makeMallSign(payload, ts) {
-  return MD5(JSON.stringify(payload) + '&timestamp=' + ts + '&tenant=' + TENANT + '&tenantStore=' + STORE + MALL_KEY)
+  return MD5(JSON.stringify(payload) + '&timestamp=' + ts + '&tenant=' + TENANT + '&tenantStore=' + STORE + 'apoli9pjydaxd156nu839by4t17h2iva')
 }
 
-// ====== Mall API 调用 ======
 function callMall(path, payload) {
   const ts = String(Date.now())
   const sign = makeMallSign(payload, ts)
@@ -200,32 +209,30 @@ function callMall(path, payload) {
 // ====== 捕获 UID / openId ======
 async function rewriteCapture() {
   const store = load()
-  const url = $request.url || ''
   const h = $request.headers || {}
   let bodyStr = ''
   try { bodyStr = typeof $request.body === 'string' ? $request.body : JSON.stringify($request.body || '') }
-  catch (e) { bodyStr = '(body error)' }
+  catch (e) { bodyStr = '' }
 
-  console.log('[Bestore] 捕获: ' + url.split('/').pop())
-  console.log('[Bestore] Body: ' + bodyStr.substring(0, 200))
-
-  let uid = ''
-  if (h['counter_id']) uid = h['counter_id']
-  else if (h['Counter-Id']) uid = h['Counter-Id']
+  let uid = h['counter_id'] || h['Counter-Id'] || ''
 
   let bodyData = null
   if (!uid && bodyStr && bodyStr !== '{}') {
     try {
       bodyData = JSON.parse(bodyStr)
-      if (bodyData.lppz_param_json && bodyData.lppz_param_json.uid) uid = bodyData.lppz_param_json.uid
-      else if (bodyData.uid) uid = bodyData.uid
-      else if (bodyData.memberNo) uid = bodyData.memberNo
+      uid = (bodyData.lppz_param_json && bodyData.lppz_param_json.uid) || bodyData.uid || bodyData.memberNo || ''
     } catch (e) { }
   }
 
-  if (uid && uid !== store.uid) { store.uid = uid; notify('良品铺子签到', '已捕获 UID', uid) }
+  if (uid && uid !== store.uid) {
+    store.uid = uid
+    notify('良品铺子签到', '已捕获 UID', uid)
+  }
 
-  if (bodyData && bodyData.openId && bodyData.openId !== store.openId) { store.openId = bodyData.openId; notify('良品铺子签到', '已捕获 openId', store.openId) }
+  if (bodyData && bodyData.openId && bodyData.openId !== store.openId) {
+    store.openId = bodyData.openId
+    notify('良品铺子签到', '已捕获 openId', store.openId)
+  }
 
   if (store.uid || store.openId) save(store)
 }
@@ -235,27 +242,27 @@ async function taskRun() {
   const store = load()
   const uid = store.uid || ''
   const openId = store.openId || ''
-  console.log('[Bestore] 启动 | UID: ' + uid + ' | openId: ' + openId)
 
   if (!uid || !openId) {
-    notify('良品铺子签到', '缺少信息', (!uid ? '缺少UID' : '缺少openId'))
+    notify('良品铺子签到', '缺少信息', !uid ? '缺少UID，请打开小程序' : '缺少openId，请打开小程序')
     return
   }
 
   const now = new Date()
-  const signDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
+  const y = now.getFullYear()
+  const m = String(now.getMonth() + 1).padStart(2, '0')
+  const d = String(now.getDate()).padStart(2, '0')
 
   const result = await callMall('/api/customer/consumer/signIn/userSignIn', {
     openId: openId,
     activityId: '60',
-    signDate: signDate,
+    signDate: y + '-' + m + '-' + d,
     signType: 1,
     channelType: '4',
     channelId: '552',
     memberNo: uid,
   })
 
-  console.log('[Bestore] 响应: ' + JSON.stringify(result))
   const code = String(result.code || '')
   const msg = result.message || result.msg || JSON.stringify(result).substring(0, 100)
   notify('良品铺子签到', code === '0000' || code === '200' || code === '2000' ? '✅ 签到成功' : '❌ 失败 [' + code + ']', msg)
@@ -264,7 +271,7 @@ async function taskRun() {
 // ====== Main ======
 async function main() {
   try {
-    console.log('[Bestore] v' + VERSION + ' | 模式: ' + (isRequest ? '重写' : '定时'))
+    console.log('[Bestore] v' + VERSION + ' | ' + (isRequest ? '重写' : '定时'))
     if (isRequest) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
