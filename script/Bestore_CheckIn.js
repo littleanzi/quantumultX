@@ -1,5 +1,5 @@
 /*
- * 良品铺子 微信小程序每日签到1
+ * 良品铺子 微信小程序每日签到 (调试模式)
  * Quantumult X / Loon / Surge / Stash
  *
  * [rewrite_local]
@@ -17,10 +17,11 @@
  *
  * 首次使用：
  * 1. 启用 rewrite 规则
- * 2. 打开微信 → 良品铺子小程序 → 自动捕获 UID
-*/
-
-const VERSION = '1.1.0'
+ * 2. 打开微信 → 良品铺子小程序
+ * 3. 进入「我的→签到」页面
+ * 4. 查看 Quantumult X 通知 → 复制内容告诉我
+ */
+const VERSION = '1.1.0-debug'
 const ENV_KEY = 'Bestore_CheckIn_Data'
 
 // ====== 运行模式判断 ======
@@ -197,7 +198,7 @@ function callMember(path, method, payload) {
   })
 }
 
-// ====== Rewrite capture ======
+// ====== Rewrite capture (调试模式: 通知所有请求) ======
 async function rewriteCapture() {
   var store = load()
   var url = $request.url || ''
@@ -207,11 +208,27 @@ async function rewriteCapture() {
   try { bodyStr = typeof $request.body === 'string' ? $request.body : JSON.stringify($request.body || '') }
   catch (e) { bodyStr = '(body error)' }
 
+  // 提取关键 header
+  var interesting = ['counter_id','Counter-Id','timestamp','sign','content-type','tenant','tenantStore','fromClient']
+  var headerParts = []
+  for (var i = 0; i < interesting.length; i++) {
+    var key = interesting[i]
+    if (h[key]) headerParts.push(key + ': ' + h[key])
+  }
+
   console.log('[Bestore] === 捕获请求 ===')
   console.log('[Bestore] URL: ' + url)
   console.log('[Bestore] 方法: ' + method)
-  console.log('[Bestore] counter_id: ' + (h['counter_id'] || h['Counter-Id'] || '无'))
+  console.log('[Bestore] Headers: ' + headerParts.join(' | '))
   console.log('[Bestore] Body: ' + bodyStr.substring(0, 1000))
+
+  // 通知每条请求
+  var shortUrl = url.replace('https://', '')
+  var notifyMsg = '【' + shortUrl + '】\n方法: ' + method
+  if (headerParts.length) notifyMsg += '\n' + headerParts.join('\n')
+  notifyMsg += '\nBody: ' + bodyStr.substring(0, 300)
+  var title = '良品铺子 ' + url.split('/').pop()
+  notify(title, '', notifyMsg.substring(0, 1000))
 
   var uid = ''
   if (h['counter_id']) uid = h['counter_id']
@@ -233,18 +250,6 @@ async function rewriteCapture() {
     }
   } else {
     console.log('[Bestore] 未找到 UID')
-  }
-
-  if (url.indexOf('sign') > -1 || url.indexOf('signIn') > -1 || url.indexOf('checkin') > -1) {
-    console.log('[Bestore] 发现签到相关请求')
-    if (!store.signPaths) store.signPaths = []
-    var entry = { url: url, method: method, time: new Date().toISOString() }
-    if (!store.signPaths.some(function (e) { return e.url === url && e.method === method })) {
-      store.signPaths.push(entry)
-      if (store.signPaths.length > 20) store.signPaths = store.signPaths.slice(-20)
-      save(store)
-      notify('良品铺子签到', '已记录签到API', url.split('/').pop())
-    }
   }
 }
 
