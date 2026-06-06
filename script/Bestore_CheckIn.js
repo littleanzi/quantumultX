@@ -210,28 +210,31 @@ function callMall(path, payload) {
 async function rewriteCapture() {
   const store = load()
   const h = $request.headers || {}
+
+  let uid = ''
+  const rawUid = h['counter_id'] || h['Counter-Id'] || ''
+  if (rawUid && rawUid !== '[object Undefined]') uid = rawUid
+
+  let bodyData = null
   let bodyStr = ''
   try { bodyStr = typeof $request.body === 'string' ? $request.body : JSON.stringify($request.body || '') }
   catch (e) { bodyStr = '' }
 
-  let uid = h['counter_id'] || h['Counter-Id'] || ''
-
-  let bodyData = null
-  if (!uid && bodyStr && bodyStr !== '{}') {
+  if (bodyStr && bodyStr !== '{}') {
     try {
       bodyData = JSON.parse(bodyStr)
-      uid = (bodyData.lppz_param_json && bodyData.lppz_param_json.uid) || bodyData.uid || bodyData.memberNo || ''
+      if (!uid) uid = bodyData.lppz_param_json && bodyData.lppz_param_json.uid || bodyData.uid || bodyData.memberNo || ''
+
+      if (bodyData.openId && bodyData.openId !== store.openId) {
+        store.openId = bodyData.openId
+        notify('良品铺子签到', '已捕获 openId', store.openId)
+      }
     } catch (e) { }
   }
 
   if (uid && uid !== store.uid) {
     store.uid = uid
     notify('良品铺子签到', '已捕获 UID', uid)
-  }
-
-  if (bodyData && bodyData.openId && bodyData.openId !== store.openId) {
-    store.openId = bodyData.openId
-    notify('良品铺子签到', '已捕获 openId', store.openId)
   }
 
   if (store.uid || store.openId) save(store)
