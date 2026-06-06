@@ -1,5 +1,5 @@
 /*
- * 良品铺子 微信小程序每日签到 (调试模式)
+ * 良品铺子 微信小程序每日签到
  * Quantumult X / Loon / Surge / Stash
  *
  * [rewrite_local]
@@ -17,11 +17,9 @@
  *
  * 首次使用：
  * 1. 启用 rewrite 规则
- * 2. 打开微信 → 良品铺子小程序
- * 3. 进入「我的→签到」页面
- * 4. 查看 Quantumult X 通知 → 复制内容告诉我
+ * 2. 打开微信 → 良品铺子小程序 → 自动捕获 UID 和 openId
  */
-const VERSION = '1.1.0-debug'
+const VERSION = '1.1.0'
 const ENV_KEY = 'Bestore_CheckIn_Data'
 
 // ====== 运行模式判断 ======
@@ -41,7 +39,7 @@ function save(store) {
   else if (typeof $prefs !== 'undefined') $prefs.setValueForKey(str, ENV_KEY)
 }
 
-// ====== MD5 from erke.js (verified working) ======
+// ====== MD5 from erke.js ======
 var MD5 = function (string) {
   function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)) }
   function AddUnsigned(lX, lY) {
@@ -176,29 +174,39 @@ function notify(title, sub, msg) {
 function done() { if (typeof $done !== 'undefined') $done({}) }
 
 // ====== 签名算法 ======
-function makeMemberSign(ts, method, key) {
-  return MD5(ts + method + key)
-}
-
 function makeMallSign(payload, ts, tenant, tenantStore, signKey) {
   return MD5(JSON.stringify(payload) + '&timestamp=' + ts + '&tenant=' + tenant + '&tenantStore=' + tenantStore + signKey)
 }
 
-function callMember(path, method, payload) {
+// ====== Mall API 请求 ======
+var MALL_SIGN_KEY = 'apoli9pjydaxd156nu839by4t17h2iva'
+var MALL_TENANT = 'cic'
+var MALL_STORE = '1397'
+var UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43'
+
+function callMall(path, payload) {
   var ts = String(Date.now())
-  var sign = makeMemberSign(ts, method, '4ae4cb628c14c9f4934c88faceb781cc')
-  var body = { lppz_param_json: payload || {}, method: method, sign: sign, timestamp: ts }
+  var sign = makeMallSign(payload, ts, MALL_TENANT, MALL_STORE, MALL_SIGN_KEY)
   return request({
-    url: 'https://exter-sp.lppz.com' + path,
-    headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43' },
-    body: body,
+    url: 'https://api-cic-gateway.lppz.com' + path,
+    headers: {
+      tenant: MALL_TENANT,
+      tenantStore: MALL_STORE,
+      timestamp: ts,
+      sign: sign,
+      'Content-Type': 'application/json',
+      'lppz_version': 'v1.3.6',
+      counter_id: payload.memberNo || '',
+      'User-Agent': UA,
+    },
+    body: payload,
   }).then(function (r) {
     if (r.status !== 200) throw new Error('HTTP ' + r.status + ': ' + (r.body || '').substring(0, 100))
     return JSON.parse(r.body)
   })
 }
 
-// ====== Rewrite capture (调试模式: 通知所有请求) ======
+// ====== Rewrite capture ======
 async function rewriteCapture() {
   var store = load()
   var url = $request.url || ''
@@ -208,70 +216,79 @@ async function rewriteCapture() {
   try { bodyStr = typeof $request.body === 'string' ? $request.body : JSON.stringify($request.body || '') }
   catch (e) { bodyStr = '(body error)' }
 
-  // 提取关键 header
-  var interesting = ['counter_id','Counter-Id','timestamp','sign','content-type','tenant','tenantStore','fromClient']
-  var headerParts = []
-  for (var i = 0; i < interesting.length; i++) {
-    var key = interesting[i]
-    if (h[key]) headerParts.push(key + ': ' + h[key])
-  }
-
-  console.log('[Bestore] === 捕获请求 ===')
-  console.log('[Bestore] URL: ' + url)
-  console.log('[Bestore] 方法: ' + method)
-  console.log('[Bestore] Headers: ' + headerParts.join(' | '))
-  console.log('[Bestore] Body: ' + bodyStr.substring(0, 1000))
-
-  // 通知每条请求
-  var shortUrl = url.replace('https://', '')
-  var notifyMsg = '【' + shortUrl + '】\n方法: ' + method
-  if (headerParts.length) notifyMsg += '\n' + headerParts.join('\n')
-  notifyMsg += '\nBody: ' + bodyStr.substring(0, 300)
-  var title = '良品铺子 ' + url.split('/').pop()
-  notify(title, '', notifyMsg.substring(0, 1000))
+  console.log('[Bestore] 捕获: ' + url.split('/').pop())
+  console.log('[Bestore] Body: ' + bodyStr.substring(0, 200))
 
   var uid = ''
   if (h['counter_id']) uid = h['counter_id']
   else if (h['Counter-Id']) uid = h['Counter-Id']
+
+  var bodyData = null
   if (!uid && bodyStr && bodyStr !== '{}') {
     try {
-      var bodyData = JSON.parse(bodyStr)
+      bodyData = JSON.parse(bodyStr)
       if (bodyData.lppz_param_json && bodyData.lppz_param_json.uid) uid = bodyData.lppz_param_json.uid
       else if (bodyData.uid) uid = bodyData.uid
+      else if (bodyData.memberNo) uid = bodyData.memberNo
     } catch (e) { }
   }
 
   if (uid) {
-    console.log('[Bestore] 捕获到 UID: ' + uid)
     if (uid !== store.uid) {
       store.uid = uid
-      save(store)
-      notify('良品铺子签到', '已捕获 UID', 'UID: ' + uid)
+      console.log('[Bestore] 新 UID: ' + uid)
+      notify('良品铺子签到', '已捕获 UID', uid)
     }
-  } else {
-    console.log('[Bestore] 未找到 UID')
   }
+
+  // 捕获 openId
+  if (bodyData && bodyData.openId) {
+    if (bodyData.openId !== store.openId) {
+      store.openId = bodyData.openId
+      console.log('[Bestore] 新 openId: ' + store.openId)
+      notify('良品铺子签到', '已捕获 openId', store.openId)
+    }
+  }
+
+  if (store.uid || store.openId) save(store)
 }
 
-// ====== Task run ======
+// ====== 签到请求 ======
 async function taskRun() {
   var store = load()
   var uid = store.uid || ''
-  console.log('[Bestore] 定时任务启动 | UID: ' + uid)
+  var openId = store.openId || ''
+  console.log('[Bestore] 定时任务启动 | UID: ' + uid + ' | openId: ' + openId)
 
-  if (!uid) {
-    notify('良品铺子签到', '缺少UID', '请先打开小程序捕获UID')
+  if (!uid || !openId) {
+    notify('良品铺子签到', '缺少信息', (!uid ? '缺少UID' : '') + (!openId ? '缺少openId' : ''))
     return
   }
 
-  var result = await callMember('/lppzWs/external/api/sign/getSmartPageInfo', 'getSmartPageInfo', { uid: uid })
+  var today = new Date()
+  var y = today.getFullYear()
+  var m = String(today.getMonth() + 1).padStart(2, '0')
+  var d = String(today.getDate()).padStart(2, '0')
+  var signDate = y + '-' + m + '-' + d
+
+  var payload = {
+    openId: openId,
+    activityId: '60',
+    signDate: signDate,
+    signType: 1,
+    channelType: '4',
+    channelId: '552',
+    memberNo: uid,
+  }
+
+  var result = await callMall('/api/customer/consumer/signIn/userSignIn', payload)
   console.log('[Bestore] 签到响应: ' + JSON.stringify(result))
   var code = String(result.code || '')
-  var msg = result.message || result.resultMsg || JSON.stringify(result).substring(0, 100)
-  if (code === '0000' || code === '200') {
-    notify('良品铺子签到', '签到成功', msg)
+  var msg = result.message || result.msg || JSON.stringify(result).substring(0, 100)
+  if (code === '0000' || code === '200' || code === '2000') {
+    notify('良品铺子签到', '✅ 签到成功', msg)
   } else {
-    notify('良品铺子签到', '签到失败', msg)
+    notify('良品铺子签到', '❌ 签到失败 [' + code + ']', msg)
   }
 }
 
