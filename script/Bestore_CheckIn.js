@@ -6,9 +6,6 @@
  * MITM 域名: exter-sp.lppz.com, api-cic-gateway.lppz.com
  * 重写规则 (Rewrite): ^https:\/\/(exter-sp\.lppz\.com|api-cic-gateway\.lppz\.com)\/.* url script-request-body Bestore_CheckIn.js
  * Mall 签名算法: MD5(JSON.stringify(body) + &timestamp= + ts + &tenant=cic + &tenantStore=1397 + mall_sign_key)
- * 首次使用：
- *   1. 启用 rewrite 规则
- *   2. 打开微信 → 良品铺子小程序 → 自动捕获 UID 和 openId
  * [rewrite_local]
  * ^https:\/\/(exter-sp\.lppz\.com|api-cic-gateway\.lppz\.com)\/.* url script-request-body Bestore_CheckIn.js
  * [task_local]
