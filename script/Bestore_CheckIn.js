@@ -1,5 +1,5 @@
 /*
- * 良品铺子 微信小程序每日签到
+ * 良品铺子 微信小程序每日签到1
  * Quantumult X / Loon / Surge / Stash
  *
  * [rewrite_local]
