@@ -21,9 +21,11 @@
 const VERSION = '1.1.0'
 const ENV_KEY = 'Bestore_CheckIn_Data'
 
+// ====== 运行模式判断 ======
 const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
+// ====== 持久化存储 ======
 function load() {
   const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
@@ -161,14 +163,16 @@ function request(opts) {
   })
 }
 
+// ====== 通知 ======
 function notify(title, sub, msg) {
   if (typeof $notification !== 'undefined') $notification.post(title, sub, msg)
   else if (typeof $notify !== 'undefined') $notify(title, sub, msg)
 }
 
+// ====== 完成请求 ======
 function done() { if (typeof $done !== 'undefined') $done({}) }
 
-// ====== API helpers ======
+// ====== 签名算法 ======
 function makeMemberSign(ts, method, key) {
   return MD5(ts + method + key)
 }
