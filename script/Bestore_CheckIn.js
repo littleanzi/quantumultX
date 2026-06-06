@@ -19,14 +19,19 @@
  * 1. 启用 rewrite 规则
  * 2. 打开微信 → 良品铺子小程序 → 自动捕获 UID 和 openId
  */
+
 const VERSION = '1.1.0'
 const ENV_KEY = 'Bestore_CheckIn_Data'
+const MALL_KEY = 'apoli9pjydaxd156nu839by4t17h2iva'
+const TENANT = 'cic'
+const STORE = '1397'
+const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43'
 
-// ====== 运行模式判断 ======
+// ====== 运行模式 ======
 const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
-// ====== 持久化存储 ======
+// ====== 持久化 ======
 function load() {
   const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
@@ -39,8 +44,8 @@ function save(store) {
   else if (typeof $prefs !== 'undefined') $prefs.setValueForKey(str, ENV_KEY)
 }
 
-// ====== MD5 from erke.js ======
-var MD5 = function (string) {
+// ====== MD5 (from erke.js) ======
+const MD5 = function (string) {
   function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)) }
   function AddUnsigned(lX, lY) {
     var lX4, lY4, lX8, lY8, lResult
@@ -80,17 +85,17 @@ var MD5 = function (string) {
     return lWordArray
   }
   function WordToHex(lValue) {
-    var WordToHexValue = "", WordToHexValue_temp = "", lByte, lCount
+    var WordToHexValue = '', WordToHexValue_temp = '', lByte, lCount
     for (lCount = 0; lCount <= 3; lCount++) {
       lByte = (lValue >>> (lCount * 8)) & 255
-      WordToHexValue_temp = "0" + lByte.toString(16)
+      WordToHexValue_temp = '0' + lByte.toString(16)
       WordToHexValue = WordToHexValue + WordToHexValue_temp.substr(WordToHexValue_temp.length - 2, 2)
     }
     return WordToHexValue
   }
   function Utf8Encode(string) {
-    string = string.replace(/\r\n/g, "\n")
-    var utftext = ""
+    string = string.replace(/\r\n/g, '\n')
+    var utftext = ''
     for (var n = 0; n < string.length; n++) {
       var c = string.charCodeAt(n)
       if (c < 128) utftext += String.fromCharCode(c)
@@ -144,17 +149,16 @@ var MD5 = function (string) {
   return (WordToHex(a) + WordToHex(b) + WordToHex(c) + WordToHex(d)).toLowerCase()
 }
 
-// ====== Request helper ======
+// ====== HTTP 请求 ======
 function request(opts) {
   return new Promise(function (resolve, reject) {
-    var o = {
+    const o = {
       url: opts.url,
       method: opts.method || 'POST',
       headers: opts.headers || {},
       body: opts.body ? (typeof opts.body === 'string' ? opts.body : JSON.stringify(opts.body)) : undefined,
     }
-    if (o.body) console.log('[Bestore] REQ: ' + opts.url + ' | Body: ' + o.body.substring(0, 300))
-    else console.log('[Bestore] REQ: ' + opts.url)
+    console.log('[Bestore] REQ: ' + opts.url + (o.body ? ' | Body: ' + o.body.substring(0, 300) : ''))
     if (typeof $httpClient !== 'undefined') {
       $httpClient[o.method.toLowerCase()](o, function (e, r, d) { return e ? reject(e) : (console.log('[Bestore] RSP: ' + d), resolve({ status: r.status, body: d })) })
     } else if (typeof $task !== 'undefined') {
@@ -170,28 +174,23 @@ function notify(title, sub, msg) {
   else if (typeof $notify !== 'undefined') $notify(title, sub, msg)
 }
 
-// ====== 完成请求 ======
+// ====== 完成 ======
 function done() { if (typeof $done !== 'undefined') $done({}) }
 
-// ====== 签名算法 ======
-function makeMallSign(payload, ts, tenant, tenantStore, signKey) {
-  return MD5(JSON.stringify(payload) + '&timestamp=' + ts + '&tenant=' + tenant + '&tenantStore=' + tenantStore + signKey)
+// ====== Mall API 签名 ======
+function makeMallSign(payload, ts) {
+  return MD5(JSON.stringify(payload) + '&timestamp=' + ts + '&tenant=' + TENANT + '&tenantStore=' + STORE + MALL_KEY)
 }
 
-// ====== Mall API 请求 ======
-var MALL_SIGN_KEY = 'apoli9pjydaxd156nu839by4t17h2iva'
-var MALL_TENANT = 'cic'
-var MALL_STORE = '1397'
-var UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43'
-
+// ====== Mall API 调用 ======
 function callMall(path, payload) {
-  var ts = String(Date.now())
-  var sign = makeMallSign(payload, ts, MALL_TENANT, MALL_STORE, MALL_SIGN_KEY)
+  const ts = String(Date.now())
+  const sign = makeMallSign(payload, ts)
   return request({
     url: 'https://api-cic-gateway.lppz.com' + path,
     headers: {
-      tenant: MALL_TENANT,
-      tenantStore: MALL_STORE,
+      tenant: TENANT,
+      tenantStore: STORE,
       timestamp: ts,
       sign: sign,
       'Content-Type': 'application/json',
@@ -206,24 +205,23 @@ function callMall(path, payload) {
   })
 }
 
-// ====== Rewrite capture ======
+// ====== 捕获 UID / openId ======
 async function rewriteCapture() {
-  var store = load()
-  var url = $request.url || ''
-  var method = ($request.method || 'GET').toUpperCase()
-  var h = $request.headers || {}
-  var bodyStr = ''
+  const store = load()
+  const url = $request.url || ''
+  const h = $request.headers || {}
+  let bodyStr = ''
   try { bodyStr = typeof $request.body === 'string' ? $request.body : JSON.stringify($request.body || '') }
   catch (e) { bodyStr = '(body error)' }
 
   console.log('[Bestore] 捕获: ' + url.split('/').pop())
   console.log('[Bestore] Body: ' + bodyStr.substring(0, 200))
 
-  var uid = ''
+  let uid = ''
   if (h['counter_id']) uid = h['counter_id']
   else if (h['Counter-Id']) uid = h['Counter-Id']
 
-  var bodyData = null
+  let bodyData = null
   if (!uid && bodyStr && bodyStr !== '{}') {
     try {
       bodyData = JSON.parse(bodyStr)
@@ -233,45 +231,29 @@ async function rewriteCapture() {
     } catch (e) { }
   }
 
-  if (uid) {
-    if (uid !== store.uid) {
-      store.uid = uid
-      console.log('[Bestore] 新 UID: ' + uid)
-      notify('良品铺子签到', '已捕获 UID', uid)
-    }
-  }
+  if (uid && uid !== store.uid) { store.uid = uid; notify('良品铺子签到', '已捕获 UID', uid) }
 
-  // 捕获 openId
-  if (bodyData && bodyData.openId) {
-    if (bodyData.openId !== store.openId) {
-      store.openId = bodyData.openId
-      console.log('[Bestore] 新 openId: ' + store.openId)
-      notify('良品铺子签到', '已捕获 openId', store.openId)
-    }
-  }
+  if (bodyData && bodyData.openId && bodyData.openId !== store.openId) { store.openId = bodyData.openId; notify('良品铺子签到', '已捕获 openId', store.openId) }
 
   if (store.uid || store.openId) save(store)
 }
 
-// ====== 签到请求 ======
+// ====== 签到 ======
 async function taskRun() {
-  var store = load()
-  var uid = store.uid || ''
-  var openId = store.openId || ''
-  console.log('[Bestore] 定时任务启动 | UID: ' + uid + ' | openId: ' + openId)
+  const store = load()
+  const uid = store.uid || ''
+  const openId = store.openId || ''
+  console.log('[Bestore] 启动 | UID: ' + uid + ' | openId: ' + openId)
 
   if (!uid || !openId) {
-    notify('良品铺子签到', '缺少信息', (!uid ? '缺少UID' : '') + (!openId ? '缺少openId' : ''))
+    notify('良品铺子签到', '缺少信息', (!uid ? '缺少UID' : '缺少openId'))
     return
   }
 
-  var today = new Date()
-  var y = today.getFullYear()
-  var m = String(today.getMonth() + 1).padStart(2, '0')
-  var d = String(today.getDate()).padStart(2, '0')
-  var signDate = y + '-' + m + '-' + d
+  const now = new Date()
+  const signDate = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0')
 
-  var payload = {
+  const result = await callMall('/api/customer/consumer/signIn/userSignIn', {
     openId: openId,
     activityId: '60',
     signDate: signDate,
@@ -279,33 +261,24 @@ async function taskRun() {
     channelType: '4',
     channelId: '552',
     memberNo: uid,
-  }
+  })
 
-  var result = await callMall('/api/customer/consumer/signIn/userSignIn', payload)
-  console.log('[Bestore] 签到响应: ' + JSON.stringify(result))
-  var code = String(result.code || '')
-  var msg = result.message || result.msg || JSON.stringify(result).substring(0, 100)
-  if (code === '0000' || code === '200' || code === '2000') {
-    notify('良品铺子签到', '✅ 签到成功', msg)
-  } else {
-    notify('良品铺子签到', '❌ 签到失败 [' + code + ']', msg)
-  }
+  console.log('[Bestore] 响应: ' + JSON.stringify(result))
+  const code = String(result.code || '')
+  const msg = result.message || result.msg || JSON.stringify(result).substring(0, 100)
+  notify('良品铺子签到', code === '0000' || code === '200' || code === '2000' ? '✅ 签到成功' : '❌ 失败 [' + code + ']', msg)
 }
 
 // ====== Main ======
 async function main() {
   try {
-    console.log('[Bestore] 启动 | v' + VERSION + ' | 模式: ' + (isRequest ? '重写' : '定时'))
+    console.log('[Bestore] v' + VERSION + ' | 模式: ' + (isRequest ? '重写' : '定时'))
     if (isRequest) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
-    var errMsg = ''
-    if (typeof e === 'string') errMsg = e
-    else if (e.message) errMsg = e.message
-    else if (e.error) errMsg = e.error
-    else errMsg = JSON.stringify(e)
-    console.log('[Bestore] 错误: ' + errMsg.substring(0, 500))
-    notify('良品铺子签到', '脚本错误', errMsg.substring(0, 200))
+    const msg = (typeof e === 'string' ? e : e.message || e.error || JSON.stringify(e)).substring(0, 500)
+    console.log('[Bestore] 错误: ' + msg)
+    notify('良品铺子签到', '脚本错误', msg.substring(0, 200))
     done()
   }
 }
