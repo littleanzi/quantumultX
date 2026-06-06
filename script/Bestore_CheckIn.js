@@ -1,23 +1,21 @@
 /*
- * 良品铺子 微信小程序每日签到
- * Quantumult X / Loon / Surge / Stash
- *
+ * 良品铺子·微信小程序每日签到
+ * 2026-06-07 版本: 1.1.0
+ * 签名密钥 (member_sign_key): 4ae4cb628c14c9f4934c88faceb781cc
+ * 签名密钥 (mall_sign_key): apoli9pjydaxd156nu839by4t17h2iva
+ * MITM 域名: exter-sp.lppz.com, api-cic-gateway.lppz.com
+ * 重写规则 (Rewrite): ^https:\/\/(exter-sp\.lppz\.com|api-cic-gateway\.lppz\.com)\/.* url script-request-body Bestore_CheckIn.js
+ * Mall 签名算法: MD5(JSON.stringify(body) + &timestamp= + ts + &tenant=cic + &tenantStore=1397 + mall_sign_key)
+ * 首次使用：
+ *   1. 启用 rewrite 规则
+ *   2. 打开微信 → 良品铺子小程序 → 自动捕获 UID 和 openId
  * [rewrite_local]
  * ^https:\/\/(exter-sp\.lppz\.com|api-cic-gateway\.lppz\.com)\/.* url script-request-body Bestore_CheckIn.js
- *
  * [task_local]
  * 33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/quantumultX/script/Bestore_CheckIn.js, tag=良品铺子签到, enabled=true
- *
  * [MITM]
  * hostname = exter-sp.lppz.com, api-cic-gateway.lppz.com
- *
  * BoxJS 订阅: https://raw.githubusercontent.com/littleanzi/quantumultX/main/quantumultX/script/quan.boxjs.json
- *
- * 更新: 2026-06-07
- *
- * 首次使用：
- * 1. 启用 rewrite 规则
- * 2. 打开微信 → 良品铺子小程序 → 自动捕获 UID 和 openId
  */
 
 const VERSION = '1.1.0'
