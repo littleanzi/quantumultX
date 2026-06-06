@@ -155,6 +155,7 @@ function request(opts) {
     if (typeof $httpClient !== 'undefined') {
       $httpClient[o.method.toLowerCase()](o, function (e, r, d) { return e ? reject(e) : (console.log('[Bestore] RSP: ' + d), resolve({ status: r.status, body: d })) })
     } else if (typeof $task !== 'undefined') {
+      o.opts = o.opts || {}; o.opts.timeout = 30
       $task.fetch(o).then(function (r) { console.log('[Bestore] RSP: ' + r.body); return resolve({ status: r.statusCode, body: r.body }) }, function (e) { console.log('[Bestore] ERR: ' + JSON.stringify(e)); reject(e) })
     } else reject(new Error('no http client'))
   })
