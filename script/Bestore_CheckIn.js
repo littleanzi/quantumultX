@@ -13,7 +13,7 @@
  *
  * BoxJS 订阅: https://raw.githubusercontent.com/littleanzi/quantumultX/main/quantumultX/script/quan.boxjs.json
  *
- * 更新: 2026-06-07 16:30
+ * 更新: 2026-06-07
  *
  * 首次使用：
  * 1. 启用 rewrite 规则
