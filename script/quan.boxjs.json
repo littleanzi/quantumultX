@@ -1,0 +1,96 @@
+{
+    "id": "erke_sign_2026",
+    "name": "any自用脚本订阅",
+    "author": "@any",
+    "icon": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/anboy.png",
+    "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
+    "apps": [
+        {
+            "id": "Bestore_CheckIn",
+            "name": "良品铺子签到",
+            "keys": ["Bestore_CheckIn_Data"],
+            "settings": [
+                {
+                    "id": "Bestore_CheckIn_Data",
+                    "name": "账号数据",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "打开小程序后自动捕获",
+                    "autoGrow": true,
+                    "rows": 4,
+                    "desc": "包含 uid 和 signPaths，自动捕获填充"
+                }
+            ],
+            "author": "@any",
+            "repo": "https://github.com/littleanzi/quantumultX/tree/main/script",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/Bestore_CheckIn.js",
+            "icons": [
+                "https://lppz-xcx.oss-cn-hangzhou.aliyuncs.com/wx/member/default_avatar.png",
+                "https://lppz-xcx.oss-cn-hangzhou.aliyuncs.com/wx/mall/default_thumbnail.png"
+            ]
+        },
+        {
+            "id": "erke_sign",
+            "name": "鸿星尔克签到",
+            "keys": [
+                "erke_data"
+            ],
+            "settings": [
+                {
+                    "id": "erke_data",
+                    "name": "鸿星尔克URL",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "",
+                    "autoGrow": true,
+                    "rows": 2,
+                    "desc": ""
+                }
+            ],
+            "author": "@any",
+            "repo": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js",
+            "icons": [
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hxek.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hxek.png"
+            ]
+        },
+        {
+            "id": "hisense_sign",
+            "name": "海信爱家签到",
+            "keys": [
+                "hisense_data",
+                "hisense_sign_key"
+            ],
+            "settings": [
+                {
+                    "id": "hisense_sign_key",
+                    "name": "签名密钥 (Sign Key)",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "请输入抓包获取的固定密钥",
+                    "autoGrow": false,
+                    "rows": 1,
+                    "desc": "必须配置，否则签名校验失败"
+                },
+                {
+                    "id": "hisense_data",
+                    "name": "账号数据 (JSON)",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "{\"ID\":{\"accessToken\":\"...\",\"customerId\":\"...\"}}",
+                    "autoGrow": true,
+                    "rows": 6,
+                    "desc": "支持多账号，格式为JSON对象"
+                }
+            ],
+            "author": "@any",
+            "repo": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js",
+            "icons": [
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png"
+            ]
+        }
+    ]
+}

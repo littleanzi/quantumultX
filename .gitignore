@@ -1,0 +1,7 @@
+# Quantumult X 良品铺子签到脚本
+# 安全：不要提交本地持久化存储或个人配置
+
+.env
+*.local.*
+**/persistentStore*
+**/store.json
