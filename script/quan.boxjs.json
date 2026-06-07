@@ -8,7 +8,9 @@
         {
             "id": "Bestore_CheckIn",
             "name": "良品铺子签到",
-            "keys": ["Bestore_CheckIn_Data"],
+            "keys": [
+                "Bestore_CheckIn_Data"
+            ],
             "settings": [
                 {
                     "id": "Bestore_CheckIn_Data",
