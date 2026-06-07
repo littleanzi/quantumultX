@@ -9,7 +9,7 @@
  * [rewrite_local]
  * ^https:\/\/(exter-sp\.lppz\.com|api-cic-gateway\.lppz\.com)\/.* url script-request-body Bestore_CheckIn.js
  * [task_local]
- * 33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/quantumultX/script/Bestore_CheckIn.js, tag=良品铺子签到, enabled=true
+ * 33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/Bestore_CheckIn.js, tag=良品铺子签到, enabled=true
  * [MITM]
  * hostname = exter-sp.lppz.com, api-cic-gateway.lppz.com
  */
