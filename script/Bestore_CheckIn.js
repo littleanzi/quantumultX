@@ -16,11 +16,12 @@
 
 const VERSION = '1.1.0'
 const ENV_KEY = 'Bestore_CheckIn_Data'
+
+const MALL_KEY = 'apoli9pjydaxd156nu839by4t17h2iva'
 const TENANT = 'cic'
 const STORE = '1397'
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43'
 
-// ====== 运行模式 ======
 const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
@@ -30,14 +31,18 @@ function load() {
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
   return raw ? JSON.parse(raw) : {}
 }
-
 function save(store) {
   const str = JSON.stringify(store)
   if (typeof $persistentStore !== 'undefined') $persistentStore.write(str, ENV_KEY)
   else if (typeof $prefs !== 'undefined') $prefs.setValueForKey(str, ENV_KEY)
 }
+function notify(title, sub, msg) {
+  if (typeof $notification !== 'undefined') $notification.post(title, sub, msg)
+  else if (typeof $notify !== 'undefined') $notify(title, sub, msg)
+}
+function done() { if (typeof $done !== 'undefined') $done({}) }
 
-// ====== MD5 (from erke.js) ======
+// ====== MD5 ======
 var MD5 = function (string) {
   function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)) }
   function AddUnsigned(lX, lY) {
@@ -151,7 +156,7 @@ function request(opts) {
       headers: opts.headers || {},
       body: opts.body ? (typeof opts.body === 'string' ? opts.body : JSON.stringify(opts.body)) : undefined,
     }
-    console.log('[Bestore] REQ: ' + opts.url + (o.body ? ' | Body: ' + o.body.substring(0, 300) : ''))
+    console.log('[Bestore] REQ: ' + opts.url + (o.body ? ' | ' + o.body.substring(0, 200) : ''))
     if (typeof $httpClient !== 'undefined') {
       $httpClient[o.method.toLowerCase()](o, function (e, r, d) {
         return e ? reject(e) : (console.log('[Bestore] RSP: ' + d), resolve({ status: r.status, body: d }))
@@ -170,18 +175,9 @@ function request(opts) {
   })
 }
 
-// ====== 通知 ======
-function notify(title, sub, msg) {
-  if (typeof $notification !== 'undefined') $notification.post(title, sub, msg)
-  else if (typeof $notify !== 'undefined') $notify(title, sub, msg)
-}
-
-// ====== 完成 ======
-function done() { if (typeof $done !== 'undefined') $done({}) }
-
-// ====== Mall API ======
+// ====== Mall API 签名 ======
 function makeMallSign(payload, ts) {
-  return MD5(JSON.stringify(payload) + '&timestamp=' + ts + '&tenant=' + TENANT + '&tenantStore=' + STORE + 'apoli9pjydaxd156nu839by4t17h2iva')
+  return MD5(JSON.stringify(payload) + '&timestamp=' + ts + '&tenant=' + TENANT + '&tenantStore=' + STORE + MALL_KEY)
 }
 
 function callMall(path, payload) {
@@ -201,35 +197,34 @@ function callMall(path, payload) {
     },
     body: payload,
   }).then(function (r) {
-    if (r.status !== 200) throw new Error('HTTP ' + r.status + ': ' + (r.body || '').substring(0, 100))
+    if (r.status !== 200) throw new Error('HTTP ' + r.status)
     return JSON.parse(r.body)
   })
 }
 
-// ====== 捕获 UID / openId ======
+// ====== 捕获 UID & openId ======
 async function rewriteCapture() {
   const store = load()
   const h = $request.headers || {}
 
   let uid = ''
-  const rawUid = h['counter_id'] || h['Counter-Id'] || ''
-  if (rawUid && rawUid !== '[object Undefined]') uid = rawUid
+  const raw = h['counter_id'] || h['Counter-Id'] || ''
+  if (raw && raw !== '[object Undefined]') uid = raw
 
   let bodyData = null
-  let bodyStr = ''
-  try { bodyStr = typeof $request.body === 'string' ? $request.body : JSON.stringify($request.body || '') }
-  catch (e) { bodyStr = '' }
+  try {
+    const bodyStr = typeof $request.body === 'string' ? $request.body : JSON.stringify($request.body || '{}')
+    if (bodyStr && bodyStr !== '{}') bodyData = JSON.parse(bodyStr)
+  } catch (e) {}
 
-  if (bodyStr && bodyStr !== '{}') {
-    try {
-      bodyData = JSON.parse(bodyStr)
-      if (!uid) uid = bodyData.lppz_param_json && bodyData.lppz_param_json.uid || bodyData.uid || bodyData.memberNo || ''
-
-      if (bodyData.openId && bodyData.openId !== store.openId) {
-        store.openId = bodyData.openId
-        notify('良品铺子签到', '已捕获 openId', store.openId)
-      }
-    } catch (e) { }
+  if (bodyData) {
+    if (!uid) {
+      uid = (bodyData.lppz_param_json && bodyData.lppz_param_json.uid) || bodyData.uid || bodyData.memberNo || ''
+    }
+    if (bodyData.openId && bodyData.openId !== store.openId) {
+      store.openId = bodyData.openId
+      notify('良品铺子签到', '已捕获 openId', store.openId)
+    }
   }
 
   if (uid && uid !== store.uid) {
