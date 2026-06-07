@@ -29,12 +29,22 @@ const isTask = typeof $request === 'undefined' && typeof $notification !== 'unde
 function load() {
   const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
-  return raw ? JSON.parse(raw) : {}
+  const store = raw ? JSON.parse(raw) : {}
+
+  const manualOpenId = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.openId') || '' : ''
+  if (manualOpenId && !store.openId) store.openId = manualOpenId
+
+  return store
 }
 function save(store) {
   const str = JSON.stringify(store)
   if (typeof $persistentStore !== 'undefined') $persistentStore.write(str, ENV_KEY)
   else if (typeof $prefs !== 'undefined') $prefs.setValueForKey(str, ENV_KEY)
+}
+function getBoxVal(key) {
+  if (typeof $persistentStore !== 'undefined') return $persistentStore.read(key) || ''
+  if (typeof $prefs !== 'undefined') return $prefs.valueForKey(key) || ''
+  return ''
 }
 function notify(title, sub, msg) {
   if (typeof $notification !== 'undefined') $notification.post(title, sub, msg)
@@ -223,6 +233,7 @@ async function rewriteCapture() {
     }
     if (bodyData.openId && bodyData.openId !== store.openId) {
       store.openId = bodyData.openId
+      if (typeof $persistentStore !== 'undefined') $persistentStore.write(bodyData.openId, ENV_KEY + '.openId')
       notify('良品铺子签到', '已捕获 openId', store.openId)
     }
   }
