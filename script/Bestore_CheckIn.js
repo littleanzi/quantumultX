@@ -274,7 +274,7 @@ async function taskRun() {
 
   const code = String(result.code || '')
   const msg = result.message || result.msg || JSON.stringify(result).substring(0, 100)
-  notify('良品铺子签到', code === '0000' || code === '200' || code === '2000' ? '✅ 签到成功' : '❌ 失败 [' + code + ']', msg)
+  notify('良品铺子签到', code === '0000' || code === '200' || code === '2000' || code === '5304' ? '✅ 签到成功' : '❌ 失败 [' + code + ']', msg)
 }
 
 // ====== Main ======
