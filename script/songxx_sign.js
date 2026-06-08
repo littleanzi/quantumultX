@@ -1,21 +1,23 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-08 版本: 1.7.0
-* 签名密钥: N/A
-* MITM 域名: passport.youzan.com, h5.youzan.com
-* 重写规则 (Rewrite): ^https:\/\/(passport\.youzan\.com|h5\.youzan\.com)\/.*
-* 算法: Cookie 认证 → h5.youzan.com/wscump/checkin
-* [rewrite_local]
-* ^https:\/\/(passport\.youzan\.com|h5\.youzan\.com)\/.* url script-request-header songxx_sign.js
-* [task_local]
-* 0 9 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/songxx_sign.js, tag=松鲜鲜签到, enabled=true
-* [MITM]
-* hostname = passport.youzan.com, open.youzan.com, h5.youzan.com
+ * 2026-06-08 版本: 1.8.0
+ * 签名密钥: N/A
+ * MITM 域名: h5.youzan.com
+ * 重写规则 (Rewrite): ^https:\/\/h5\.youzan\.com\/wscump\/checkin\/.*
+ * 算法: access_token + Extra-Data → h5.youzan.com/wscump/checkin/*.json
+ * [rewrite_local]
+ * ^https:\/\/h5\.youzan\.com\/wscump\/checkin\/.* url script-request-header songxx_sign.js
+ * [task_local]
+ * 0 9 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/songxx_sign.js, tag=松鲜鲜签到, enabled=true
+ * [MITM]
+ * hostname = h5.youzan.com
  */
 
 const ENV_KEY = 'songxx_sign_data'
+const APP_ID = 'wxe65af2b5b95dc5da'
+const KDT_ID = '117130552'
 
-const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43'
+const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.74(0x18004a29) NetType/WIFI Language/zh_CN'
 
 const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined'
@@ -24,7 +26,7 @@ const isTask = typeof $request === 'undefined'
 function load() {
   const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
-  return raw ? JSON.parse(raw) : {}
+  try { return raw ? JSON.parse(raw) : {} } catch (e) { return {} }
 }
 function save(store) {
   const str = JSON.stringify(store)
@@ -42,11 +44,11 @@ function request(opts) {
   return new Promise(function (resolve, reject) {
     const o = {
       url: opts.url,
-      method: opts.method || 'POST',
+      method: opts.method || 'GET',
       headers: opts.headers || {},
-      body: opts.body ? (typeof opts.body === 'string' ? opts.body : JSON.stringify(opts.body)) : undefined,
+      body: opts.body || undefined,
     }
-    console.log('[松鲜鲜] REQ: ' + (opts.method || 'POST') + ' ' + opts.url)
+    console.log('[松鲜鲜] ' + o.method + ' ' + o.url)
     if (typeof $httpClient !== 'undefined') {
       $httpClient[o.method.toLowerCase()](o, function (e, r, d) {
         return e ? reject(e) : resolve({ status: r.status, body: d })
@@ -63,57 +65,59 @@ function request(opts) {
   })
 }
 
-// ====== 有赞 API ======
-function callApi(path, cookie) {
-  const url = 'https://h5.youzan.com' + path
-  return request({
-    url: url,
-    method: 'POST',
+// ====== 构建请求 ======
+function buildReq(path, store) {
+  return {
+    url: 'https://h5.youzan.com/wscump/checkin/' + path + '?app_id=' + APP_ID + '&kdt_id=' + KDT_ID + '&access_token=' + (store.access_token || ''),
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
+      'Extra-Data': store.extraData || '',
       'User-Agent': UA,
-      'Cookie': cookie,
+      'Referer': 'https://servicewechat.com/' + APP_ID + '/93/page-frame.html',
     },
-  }).then(function (r) {
-    console.log('[松鲜鲜] RSP[' + r.status + ']: ' + r.body.substring(0, 300))
-    if (r.status !== 200) throw new Error('HTTP ' + r.status)
-    return JSON.parse(r.body)
-  })
+  }
 }
 
-// ====== 捕获 Cookie ======
+// ====== 捕获参数 ======
 async function rewriteCapture() {
   let store = load()
   if (typeof store === 'string') store = {}
 
-  const rh = ($request && $request.headers) || {}
-  const cookie = rh['Cookie'] || rh['cookie'] || ''
+  const url = $request.url || ''
+  const headers = $request.headers || {}
+  const extraData = headers['Extra-Data'] || headers['extra-data'] || ''
 
-  if (cookie && cookie !== store.cookie) {
-    store.cookie = cookie
+  // 从 URL 提取 access_token
+  let token = ''
+  try { token = url.match(/access_token=([^&]+)/)[1] } catch (e) {}
+
+  let changed = false
+
+  if (extraData && extraData !== store.extraData) {
+    store.extraData = extraData
+    changed = true
+  }
+  if (token && token !== store.access_token) {
+    store.access_token = token
+    changed = true
+  }
+
+  if (changed) {
     save(store)
-    console.log('[松鲜鲜] Cookie 已从MITM捕获')
+    console.log('[松鲜鲜] 参数已捕获')
     notify('松鲜鲜签到', '已捕获', '可定时签到')
   }
 }
 
 // ====== 签到 ======
 async function taskRun() {
-  const raw = load()
+  let store = load()
+  if (typeof store === 'string') store = {}
 
-  // 手动填写的Cookie是纯字符串，MITM捕获的是JSON对象
-  let cookie = ''
-  let store = {}
-  if (typeof raw === 'string') {
-    cookie = raw.trim()
-    store = { manualCookie: cookie }
-  } else {
-    store = raw
-    cookie = store.manualCookie || store.cookie || ''
-  }
+  const token = store.access_token || ''
 
-  if (!cookie) {
-    notify('松鲜鲜签到', '缺少 Cookie', '请在BoxJS中粘贴Cookie，或确认MITM已启用')
+  if (!token || !store.extraData) {
+    notify('松鲜鲜签到', '缺少参数', '请在签到页面触发抓包')
     return
   }
 
@@ -125,78 +129,49 @@ async function taskRun() {
   }
 
   // 查询签到状态
-  const statusPaths = [
-    '/wscump/checkin/status.json',
-    '/wscump/checkin/status',
-    '/wscump/checkin/status/get',
-  ]
-  let alreadySigned = false
-  let workingPath = ''
-  for (const path of statusPaths) {
-    try {
-      console.log('[松鲜鲜] 尝试: GET ' + path)
-      const statusRes = await callApi(path, cookie)
-      console.log('[松鲜鲜] RSP: ' + JSON.stringify(statusRes).substring(0, 200))
-      if (statusRes.code === 0 || statusRes.success) {
-        alreadySigned = statusRes.data?.is_sign || statusRes.data?.isSign || statusRes.data?.today_signed || statusRes.data?.todaySigned || false
-        workingPath = path
-        console.log('[松鲜鲜] ✓ 成功! path=' + path)
-        break
+  try {
+    const statusRes = await request(buildReq('check-in-info.json', store))
+    console.log('[松鲜鲜] 状态: ' + statusRes.body.substring(0, 200))
+    const data = JSON.parse(statusRes.body)
+    if (data.code === 0 || data.success) {
+      const signed = data.data?.is_sign || data.data?.isSign || data.data?.today_signed || data.data?.todaySigned || false
+      if (signed) {
+        store.lastSign = today
+        save(store)
+        notify('松鲜鲜签到', '今日已签到', '无需重复签到')
+        return
       }
-      console.log('[松鲜鲜] ✗ ' + path + ' code=' + statusRes.code)
-    } catch (e) {
-      console.log('[松鲜鲜] ✗ ' + path + ' -> ' + (e.message || '').substring(0, 100))
     }
-  }
-
-  if (!workingPath) {
-    notify('松鲜鲜签到', '签到接口未找到', '所有路径均返回错误，检查日志')
-    return
-  }
-
-  if (alreadySigned) {
-    store.lastSign = today
-    save(store)
-    notify('松鲜鲜签到', '今日已签到', '无需重复签到')
-    return
+  } catch (e) {
+    console.log('[松鲜鲜] 状态查询失败: ' + (e.message || '').substring(0, 100))
   }
 
   // 执行签到
-  const punchPaths = [
-    workingPath.replace('status', 'punch'),
-    '/wscump/checkin/punch.json',
-    '/wscump/checkin/punch',
-  ]
-  for (const path of punchPaths) {
-    try {
-      console.log('[松鲜鲜] 签到: POST ' + path)
-      const signRes = await callApi(path, cookie)
-      const code = String(signRes.code || '')
-      const msg = signRes.msg || signRes.message || JSON.stringify(signRes).substring(0, 100)
-
-      if (code === '0' || signRes.success) {
-        store.lastSign = today
-        save(store)
-        notify('松鲜鲜签到', '签到成功', msg)
-        return
-      }
-      console.log('[松鲜鲜] 签到失败 ' + path + ': [' + code + '] ' + msg.substring(0, 100))
-    } catch (e) {
-      console.log('[松鲜鲜] 签到异常: ' + (e.message || '').substring(0, 100))
+  try {
+    const signRes = await request(buildReq('check-in.json', store))
+    console.log('[松鲜鲜] 签到: ' + signRes.body.substring(0, 200))
+    const data = JSON.parse(signRes.body)
+    if (data.code === 0 || data.success) {
+      store.lastSign = today
+      save(store)
+      notify('松鲜鲜签到', '签到成功', data.data?.message || data.msg || '')
+    } else {
+      notify('松鲜鲜签到', '失败', (data.msg || JSON.stringify(data)).substring(0, 200))
     }
+  } catch (e) {
+    console.log('[松鲜鲜] 签到异常: ' + (e.message || '').substring(0, 100))
+    notify('松鲜鲜签到', '异常', (e.message || '').substring(0, 200))
   }
-  notify('松鲜鲜签到', '签到失败', '所有路径均失败')
 }
 
 // ====== Main ======
 async function main() {
   try {
-    console.log('[松鲜鲜] v1.7.0 | ' + (isRequest ? '重写' : '定时'))
+    console.log('[松鲜鲜] v1.8.0 | ' + (isRequest ? '重写' : '定时'))
     if (isRequest) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
-    const msg = (typeof e === 'string' ? e : e.message || e.error || JSON.stringify(e)).substring(0, 500)
-    console.log('[松鲜鲜] 错误: ' + msg)
+    console.log('[松鲜鲜] 错误: ' + (e.message || '').substring(0, 200))
     done()
   }
 }
