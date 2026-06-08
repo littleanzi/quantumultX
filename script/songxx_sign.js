@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-08 版本: 1.0.0
+ * 2026-06-08 版本: 1.1.0
  * 签名密钥: N/A
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
@@ -13,7 +13,6 @@
  * hostname = open.youzan.com, h5.youzan.com
  */
 
-const VERSION = '1.0.0'
 const ENV_KEY = 'songxx_sign_data'
 
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43'
@@ -269,7 +268,7 @@ async function taskRun() {
 // ====== Main ======
 async function main() {
   try {
-    console.log('[松鲜鲜] v' + VERSION + ' | ' + (isRequest ? '重写' : '定时'))
+    console.log('[松鲜鲜] v1.1.0 | ' + (isRequest ? '重写' : '定时'))
     if (isRequest) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
