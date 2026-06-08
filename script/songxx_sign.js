@@ -6,7 +6,7 @@
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: Cookie 认证 → open.youzan.com/api (wsc.ump.checkin)
  * [rewrite_local]
- * ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.* url script-request-header songxx_sign.js
+ * ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.* url script-response-header songxx_sign.js
  * [task_local]
  * 0 9 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/songxx_sign.js, tag=松鲜鲜签到, enabled=true
  * [MITM]
@@ -190,12 +190,24 @@ function callUmp(method, cookie) {
 // ====== 捕获 Cookie ======
 async function rewriteCapture() {
   const store = load()
-  const cookie = ($request.headers || {})['Cookie'] || ($request.headers || {})['cookie'] || ''
+  const h = $response.headers || {}
+
+  // 从响应 Set-Cookie 中提取(session cookie设置在响应里)
+  let cookie = h['Set-Cookie'] || h['set-cookie'] || ''
+
+  // 也尝试从请求头获取(可能后续请求已有cookie)
+  if (!cookie) {
+    const rh = ($request && $request.headers) || {}
+    cookie = rh['Cookie'] || rh['cookie'] || ''
+  }
+
+  console.log('[松鲜鲜] 捕获URL: ' + ($request ? $request.url : 'unknown'))
+  console.log('[松鲜鲜] Cookie: ' + (cookie ? cookie.substring(0, 80) + '...' : '(空)'))
 
   if (cookie && cookie !== store.cookie) {
     store.cookie = cookie
     save(store)
-    notify('松鲜鲜签到', '已捕获 Cookie', '已更新，可定时签到')
+    notify('松鲜鲜签到', '已捕获', '可定时签到')
   }
 }
 
