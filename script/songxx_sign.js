@@ -1,9 +1,9 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 2.3.0
+ * 2026-06-09 版本: 3.0.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
- * 算法: MITM 抓取 Cookie → Carmen API 签到
+ * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
  * [rewrite_local]
  * ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.* url script-request-header songxx_sign.js
  * [task_local]
@@ -14,28 +14,15 @@
 
 // ====== 存储 Key ======
 var CONFIG = {
-  SESSION: "songxx_session",
-  BUYER_ID: "songxx_buyer_id",
+  ACCESS_TOKEN: "songxx_access_token",
   KDT_ID: "songxx_kdt_id",
+  APP_ID: "songxx_app_id",
   LAST_SIGN: "songxx_last_sign",
   SIGN_COUNT: "songxx_sign_count",
   BOXJS: "songxx_sign_data"
 };
 
-var CARMEN_API = "https://open.youzan.com/api";
-
-var API_METHODS = {
-  CHECK: [
-    "wsc.ump.checkin.status.get/1.0.0",
-    "wsc.ump.punch.status.get/1.0.0",
-    "wsc.checkin.status.get/1.0.0"
-  ],
-  SIGN: [
-    "wsc.ump.checkin.punch/1.0.0",
-    "wsc.ump.punch.sign/1.0.0",
-    "wsc.checkin.punch/1.0.0"
-  ]
-};
+var BASE_URL = "https://h5.youzan.com/wscump/checkin";
 
 // ====== 主入口 ======
 if (typeof $task !== "undefined" && $task.fetch) {
@@ -46,49 +33,33 @@ if (typeof $task !== "undefined" && $task.fetch) {
   $done({});
 }
 
-// ====== 获取 Cookie ======
-function getCookie() {
-  var boxjsCookie = $prefs.valueForKey(CONFIG.BOXJS);
-  if (boxjsCookie) {
-    log("使用 Boxjs Cookie");
-    return boxjsCookie;
-  }
-  return $prefs.valueForKey(CONFIG.SESSION);
-}
-
 // ====== 重写捕获逻辑 ======
 function capture() {
   var url = $request.url;
   var headers = $request.headers;
-  var cookie = headers["Cookie"] || headers["cookie"] || "";
 
-  if (!cookie) {
-    $done({});
-    return;
-  }
-
-  var stored = $prefs.valueForKey(CONFIG.SESSION);
-  if (stored !== cookie) {
-    $prefs.setValueForKey(cookie, CONFIG.SESSION);
-    log("Cookie 已更新");
-  }
-
-  if ($request.body) {
+  // 从 Extra-Data 提取信息
+  var extraData = headers["Extra-Data"];
+  if (extraData) {
     try {
-      var body = JSON.parse($request.body);
-      if (body.kdt_id || body.kdtId) {
-        $prefs.setValueForKey(String(body.kdt_id || body.kdtId), CONFIG.KDT_ID);
-      }
-      if (body.buyer_id || body.buyerId) {
-        $prefs.setValueForKey(String(body.buyer_id || body.buyerId), CONFIG.BUYER_ID);
+      var extra = JSON.parse(extraData);
+      if (extra.sid) {
+        $prefs.setValueForKey(extra.sid, CONFIG.ACCESS_TOKEN);
+        log("捕获 sid: " + extra.sid);
       }
     } catch (e) {}
   }
 
+  // 从 URL 参数提取 access_token, kdt_id, app_id
   try {
     var urlObj = new URL(url);
-    var kdtId = urlObj.searchParams.get("kdt_id") || urlObj.searchParams.get("kdtId");
+    var token = urlObj.searchParams.get("access_token");
+    var kdtId = urlObj.searchParams.get("kdt_id");
+    var appId = urlObj.searchParams.get("app_id");
+
+    if (token) $prefs.setValueForKey(token, CONFIG.ACCESS_TOKEN);
     if (kdtId) $prefs.setValueForKey(kdtId, CONFIG.KDT_ID);
+    if (appId) $prefs.setValueForKey(appId, CONFIG.APP_ID);
   } catch (e) {}
 
   $done({});
@@ -98,9 +69,26 @@ function capture() {
 function main() {
   log("开始执行签到任务...");
 
-  var cookie = getCookie();
-  if (!cookie) {
-    notify("松鲜鲜签到", "未捕获到 Cookie，请先打开小程序或在 Boxjs 填入");
+  var token = $prefs.valueForKey(CONFIG.ACCESS_TOKEN);
+  var kdtId = $prefs.valueForKey(CONFIG.KDT_ID);
+  var appId = $prefs.valueForKey(CONFIG.APP_ID);
+
+  // 优先从 boxjs 读取
+  var boxjsData = $prefs.valueForKey(CONFIG.BOXJS);
+  if (boxjsData) {
+    try {
+      var data = JSON.parse(boxjsData);
+      if (data.token) token = data.token;
+      if (data.kdt_id) kdtId = data.kdt_id;
+      if (data.app_id) appId = data.app_id;
+      log("使用 Boxjs 配置");
+    } catch (e) {
+      token = boxjsData;
+    }
+  }
+
+  if (!token || !kdtId) {
+    notify("松鲜鲜签到", "缺少 Token 或 kdt_id，请打开小程序捕获");
     $done();
     return;
   }
@@ -113,24 +101,25 @@ function main() {
     return;
   }
 
-  // 先查询签到状态
-  tryMethods(API_METHODS.CHECK, cookie, {}, function(err, data) {
-    if (!err && data) {
-      var alreadySigned = data.data && (
-        data.data.is_sign || data.data.isSign ||
-        data.data.today_signed || data.data.todaySigned ||
-        data.data.signed
-      );
-      if (alreadySigned) {
-        $prefs.setValueForKey(today, CONFIG.LAST_SIGN);
-        notify("松鲜鲜签到", "今日已签到，无需重复");
-        $done();
-        return;
-      }
+  // 查询签到状态
+  checkSignInfo(token, kdtId, appId, function(err, info) {
+    if (err) {
+      log("查询失败: " + err);
+      notify("松鲜鲜签到失败", err);
+      $done();
+      return;
+    }
+
+    // 检查是否已签到
+    if (info.data && info.data.checked_in) {
+      $prefs.setValueForKey(today, CONFIG.LAST_SIGN);
+      notify("松鲜鲜签到", "今日已签到，无需重复");
+      $done();
+      return;
     }
 
     // 执行签到
-    tryMethods(API_METHODS.SIGN, cookie, {}, function(err2, data2) {
+    doCheckIn(token, kdtId, appId, function(err2, result) {
       if (err2) {
         notify("松鲜鲜签到失败", err2);
         $done();
@@ -146,39 +135,55 @@ function main() {
   });
 }
 
-// ====== 依次尝试多个 API Method ======
-function tryMethods(methods, cookie, params, callback, idx) {
-  idx = idx || 0;
-  if (idx >= methods.length) {
-    callback("所有签到接口均失败，请抓包确认实际 API");
-    return;
-  }
-
-  var method = methods[idx];
-  log("尝试 API: " + method);
+// ====== 查询签到状态 ======
+function checkSignInfo(token, kdtId, appId, callback) {
+  var url = BASE_URL + "/check-in-info.json";
+  if (appId) url += "?app_id=" + appId;
+  url += (appId ? "&" : "?") + "kdt_id=" + kdtId;
+  url += "&access_token=" + token;
 
   $task.fetch({
-    url: CARMEN_API,
+    url: url,
+    method: "GET",
     headers: {
-      "Content-Type": "application/json",
-      "Cookie": cookie
-    },
-    body: JSON.stringify({ method: method, params: params || {} })
+      "Content-Type": "application/json"
+    }
   }).then(function(response) {
     try {
       var data = JSON.parse(response.body);
-      if (data.code === 0 || data.code === "" || data.success) {
-        callback(null, data);
-      } else if (data.code === 40010 || data.code === 40009) {
-        callback("登录态已过期，请重新打开小程序");
-      } else {
-        tryMethods(methods, cookie, params, callback, idx + 1);
-      }
+      callback(null, data);
     } catch (e) {
-      tryMethods(methods, cookie, params, callback, idx + 1);
+      callback("解析响应失败");
     }
-  }).catch(function() {
-    tryMethods(methods, cookie, params, callback, idx + 1);
+  }).catch(function(e) {
+    callback("网络请求失败: " + e);
+  });
+}
+
+// ====== 执行签到 ======
+function doCheckIn(token, kdtId, appId, callback) {
+  var url = BASE_URL + "/check-in.json";
+
+  $task.fetch({
+    url: url,
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      app_id: appId || "",
+      kdt_id: kdtId,
+      access_token: token
+    })
+  }).then(function(response) {
+    try {
+      var data = JSON.parse(response.body);
+      callback(null, data);
+    } catch (e) {
+      callback("签到请求失败");
+    }
+  }).catch(function(e) {
+    callback("签到网络失败: " + e);
   });
 }
 
