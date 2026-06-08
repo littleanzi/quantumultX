@@ -14,7 +14,7 @@
  * hostname = exter-sp.lppz.com, api-cic-gateway.lppz.com
  */
 
-const VERSION = '1.1.0'
+const $ = new Env('良品铺子签到');
 const ENV_KEY = 'Bestore_CheckIn_Data'
 
 const MALL_KEY = 'apoli9pjydaxd156nu839by4t17h2iva'
@@ -225,7 +225,7 @@ async function rewriteCapture() {
   try {
     const bodyStr = typeof $request.body === 'string' ? $request.body : JSON.stringify($request.body || '{}')
     if (bodyStr && bodyStr !== '{}') bodyData = JSON.parse(bodyStr)
-  } catch (e) {}
+  } catch (e) { }
 
   if (bodyData) {
     if (!uid) {
