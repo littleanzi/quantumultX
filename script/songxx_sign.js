@@ -66,7 +66,7 @@ function request(opts) {
 // ====== 有赞 API ======
 function callUmp(method, cookie) {
   return request({
-    url: 'https://open.youzan.com/api',
+    url: 'https://open.youzan.com/api/',
     headers: {
       'Content-Type': 'application/json',
       'User-Agent': UA,
@@ -74,6 +74,7 @@ function callUmp(method, cookie) {
     },
     body: { method: method, params: {} },
   }).then(function (r) {
+    console.log('[松鲜鲜] RSP[' + r.status + ']: ' + r.body.substring(0, 300))
     if (r.status !== 200) throw new Error('HTTP ' + r.status)
     return JSON.parse(r.body)
   })
