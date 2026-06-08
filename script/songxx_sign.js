@@ -48,12 +48,12 @@ if (typeof $task !== "undefined" && $task.fetch) {
 
 // ====== 获取 Cookie ======
 function getCookie() {
-  var boxjsCookie = $persistentStore.read(CONFIG.BOXJS);
+  var boxjsCookie = $prefs.valueForKey(CONFIG.BOXJS);
   if (boxjsCookie) {
     log("使用 Boxjs Cookie");
     return boxjsCookie;
   }
-  return $persistentStore.read(CONFIG.SESSION);
+  return $prefs.valueForKey(CONFIG.SESSION);
 }
 
 // ====== 重写捕获逻辑 ======
@@ -67,9 +67,9 @@ function capture() {
     return;
   }
 
-  var stored = $persistentStore.read(CONFIG.SESSION);
+  var stored = $prefs.valueForKey(CONFIG.SESSION);
   if (stored !== cookie) {
-    $persistentStore.write(cookie, CONFIG.SESSION);
+    $prefs.setValueForKey(cookie, CONFIG.SESSION);
     log("Cookie 已更新");
   }
 
@@ -77,10 +77,10 @@ function capture() {
     try {
       var body = JSON.parse($request.body);
       if (body.kdt_id || body.kdtId) {
-        $persistentStore.write(String(body.kdt_id || body.kdtId), CONFIG.KDT_ID);
+        $prefs.setValueForKey(String(body.kdt_id || body.kdtId), CONFIG.KDT_ID);
       }
       if (body.buyer_id || body.buyerId) {
-        $persistentStore.write(String(body.buyer_id || body.buyerId), CONFIG.BUYER_ID);
+        $prefs.setValueForKey(String(body.buyer_id || body.buyerId), CONFIG.BUYER_ID);
       }
     } catch (e) {}
   }
@@ -88,7 +88,7 @@ function capture() {
   try {
     var urlObj = new URL(url);
     var kdtId = urlObj.searchParams.get("kdt_id") || urlObj.searchParams.get("kdtId");
-    if (kdtId) $persistentStore.write(kdtId, CONFIG.KDT_ID);
+    if (kdtId) $prefs.setValueForKey(kdtId, CONFIG.KDT_ID);
   } catch (e) {}
 
   $done({});
@@ -106,7 +106,7 @@ function main() {
   }
 
   var today = getToday();
-  var lastSign = $persistentStore.read(CONFIG.LAST_SIGN);
+  var lastSign = $prefs.valueForKey(CONFIG.LAST_SIGN);
   if (lastSign === today) {
     log("今日已签到，跳过");
     $done();
@@ -122,7 +122,7 @@ function main() {
         data.data.signed
       );
       if (alreadySigned) {
-        $persistentStore.write(today, CONFIG.LAST_SIGN);
+        $prefs.setValueForKey(today, CONFIG.LAST_SIGN);
         notify("松鲜鲜签到", "今日已签到，无需重复");
         $done();
         return;
@@ -137,9 +137,9 @@ function main() {
         return;
       }
 
-      $persistentStore.write(today, CONFIG.LAST_SIGN);
-      var count = parseInt($persistentStore.read(CONFIG.SIGN_COUNT) || "0") + 1;
-      $persistentStore.write(String(count), CONFIG.SIGN_COUNT);
+      $prefs.setValueForKey(today, CONFIG.LAST_SIGN);
+      var count = parseInt($prefs.valueForKey(CONFIG.SIGN_COUNT) || "0") + 1;
+      $prefs.setValueForKey(String(count), CONFIG.SIGN_COUNT);
       notify("松鲜鲜签到成功", "已签到 " + count + " 天");
       $done();
     });
