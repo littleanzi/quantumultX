@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 2.2.0
+ * 2026-06-09 版本: 2.3.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie → Carmen API 签到
