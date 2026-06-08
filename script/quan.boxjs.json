@@ -113,13 +113,13 @@
             "settings": [
                 {
                     "id": "songxx_sign_data",
-                    "name": "账号数据",
+                    "name": "Cookie（手动填入优先）",
                     "val": "",
                     "type": "text",
-                    "placeholder": "打开小程序后自动捕获",
+                    "placeholder": "从QX日志/抓包复制Cookie粘贴到此",
                     "autoGrow": true,
-                    "rows": 4,
-                    "desc": "包含 Cookie，打开小程序浏览签到页面自动捕获"
+                    "rows": 6,
+                    "desc": "手动填写后优先使用，MITM自动捕获为备用"
                 }
             ],
             "author": "@any",
