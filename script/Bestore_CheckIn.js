@@ -14,7 +14,7 @@
  * hostname = exter-sp.lppz.com, api-cic-gateway.lppz.com
  */
 
-const $ = new Env('良品铺子签到');
+const VERSION = '1.1.0'
 const ENV_KEY = 'Bestore_CheckIn_Data'
 
 const MALL_KEY = 'apoli9pjydaxd156nu839by4t17h2iva'
