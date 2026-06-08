@@ -1,10 +1,10 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-08 版本: 1.4.0
+ * 2026-06-08 版本: 1.5.0
 * 签名密钥: N/A
 * MITM 域名: passport.youzan.com, open.youzan.com, h5.youzan.com, *.youzan.com
 * 重写规则 (Rewrite): ^https:\/\/(passport\.youzan\.com|open\.youzan\.com|h5\.youzan\.com|.*\.youzan\.com)\/.*
-* 算法: Cookie 认证 → open.youzan.com/api (wsc.ump.checkin)
+* 算法: Cookie 认证 → open.youzan.com/api/oauthentry/{method}
 * [rewrite_local]
 * ^https:\/\/(passport\.youzan\.com|open\.youzan\.com|h5\.youzan\.com|.*\.youzan\.com)\/.* url script-request-header songxx_sign.js
 * [task_local]
@@ -65,14 +65,14 @@ function request(opts) {
 
 // ====== 有赞 API ======
 function callUmp(method, cookie) {
+  const url = 'https://open.youzan.com/api/oauthentry/' + method
   return request({
-    url: 'https://open.youzan.com/api/',
+    url: url,
     headers: {
       'Content-Type': 'application/json',
       'User-Agent': UA,
       'Cookie': cookie,
     },
-    body: { method: method, params: {} },
   }).then(function (r) {
     console.log('[松鲜鲜] RSP[' + r.status + ']: ' + r.body.substring(0, 300))
     if (r.status !== 200) throw new Error('HTTP ' + r.status)
@@ -164,7 +164,7 @@ async function taskRun() {
 // ====== Main ======
 async function main() {
   try {
-    console.log('[松鲜鲜] v1.4.0 | ' + (isRequest ? '重写' : '定时'))
+    console.log('[松鲜鲜] v1.5.0 | ' + (isRequest ? '重写' : '定时'))
     if (isRequest) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
