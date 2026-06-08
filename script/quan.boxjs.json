@@ -103,6 +103,32 @@
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png",
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png"
             ]
+        },
+        {
+            "id": "songxx_sign",
+            "name": "松鲜鲜签到",
+            "keys": [
+                "songxx_sign_data"
+            ],
+            "settings": [
+                {
+                    "id": "songxx_sign_data",
+                    "name": "账号数据",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "打开小程序后自动捕获",
+                    "autoGrow": true,
+                    "rows": 4,
+                    "desc": "包含 Cookie，打开小程序浏览签到页面自动捕获"
+                }
+            ],
+            "author": "@any",
+            "repo": "https://github.com/littleanzi/quantumultX/tree/main",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx_sign.js",
+            "icons": [
+                "https://img01.yzcdn.cn/upload_files/2023/07/03/FtFv4zB9O7vAuHxsgdLpP0uSRHBF.png",
+                "https://img01.yzcdn.cn/upload_files/2023/07/03/FtFv4zB9O7vAuHxsgdLpP0uSRHBF.png"
+            ]
         }
     ]
 }
