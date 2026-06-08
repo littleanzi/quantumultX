@@ -113,13 +113,13 @@
             "settings": [
                 {
                     "id": "songxx_sign_data",
-                    "name": "Cookie（手动填入优先）",
+                    "name": "access_token",
                     "val": "",
                     "type": "text",
-                    "placeholder": "从QX日志/抓包复制Cookie粘贴到此",
-                    "autoGrow": true,
-                    "rows": 6,
-                    "desc": "手动填写后优先使用，MITM自动捕获为备用"
+                    "placeholder": "从抓包 access_token 参数获取",
+                    "autoGrow": false,
+                    "rows": 1,
+                    "desc": "打开小程序签到页面，抓包获取 access_token"
                 }
             ],
             "author": "@any",
