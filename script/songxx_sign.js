@@ -1,12 +1,12 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-08 版本: 1.1.0
- * 签名密钥: N/A
- * MITM 域名: open.youzan.com, h5.youzan.com
- * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
- * 算法: Cookie 认证 → open.youzan.com/api (wsc.ump.checkin)
- * [rewrite_local]
- * ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.* url script-response-header songxx_sign.js
+ * 2026-06-08 版本: 1.2.0
+* 签名密钥: N/A
+* MITM 域名: open.youzan.com, h5.youzan.com, *.youzan.com
+* 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com|.*\.youzan\.com)\/.*
+* 算法: Cookie 认证 → open.youzan.com/api (wsc.ump.checkin)
+* [rewrite_local]
+* ^https:\/\/(open\.youzan\.com|h5\.youzan\.com|.*\.youzan\.com)\/.* url script-response-header songxx_sign.js
  * [task_local]
  * 0 9 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/songxx_sign.js, tag=松鲜鲜签到, enabled=true
  * [MITM]
@@ -17,7 +17,7 @@ const ENV_KEY = 'songxx_sign_data'
 
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43'
 
-const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
+const isResponse = typeof $request !== 'undefined' && typeof $response !== 'undefined'
 const isTask = typeof $request === 'undefined'
 
 // ====== 持久化 ======
@@ -268,8 +268,8 @@ async function taskRun() {
 // ====== Main ======
 async function main() {
   try {
-    console.log('[松鲜鲜] v1.1.0 | ' + (isRequest ? '重写' : '定时'))
-    if (isRequest) { await rewriteCapture(); done() }
+    console.log('[松鲜鲜] v1.2.0 | ' + (isResponse ? '重写' : '定时'))
+    if (isResponse) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
     const msg = (typeof e === 'string' ? e : e.message || e.error || JSON.stringify(e)).substring(0, 500)
