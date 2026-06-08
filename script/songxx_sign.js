@@ -1,12 +1,12 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-08 版本: 1.6.0
+ * 2026-06-08 版本: 1.7.0
 * 签名密钥: N/A
-* MITM 域名: passport.youzan.com, open.youzan.com, h5.youzan.com, *.youzan.com
-* 重写规则 (Rewrite): ^https:\/\/(passport\.youzan\.com|open\.youzan\.com|h5\.youzan\.com|.*\.youzan\.com)\/.*
-* 算法: Cookie 认证 → open.youzan.com/api/oauthentry/{method}?kdt_id=117130552
+* MITM 域名: passport.youzan.com, h5.youzan.com
+* 重写规则 (Rewrite): ^https:\/\/(passport\.youzan\.com|h5\.youzan\.com)\/.*
+* 算法: Cookie 认证 → h5.youzan.com/wscump/checkin
 * [rewrite_local]
-* ^https:\/\/(passport\.youzan\.com|open\.youzan\.com|h5\.youzan\.com|.*\.youzan\.com)\/.* url script-request-header songxx_sign.js
+* ^https:\/\/(passport\.youzan\.com|h5\.youzan\.com)\/.* url script-request-header songxx_sign.js
 * [task_local]
 * 0 9 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/songxx_sign.js, tag=松鲜鲜签到, enabled=true
 * [MITM]
@@ -64,12 +64,13 @@ function request(opts) {
 }
 
 // ====== 有赞 API ======
-function callUmp(method, cookie) {
-  const url = 'https://open.youzan.com/api/oauthentry/' + method + '?kdt_id=117130552'
+function callApi(path, cookie) {
+  const url = 'https://h5.youzan.com' + path
   return request({
     url: url,
-    method: 'GET',
+    method: 'POST',
     headers: {
+      'Content-Type': 'application/json',
       'User-Agent': UA,
       'Cookie': cookie,
     },
@@ -124,27 +125,32 @@ async function taskRun() {
   }
 
   // 查询签到状态
-  const methodPrefixes = ['youzan.ump.checkin', 'wsc.ump.checkin', 'ump.checkin']
+  const statusPaths = [
+    '/wscump/checkin/status.json',
+    '/wscump/checkin/status',
+    '/wscump/checkin/status/get',
+  ]
   let alreadySigned = false
-  let workingPrefix = ''
-  for (const prefix of methodPrefixes) {
+  let workingPath = ''
+  for (const path of statusPaths) {
     try {
-      console.log('[松鲜鲜] 尝试: ' + prefix + '.status.get/1.0.0')
-      const statusRes = await callUmp(prefix + '.status.get/1.0.0', cookie)
+      console.log('[松鲜鲜] 尝试: GET ' + path)
+      const statusRes = await callApi(path, cookie)
+      console.log('[松鲜鲜] RSP: ' + JSON.stringify(statusRes).substring(0, 200))
       if (statusRes.code === 0 || statusRes.success) {
         alreadySigned = statusRes.data?.is_sign || statusRes.data?.isSign || statusRes.data?.today_signed || statusRes.data?.todaySigned || false
-        workingPrefix = prefix
-        console.log('[松鲜鲜] ✓ 成功! method=' + prefix)
+        workingPath = path
+        console.log('[松鲜鲜] ✓ 成功! path=' + path)
         break
       }
-      console.log('[松鲜鲜] ✗ ' + prefix + ' -> ' + JSON.stringify(statusRes).substring(0, 100))
+      console.log('[松鲜鲜] ✗ ' + path + ' code=' + statusRes.code)
     } catch (e) {
-      console.log('[松鲜鲜] ✗ ' + prefix + ' -> ' + (e.message || JSON.stringify(e)).substring(0, 100))
+      console.log('[松鲜鲜] ✗ ' + path + ' -> ' + (e.message || '').substring(0, 100))
     }
   }
 
-  if (!workingPrefix) {
-    notify('松鲜鲜签到', '无法查询状态', '所有方法名均返回错误，检查日志')
+  if (!workingPath) {
+    notify('松鲜鲜签到', '签到接口未找到', '所有路径均返回错误，检查日志')
     return
   }
 
@@ -156,30 +162,36 @@ async function taskRun() {
   }
 
   // 执行签到
-  try {
-    console.log('[松鲜鲜] 签到: ' + workingPrefix + '.punch/1.0.0')
-    const signRes = await callUmp(workingPrefix + '.punch/1.0.0', cookie)
-    const code = String(signRes.code || '')
-    const msg = signRes.msg || signRes.message || JSON.stringify(signRes).substring(0, 100)
+  const punchPaths = [
+    workingPath.replace('status', 'punch'),
+    '/wscump/checkin/punch.json',
+    '/wscump/checkin/punch',
+  ]
+  for (const path of punchPaths) {
+    try {
+      console.log('[松鲜鲜] 签到: POST ' + path)
+      const signRes = await callApi(path, cookie)
+      const code = String(signRes.code || '')
+      const msg = signRes.msg || signRes.message || JSON.stringify(signRes).substring(0, 100)
 
-    if (code === '0' || signRes.success) {
-      store.lastSign = today
-      save(store)
-      notify('松鲜鲜签到', '签到成功', msg)
-    } else {
-      notify('松鲜鲜签到', '失败 [' + code + ']', msg)
+      if (code === '0' || signRes.success) {
+        store.lastSign = today
+        save(store)
+        notify('松鲜鲜签到', '签到成功', msg)
+        return
+      }
+      console.log('[松鲜鲜] 签到失败 ' + path + ': [' + code + '] ' + msg.substring(0, 100))
+    } catch (e) {
+      console.log('[松鲜鲜] 签到异常: ' + (e.message || '').substring(0, 100))
     }
-  } catch (e) {
-    const msg = (typeof e === 'string' ? e : e.message || e.error || JSON.stringify(e)).substring(0, 200)
-    console.log('[松鲜鲜] 签到异常: ' + msg)
-    notify('松鲜鲜签到', '异常', msg)
   }
+  notify('松鲜鲜签到', '签到失败', '所有路径均失败')
 }
 
 // ====== Main ======
 async function main() {
   try {
-    console.log('[松鲜鲜] v1.6.0 | ' + (isRequest ? '重写' : '定时'))
+    console.log('[松鲜鲜] v1.7.0 | ' + (isRequest ? '重写' : '定时'))
     if (isRequest) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
