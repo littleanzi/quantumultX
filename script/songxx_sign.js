@@ -1,10 +1,10 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-08 版本: 1.5.0
+ * 2026-06-08 版本: 1.6.0
 * 签名密钥: N/A
 * MITM 域名: passport.youzan.com, open.youzan.com, h5.youzan.com, *.youzan.com
 * 重写规则 (Rewrite): ^https:\/\/(passport\.youzan\.com|open\.youzan\.com|h5\.youzan\.com|.*\.youzan\.com)\/.*
-* 算法: Cookie 认证 → open.youzan.com/api/oauthentry/{method}
+* 算法: Cookie 认证 → open.youzan.com/api/oauthentry/{method}?kdt_id=117130552
 * [rewrite_local]
 * ^https:\/\/(passport\.youzan\.com|open\.youzan\.com|h5\.youzan\.com|.*\.youzan\.com)\/.* url script-request-header songxx_sign.js
 * [task_local]
@@ -65,11 +65,11 @@ function request(opts) {
 
 // ====== 有赞 API ======
 function callUmp(method, cookie) {
-  const url = 'https://open.youzan.com/api/oauthentry/' + method
+  const url = 'https://open.youzan.com/api/oauthentry/' + method + '?kdt_id=117130552'
   return request({
     url: url,
+    method: 'GET',
     headers: {
-      'Content-Type': 'application/json',
       'User-Agent': UA,
       'Cookie': cookie,
     },
@@ -124,14 +124,28 @@ async function taskRun() {
   }
 
   // 查询签到状态
+  const methodPrefixes = ['youzan.ump.checkin', 'wsc.ump.checkin', 'ump.checkin']
   let alreadySigned = false
-  try {
-    const statusRes = await callUmp('wsc.ump.checkin.status.get/1.0.0', cookie)
-    if (statusRes.code === 0 || statusRes.success) {
-      alreadySigned = statusRes.data?.is_sign || statusRes.data?.isSign || statusRes.data?.today_signed || statusRes.data?.todaySigned || false
+  let workingPrefix = ''
+  for (const prefix of methodPrefixes) {
+    try {
+      console.log('[松鲜鲜] 尝试: ' + prefix + '.status.get/1.0.0')
+      const statusRes = await callUmp(prefix + '.status.get/1.0.0', cookie)
+      if (statusRes.code === 0 || statusRes.success) {
+        alreadySigned = statusRes.data?.is_sign || statusRes.data?.isSign || statusRes.data?.today_signed || statusRes.data?.todaySigned || false
+        workingPrefix = prefix
+        console.log('[松鲜鲜] ✓ 成功! method=' + prefix)
+        break
+      }
+      console.log('[松鲜鲜] ✗ ' + prefix + ' -> ' + JSON.stringify(statusRes).substring(0, 100))
+    } catch (e) {
+      console.log('[松鲜鲜] ✗ ' + prefix + ' -> ' + (e.message || JSON.stringify(e)).substring(0, 100))
     }
-  } catch (e) {
-    console.log('[松鲜鲜] 状态查询失败: ' + e.message)
+  }
+
+  if (!workingPrefix) {
+    notify('松鲜鲜签到', '无法查询状态', '所有方法名均返回错误，检查日志')
+    return
   }
 
   if (alreadySigned) {
@@ -143,7 +157,8 @@ async function taskRun() {
 
   // 执行签到
   try {
-    const signRes = await callUmp('wsc.ump.checkin.punch/1.0.0', cookie)
+    console.log('[松鲜鲜] 签到: ' + workingPrefix + '.punch/1.0.0')
+    const signRes = await callUmp(workingPrefix + '.punch/1.0.0', cookie)
     const code = String(signRes.code || '')
     const msg = signRes.msg || signRes.message || JSON.stringify(signRes).substring(0, 100)
 
@@ -164,7 +179,7 @@ async function taskRun() {
 // ====== Main ======
 async function main() {
   try {
-    console.log('[松鲜鲜] v1.5.0 | ' + (isRequest ? '重写' : '定时'))
+    console.log('[松鲜鲜] v1.6.0 | ' + (isRequest ? '重写' : '定时'))
     if (isRequest) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
