@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-08 版本: 2.1.0
+ * 2026-06-09 版本: 2.2.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie → Carmen API 签到
@@ -13,7 +13,7 @@
  */
 
 // ====== 存储 Key ======
-const CONFIG = {
+var CONFIG = {
   SESSION: "songxx_session",
   BUYER_ID: "songxx_buyer_id",
   KDT_ID: "songxx_kdt_id",
@@ -22,9 +22,9 @@ const CONFIG = {
   BOXJS: "songxx_sign_data"
 };
 
-const CARMEN_API = "https://open.youzan.com/api";
+var CARMEN_API = "https://open.youzan.com/api";
 
-const API_METHODS = {
+var API_METHODS = {
   CHECK: [
     "wsc.ump.checkin.status.get/1.0.0",
     "wsc.ump.punch.status.get/1.0.0",
@@ -48,28 +48,26 @@ if (typeof $task !== "undefined" && $task.fetch) {
 
 // ====== 获取 Cookie ======
 function getCookie() {
-  // 优先使用 boxjs 手动填入的 Cookie
-  const boxjsCookie = $persistentStore.read(CONFIG.BOXJS);
+  var boxjsCookie = $persistentStore.read(CONFIG.BOXJS);
   if (boxjsCookie) {
     log("使用 Boxjs Cookie");
     return boxjsCookie;
   }
-  // 其次使用 MITM 自动捕获的 Cookie
   return $persistentStore.read(CONFIG.SESSION);
 }
 
 // ====== 重写捕获逻辑 ======
 function capture() {
-  const url = $request.url;
-  const headers = $request.headers;
-  const cookie = headers["Cookie"] || headers["cookie"] || "";
+  var url = $request.url;
+  var headers = $request.headers;
+  var cookie = headers["Cookie"] || headers["cookie"] || "";
 
   if (!cookie) {
     $done({});
     return;
   }
 
-  const stored = $persistentStore.read(CONFIG.SESSION);
+  var stored = $persistentStore.read(CONFIG.SESSION);
   if (stored !== cookie) {
     $persistentStore.write(cookie, CONFIG.SESSION);
     log("Cookie 已更新");
@@ -77,7 +75,7 @@ function capture() {
 
   if ($request.body) {
     try {
-      const body = JSON.parse($request.body);
+      var body = JSON.parse($request.body);
       if (body.kdt_id || body.kdtId) {
         $persistentStore.write(String(body.kdt_id || body.kdtId), CONFIG.KDT_ID);
       }
@@ -88,8 +86,8 @@ function capture() {
   }
 
   try {
-    const urlObj = new URL(url);
-    const kdtId = urlObj.searchParams.get("kdt_id") || urlObj.searchParams.get("kdtId");
+    var urlObj = new URL(url);
+    var kdtId = urlObj.searchParams.get("kdt_id") || urlObj.searchParams.get("kdtId");
     if (kdtId) $persistentStore.write(kdtId, CONFIG.KDT_ID);
   } catch (e) {}
 
@@ -97,82 +95,53 @@ function capture() {
 }
 
 // ====== 主签到流程 ======
-async function main() {
+function main() {
   log("开始执行签到任务...");
 
-  const cookie = getCookie();
+  var cookie = getCookie();
   if (!cookie) {
     notify("松鲜鲜签到", "未捕获到 Cookie，请先打开小程序或在 Boxjs 填入");
     $done();
     return;
   }
 
-  const today = getToday();
-  const lastSign = $persistentStore.read(CONFIG.LAST_SIGN);
+  var today = getToday();
+  var lastSign = $persistentStore.read(CONFIG.LAST_SIGN);
   if (lastSign === today) {
     log("今日已签到，跳过");
     $done();
     return;
   }
 
-  try {
-    const checkResult = await checkSignStatus(cookie);
-    if (checkResult && checkResult.alreadySigned) {
-      $persistentStore.write(today, CONFIG.LAST_SIGN);
-      notify("松鲜鲜签到", "今日已签到，无需重复");
-      $done();
-      return;
+  // 先查询签到状态
+  tryMethods(API_METHODS.CHECK, cookie, {}, function(err, data) {
+    if (!err && data) {
+      var alreadySigned = data.data && (
+        data.data.is_sign || data.data.isSign ||
+        data.data.today_signed || data.data.todaySigned ||
+        data.data.signed
+      );
+      if (alreadySigned) {
+        $persistentStore.write(today, CONFIG.LAST_SIGN);
+        notify("松鲜鲜签到", "今日已签到，无需重复");
+        $done();
+        return;
+      }
     }
 
-    const signResult = await doSign(cookie);
-    if (signResult.success) {
+    // 执行签到
+    tryMethods(API_METHODS.SIGN, cookie, {}, function(err2, data2) {
+      if (err2) {
+        notify("松鲜鲜签到失败", err2);
+        $done();
+        return;
+      }
+
       $persistentStore.write(today, CONFIG.LAST_SIGN);
-      const count = parseInt($persistentStore.read(CONFIG.SIGN_COUNT) || "0") + 1;
+      var count = parseInt($persistentStore.read(CONFIG.SIGN_COUNT) || "0") + 1;
       $persistentStore.write(String(count), CONFIG.SIGN_COUNT);
-      notify("松鲜鲜签到成功", `已签到 ${count} 天`);
-    } else {
-      notify("松鲜鲜签到失败", signResult.message || "未知错误");
-    }
-  } catch (e) {
-    log("签到异常: " + e);
-    notify("松鲜鲜签到异常", e);
-  }
-
-  $done();
-}
-
-// ====== 查询签到状态 ======
-function checkSignStatus(cookie) {
-  return new Promise((resolve) => {
-    tryMethods(API_METHODS.CHECK, cookie, {}, (err, data) => {
-      if (err) {
-        resolve({ alreadySigned: false });
-        return;
-      }
-      const alreadySigned =
-        data.data?.is_sign ||
-        data.data?.isSign ||
-        data.data?.today_signed ||
-        data.data?.todaySigned ||
-        data.data?.signed;
-      resolve({ alreadySigned: !!alreadySigned, data });
-    });
-  });
-}
-
-// ====== 执行签到 ======
-function doSign(cookie) {
-  return new Promise((resolve) => {
-    tryMethods(API_METHODS.SIGN, cookie, {}, (err, data) => {
-      if (err) {
-        resolve({ success: false, message: err });
-        return;
-      }
-      resolve({
-        success: true,
-        message: data.data?.message || data.data?.desc || "签到成功",
-        data
-      });
+      notify("松鲜鲜签到成功", "已签到 " + count + " 天");
+      $done();
     });
   });
 }
@@ -185,7 +154,7 @@ function tryMethods(methods, cookie, params, callback, idx) {
     return;
   }
 
-  const method = methods[idx];
+  var method = methods[idx];
   log("尝试 API: " + method);
 
   $task.fetch({
@@ -194,26 +163,23 @@ function tryMethods(methods, cookie, params, callback, idx) {
       "Content-Type": "application/json",
       "Cookie": cookie
     },
-    body: JSON.stringify({ method, params: params || {} })
-  }).then(
-    (response) => {
-      try {
-        const data = JSON.parse(response.body);
-        if (data.code === 0 || data.code === "" || data.success) {
-          callback(null, data);
-        } else if (data.code === 40010 || data.code === 40009) {
-          callback("登录态已过期，请重新打开小程序");
-        } else {
-          tryMethods(methods, cookie, params, callback, idx + 1);
-        }
-      } catch (e) {
+    body: JSON.stringify({ method: method, params: params || {} })
+  }).then(function(response) {
+    try {
+      var data = JSON.parse(response.body);
+      if (data.code === 0 || data.code === "" || data.success) {
+        callback(null, data);
+      } else if (data.code === 40010 || data.code === 40009) {
+        callback("登录态已过期，请重新打开小程序");
+      } else {
         tryMethods(methods, cookie, params, callback, idx + 1);
       }
-    },
-    () => {
+    } catch (e) {
       tryMethods(methods, cookie, params, callback, idx + 1);
     }
-  );
+  }).catch(function() {
+    tryMethods(methods, cookie, params, callback, idx + 1);
+  });
 }
 
 // ====== 工具函数 ======
