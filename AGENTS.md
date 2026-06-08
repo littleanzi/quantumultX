@@ -17,22 +17,34 @@
 - 不添加逐行解释性注释
 - 每次改动同步更新注释里的版本号
 - 改单个文件，改完直接推送到github
+- 思考过程和回答都用中文显示
 - 保持简洁
 - 脚本头注释格式：
   ```
-  * {脚本名}·签到脚本
-  * {日期} 版本: {版本号}
-  * 签名密钥 ({key_name}): {key_value}
-  * MITM 域名: {domain1}, {domain2}
-  * 重写规则 (Rewrite): ^{regex}
-  * 算法: {算法描述}
-  * [rewrite_local]
-  * {rewrite规则}
-  * [task_local]
-  * {定时任务}
-  * [MITM]
-  * hostname = {域名列表}
-  */
+* {脚本名}·签到脚本
+* {日期} 版本: {版本号}
+* 签名密钥 ({key_name}): {key_value}
+* MITM 域名: {domain1}, {domain2}
+* 重写规则 (Rewrite): ^{regex}
+* 算法: {算法描述}
+* [rewrite_local]
+* {rewrite规则}
+* [task_local]
+* {定时任务}
+* [MITM]
+* hostname = {域名列表}
+*/
 
 ## Quantumult X 脚本开发
 - 每次写 Quantumult X 签到脚本前，先查阅量子重写规则使用文档，了解 `$task.fetch`、`$persistentStore` 等 API 的正确用法
+
+## 新脚本工作流程
+写完/改完脚本后，需同步更新：
+1. `script/xxx.js` - 脚本代码
+2. `autoScript/anyTask.json` - 添加定时任务
+3. `quan.boxjs.json` - 添加 Boxjs 配置（如有配置项）
+4. `icon/apps/` - 添加应用图标（如有）
+
+
+
+

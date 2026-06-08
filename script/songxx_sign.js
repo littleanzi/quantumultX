@@ -1,179 +1,230 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-08 版本: 1.8.0
- * 签名密钥: N/A
- * MITM 域名: h5.youzan.com
- * 重写规则 (Rewrite): ^https:\/\/h5\.youzan\.com\/wscump\/checkin\/.*
- * 算法: access_token + Extra-Data → h5.youzan.com/wscump/checkin/*.json
+ * 2026-06-08 版本: 2.1.0
+ * MITM 域名: open.youzan.com, h5.youzan.com
+ * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
+ * 算法: MITM 抓取 Cookie → Carmen API 签到
  * [rewrite_local]
- * ^https:\/\/h5\.youzan\.com\/wscump\/checkin\/.* url script-request-header songxx_sign.js
+ * ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.* url script-request-header songxx_sign.js
  * [task_local]
- * 0 9 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/songxx_sign.js, tag=松鲜鲜签到, enabled=true
+ * 0 9 * * * songxx_sign.js, tag=松鲜鲜签到, img-url=https://img01.yzcdn.cn/upload_files/2023/07/03/FtFv4zB9O7vAuHxsgdLpP0uSRHBF.png, enabled=true
  * [MITM]
- * hostname = h5.youzan.com
+ * hostname = open.youzan.com, h5.youzan.com
  */
 
-const ENV_KEY = 'songxx_sign_data'
-const APP_ID = 'wxe65af2b5b95dc5da'
-const KDT_ID = '117130552'
+// ====== 存储 Key ======
+const CONFIG = {
+  SESSION: "songxx_session",
+  BUYER_ID: "songxx_buyer_id",
+  KDT_ID: "songxx_kdt_id",
+  LAST_SIGN: "songxx_last_sign",
+  SIGN_COUNT: "songxx_sign_count",
+  BOXJS: "songxx_sign_data"
+};
 
-const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 26_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.74(0x18004a29) NetType/WIFI Language/zh_CN'
+const CARMEN_API = "https://open.youzan.com/api";
 
-const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
-const isTask = typeof $request === 'undefined'
+const API_METHODS = {
+  CHECK: [
+    "wsc.ump.checkin.status.get/1.0.0",
+    "wsc.ump.punch.status.get/1.0.0",
+    "wsc.checkin.status.get/1.0.0"
+  ],
+  SIGN: [
+    "wsc.ump.checkin.punch/1.0.0",
+    "wsc.ump.punch.sign/1.0.0",
+    "wsc.checkin.punch/1.0.0"
+  ]
+};
 
-// ====== 持久化 ======
-function load() {
-  const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
-    : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
-  try { return raw ? JSON.parse(raw) : {} } catch (e) { return {} }
-}
-function save(store) {
-  const str = JSON.stringify(store)
-  if (typeof $persistentStore !== 'undefined') $persistentStore.write(str, ENV_KEY)
-  else if (typeof $prefs !== 'undefined') $prefs.setValueForKey(str, ENV_KEY)
-}
-function notify(title, sub, msg) {
-  if (typeof $notification !== 'undefined') $notification.post(title, sub, msg)
-  else if (typeof $notify !== 'undefined') $notify(title, sub, msg)
-}
-function done() { if (typeof $done !== 'undefined') $done({}) }
-
-// ====== HTTP 请求 ======
-function request(opts) {
-  return new Promise(function (resolve, reject) {
-    const o = {
-      url: opts.url,
-      method: opts.method || 'GET',
-      headers: opts.headers || {},
-      body: opts.body || undefined,
-    }
-    console.log('[松鲜鲜] ' + o.method + ' ' + o.url)
-    if (typeof $httpClient !== 'undefined') {
-      $httpClient[o.method.toLowerCase()](o, function (e, r, d) {
-        return e ? reject(e) : resolve({ status: r.status, body: d })
-      })
-    } else if (typeof $task !== 'undefined') {
-      o.opts = o.opts || {}
-      o.opts.timeout = 30
-      $task.fetch(o).then(function (r) {
-        resolve({ status: r.statusCode, body: r.body })
-      }, function (e) {
-        reject(e)
-      })
-    } else reject(new Error('no http client'))
-  })
+// ====== 主入口 ======
+if (typeof $task !== "undefined" && $task.fetch) {
+  main();
+} else if (typeof $request !== "undefined") {
+  capture();
+} else {
+  $done({});
 }
 
-// ====== 构建请求 ======
-function buildReq(path, store) {
-  return {
-    url: 'https://h5.youzan.com/wscump/checkin/' + path + '?app_id=' + APP_ID + '&kdt_id=' + KDT_ID + '&access_token=' + (store.access_token || ''),
-    method: 'GET',
-    headers: {
-      'Extra-Data': store.extraData || '',
-      'User-Agent': UA,
-      'Referer': 'https://servicewechat.com/' + APP_ID + '/93/page-frame.html',
-    },
+// ====== 获取 Cookie ======
+function getCookie() {
+  // 优先使用 boxjs 手动填入的 Cookie
+  const boxjsCookie = $persistentStore.read(CONFIG.BOXJS);
+  if (boxjsCookie) {
+    log("使用 Boxjs Cookie");
+    return boxjsCookie;
   }
+  // 其次使用 MITM 自动捕获的 Cookie
+  return $persistentStore.read(CONFIG.SESSION);
 }
 
-// ====== 捕获参数 ======
-async function rewriteCapture() {
-  let store = load()
-  if (typeof store === 'string') store = {}
+// ====== 重写捕获逻辑 ======
+function capture() {
+  const url = $request.url;
+  const headers = $request.headers;
+  const cookie = headers["Cookie"] || headers["cookie"] || "";
 
-  const url = $request.url || ''
-  const headers = $request.headers || {}
-  const extraData = headers['Extra-Data'] || headers['extra-data'] || ''
-
-  // 从 URL 提取 access_token
-  let token = ''
-  try { token = url.match(/access_token=([^&]+)/)[1] } catch (e) {}
-
-  let changed = false
-
-  if (extraData && extraData !== store.extraData) {
-    store.extraData = extraData
-    changed = true
-  }
-  if (token && token !== store.access_token) {
-    store.access_token = token
-    changed = true
+  if (!cookie) {
+    $done({});
+    return;
   }
 
-  if (changed) {
-    save(store)
-    console.log('[松鲜鲜] 参数已捕获')
-    notify('松鲜鲜签到', '已捕获', '可定时签到')
-  }
-}
-
-// ====== 签到 ======
-async function taskRun() {
-  let store = load()
-  if (typeof store === 'string') store = {}
-
-  const token = store.access_token || ''
-
-  if (!token || !store.extraData) {
-    notify('松鲜鲜签到', '缺少参数', '请在签到页面触发抓包')
-    return
+  const stored = $persistentStore.read(CONFIG.SESSION);
+  if (stored !== cookie) {
+    $persistentStore.write(cookie, CONFIG.SESSION);
+    log("Cookie 已更新");
   }
 
-  const today = new Date().toISOString().slice(0, 10)
-
-  if (store.lastSign === today) {
-    console.log('[松鲜鲜] 今日已签到，跳过')
-    return
-  }
-
-  // 查询签到状态
-  try {
-    const statusRes = await request(buildReq('check-in-info.json', store))
-    console.log('[松鲜鲜] 状态: ' + statusRes.body.substring(0, 200))
-    const data = JSON.parse(statusRes.body)
-    if (data.code === 0 || data.success) {
-      const signed = data.data?.is_sign || data.data?.isSign || data.data?.today_signed || data.data?.todaySigned || false
-      if (signed) {
-        store.lastSign = today
-        save(store)
-        notify('松鲜鲜签到', '今日已签到', '无需重复签到')
-        return
+  if ($request.body) {
+    try {
+      const body = JSON.parse($request.body);
+      if (body.kdt_id || body.kdtId) {
+        $persistentStore.write(String(body.kdt_id || body.kdtId), CONFIG.KDT_ID);
       }
-    }
-  } catch (e) {
-    console.log('[松鲜鲜] 状态查询失败: ' + (e.message || '').substring(0, 100))
+      if (body.buyer_id || body.buyerId) {
+        $persistentStore.write(String(body.buyer_id || body.buyerId), CONFIG.BUYER_ID);
+      }
+    } catch (e) {}
   }
 
-  // 执行签到
   try {
-    const signRes = await request(buildReq('check-in.json', store))
-    console.log('[松鲜鲜] 签到: ' + signRes.body.substring(0, 200))
-    const data = JSON.parse(signRes.body)
-    if (data.code === 0 || data.success) {
-      store.lastSign = today
-      save(store)
-      notify('松鲜鲜签到', '签到成功', data.data?.message || data.msg || '')
-    } else {
-      notify('松鲜鲜签到', '失败', (data.msg || JSON.stringify(data)).substring(0, 200))
-    }
-  } catch (e) {
-    console.log('[松鲜鲜] 签到异常: ' + (e.message || '').substring(0, 100))
-    notify('松鲜鲜签到', '异常', (e.message || '').substring(0, 200))
-  }
+    const urlObj = new URL(url);
+    const kdtId = urlObj.searchParams.get("kdt_id") || urlObj.searchParams.get("kdtId");
+    if (kdtId) $persistentStore.write(kdtId, CONFIG.KDT_ID);
+  } catch (e) {}
+
+  $done({});
 }
 
-// ====== Main ======
+// ====== 主签到流程 ======
 async function main() {
-  try {
-    console.log('[松鲜鲜] v1.8.0 | ' + (isRequest ? '重写' : '定时'))
-    if (isRequest) { await rewriteCapture(); done() }
-    else { await taskRun(); done() }
-  } catch (e) {
-    console.log('[松鲜鲜] 错误: ' + (e.message || '').substring(0, 200))
-    done()
+  log("开始执行签到任务...");
+
+  const cookie = getCookie();
+  if (!cookie) {
+    notify("松鲜鲜签到", "未捕获到 Cookie，请先打开小程序或在 Boxjs 填入");
+    $done();
+    return;
   }
+
+  const today = getToday();
+  const lastSign = $persistentStore.read(CONFIG.LAST_SIGN);
+  if (lastSign === today) {
+    log("今日已签到，跳过");
+    $done();
+    return;
+  }
+
+  try {
+    const checkResult = await checkSignStatus(cookie);
+    if (checkResult && checkResult.alreadySigned) {
+      $persistentStore.write(today, CONFIG.LAST_SIGN);
+      notify("松鲜鲜签到", "今日已签到，无需重复");
+      $done();
+      return;
+    }
+
+    const signResult = await doSign(cookie);
+    if (signResult.success) {
+      $persistentStore.write(today, CONFIG.LAST_SIGN);
+      const count = parseInt($persistentStore.read(CONFIG.SIGN_COUNT) || "0") + 1;
+      $persistentStore.write(String(count), CONFIG.SIGN_COUNT);
+      notify("松鲜鲜签到成功", `已签到 ${count} 天`);
+    } else {
+      notify("松鲜鲜签到失败", signResult.message || "未知错误");
+    }
+  } catch (e) {
+    log("签到异常: " + e);
+    notify("松鲜鲜签到异常", e);
+  }
+
+  $done();
 }
 
-main()
+// ====== 查询签到状态 ======
+function checkSignStatus(cookie) {
+  return new Promise((resolve) => {
+    tryMethods(API_METHODS.CHECK, cookie, {}, (err, data) => {
+      if (err) {
+        resolve({ alreadySigned: false });
+        return;
+      }
+      const alreadySigned =
+        data.data?.is_sign ||
+        data.data?.isSign ||
+        data.data?.today_signed ||
+        data.data?.todaySigned ||
+        data.data?.signed;
+      resolve({ alreadySigned: !!alreadySigned, data });
+    });
+  });
+}
+
+// ====== 执行签到 ======
+function doSign(cookie) {
+  return new Promise((resolve) => {
+    tryMethods(API_METHODS.SIGN, cookie, {}, (err, data) => {
+      if (err) {
+        resolve({ success: false, message: err });
+        return;
+      }
+      resolve({
+        success: true,
+        message: data.data?.message || data.data?.desc || "签到成功",
+        data
+      });
+    });
+  });
+}
+
+// ====== 依次尝试多个 API Method ======
+function tryMethods(methods, cookie, params, callback, idx) {
+  idx = idx || 0;
+  if (idx >= methods.length) {
+    callback("所有签到接口均失败，请抓包确认实际 API");
+    return;
+  }
+
+  const method = methods[idx];
+  log("尝试 API: " + method);
+
+  $task.fetch({
+    url: CARMEN_API,
+    headers: {
+      "Content-Type": "application/json",
+      "Cookie": cookie
+    },
+    body: JSON.stringify({ method, params: params || {} })
+  }).then(
+    (response) => {
+      try {
+        const data = JSON.parse(response.body);
+        if (data.code === 0 || data.code === "" || data.success) {
+          callback(null, data);
+        } else if (data.code === 40010 || data.code === 40009) {
+          callback("登录态已过期，请重新打开小程序");
+        } else {
+          tryMethods(methods, cookie, params, callback, idx + 1);
+        }
+      } catch (e) {
+        tryMethods(methods, cookie, params, callback, idx + 1);
+      }
+    },
+    () => {
+      tryMethods(methods, cookie, params, callback, idx + 1);
+    }
+  );
+}
+
+// ====== 工具函数 ======
+function getToday() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function log(msg) {
+  console.log("[松鲜鲜] " + msg);
+}
+
+function notify(title, content) {
+  $notify(title, "", content);
+}
