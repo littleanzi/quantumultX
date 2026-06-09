@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 3.5.0
+ * 2026-06-09 版本: 3.7.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
@@ -141,18 +141,21 @@ function main() {
     }
     log("checkInId: " + checkInId);
 
-  // 从 boxjs 读取 cookie
+  // 从 boxjs 读取 cookie 和 extraData
   var cookie = "";
+  var extraData = "";
   if (boxjsData) {
     try {
       var data2 = JSON.parse(boxjsData);
       if (data2.cookie) cookie = data2.cookie;
+      if (data2.extraData) extraData = data2.extraData;
     } catch (e) {}
   }
   log("Cookie: " + (cookie ? "有" : "无"));
+  log("Extra-Data: " + (extraData ? "有" : "无"));
 
     // 执行签到
-    doCheckIn(token, kdtId, appId, checkInId, cookie, function(err2, result) {
+    doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, function(err2, result) {
       if (err2) {
         notify("松鲜鲜签到失败", err2);
         $done();
@@ -193,26 +196,18 @@ function checkSignInfo(token, kdtId, appId, callback) {
 }
 
 // ====== 执行签到 ======
-function doCheckIn(token, kdtId, appId, checkInId, cookie, callback) {
-  var url = BASE_URL + "/check-in.json";
+function doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, callback) {
+  var url = BASE_URL + "/show_checkin_page_v2.json?app_id=" + appId + "&kdt_id=" + kdtId + "&access_token=" + token;
   log("签到 URL: " + url);
-
-  var body = {
-    app_id: appId,
-    kdt_id: kdtId,
-    access_token: token,
-    check_in_id: checkInId
-  };
-  log("签到参数: " + JSON.stringify(body));
 
   $task.fetch({
     url: url,
-    method: "POST",
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "Cookie": cookie || ""
-    },
-    body: JSON.stringify(body)
+      "Cookie": cookie || "",
+      "Extra-Data": extraData || ""
+    }
   }).then(function(response) {
     log("签到响应: " + response.body);
     try {
