@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 3.7.0
+ * 2026-06-09 版本: 3.8.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
@@ -107,14 +107,6 @@ function main() {
     return;
   }
 
-  var today = getToday();
-  var lastSign = $prefs.valueForKey(CONFIG.LAST_SIGN);
-  if (lastSign === today) {
-    log("今日已签到，跳过");
-    $done();
-    return;
-  }
-
   // 查询签到状态
   checkSignInfo(token, kdtId, appId, function(err, info) {
     if (err) {
@@ -124,8 +116,11 @@ function main() {
       return;
     }
 
+    log("签到状态: " + JSON.stringify(info));
+
     // 检查是否已签到
     if (info.data && info.data.checked_in) {
+      var today = getToday();
       $prefs.setValueForKey(today, CONFIG.LAST_SIGN);
       notify("松鲜鲜签到", "今日已签到，无需重复");
       $done();
@@ -162,7 +157,7 @@ function main() {
         return;
       }
 
-      $prefs.setValueForKey(today, CONFIG.LAST_SIGN);
+      $prefs.setValueForKey(getToday(), CONFIG.LAST_SIGN);
       var count = parseInt($prefs.valueForKey(CONFIG.SIGN_COUNT) || "0") + 1;
       $prefs.setValueForKey(String(count), CONFIG.SIGN_COUNT);
       notify("松鲜鲜签到成功", "已签到 " + count + " 天");
