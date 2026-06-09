@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 3.8.0
+ * 2026-06-09 版本: 3.9.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
@@ -192,7 +192,7 @@ function checkSignInfo(token, kdtId, appId, callback) {
 
 // ====== 执行签到 ======
 function doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, callback) {
-  var url = BASE_URL + "/show_checkin_page_v2.json?app_id=" + appId + "&kdt_id=" + kdtId + "&access_token=" + token;
+  var url = BASE_URL + "/checkinV2.json?checkinId=" + checkInId + "&app_id=" + appId + "&kdt_id=" + kdtId + "&access_token=" + token;
   log("签到 URL: " + url);
 
   $task.fetch({
