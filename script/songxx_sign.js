@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 3.1.0
+ * 2026-06-09 版本: 3.2.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
@@ -79,9 +79,14 @@ function main() {
   if (boxjsData) {
     try {
       var data = JSON.parse(boxjsData);
-      if (data.token) token = data.token;
+      if (data.access_token) token = data.access_token;
       if (data.kdt_id) kdtId = data.kdt_id;
       if (data.app_id) appId = data.app_id;
+      // 从 cookie 中提取 kdt_id
+      if (!kdtId && data.cookie) {
+        var match = data.cookie.match(/_kdt_id_=(\d+)/);
+        if (match) kdtId = match[1];
+      }
       log("Boxjs 解析成功");
     } catch (e) {
       log("Boxjs 非 JSON，作为 token 使用");
