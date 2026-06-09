@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 3.9.0
+ * 2026-06-09 版本: 4.0.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
@@ -207,7 +207,12 @@ function doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, callback) 
     log("签到响应: " + response.body);
     try {
       var data = JSON.parse(response.body);
-      callback(null, data);
+      // code:0 成功, 1000030071 已签到
+      if (data.code === 0 || data.code === 1000030071) {
+        callback(null, data);
+      } else {
+        callback(data.msg || "签到失败");
+      }
     } catch (e) {
       callback("签到请求失败");
     }
