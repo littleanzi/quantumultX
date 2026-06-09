@@ -126,8 +126,8 @@
             "repo": "https://github.com/littleanzi/quantumultX/tree/main",
             "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx_sign.js",
             "icons": [
-                "https://img01.yzcdn.cn/upload_files/2023/07/03/FtFv4zB9O7vAuHxsgdLpP0uSRHBF.png",
-                "https://img01.yzcdn.cn/upload_files/2023/07/03/FtFv4zB9O7vAuHxsgdLpP0uSRHBF.png"
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/songxx.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/songxx.png"
             ]
         }
     ]
