@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 3.2.0
+ * 2026-06-09 版本: 3.3.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
@@ -23,6 +23,7 @@ var CONFIG = {
 };
 
 var BASE_URL = "https://h5.youzan.com/wscump/checkin";
+var DEFAULT_APP_ID = "wxe65af2b5b95dc5da";
 
 // ====== 主入口 ======
 if (typeof $task !== "undefined" && $task.fetch) {
@@ -96,7 +97,9 @@ function main() {
 
   log("最终 token: " + (token || "无"));
   log("最终 kdtId: " + (kdtId || "无"));
-  log("最终 appId: " + (appId || "无"));
+  log("最终 appId: " + (appId || DEFAULT_APP_ID));
+
+  appId = appId || DEFAULT_APP_ID;
 
   if (!token || !kdtId) {
     notify("松鲜鲜签到", "缺少 Token 或 kdt_id，请打开小程序捕获");
@@ -148,10 +151,8 @@ function main() {
 
 // ====== 查询签到状态 ======
 function checkSignInfo(token, kdtId, appId, callback) {
-  var url = BASE_URL + "/check-in-info.json";
-  if (appId) url += "?app_id=" + appId;
-  url += (appId ? "&" : "?") + "kdt_id=" + kdtId;
-  url += "&access_token=" + token;
+  var url = BASE_URL + "/check-in-info.json?app_id=" + appId + "&kdt_id=" + kdtId + "&access_token=" + token;
+  log("查询 URL: " + url);
 
   $task.fetch({
     url: url,
@@ -160,6 +161,7 @@ function checkSignInfo(token, kdtId, appId, callback) {
       "Content-Type": "application/json"
     }
   }).then(function(response) {
+    log("查询响应: " + response.body);
     try {
       var data = JSON.parse(response.body);
       callback(null, data);
@@ -174,6 +176,7 @@ function checkSignInfo(token, kdtId, appId, callback) {
 // ====== 执行签到 ======
 function doCheckIn(token, kdtId, appId, callback) {
   var url = BASE_URL + "/check-in.json";
+  log("签到 URL: " + url);
 
   $task.fetch({
     url: url,
