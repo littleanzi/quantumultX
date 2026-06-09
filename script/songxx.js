@@ -5,9 +5,9 @@
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
  * [rewrite_local]
- * ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.* url script-request-header songxx_sign.js
+ * ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.* url script-request-header songxx.js
  * [task_local]
- * 0 9 * * * songxx_sign.js, tag=松鲜鲜签到, img-url=https://img01.yzcdn.cn/upload_files/2023/07/03/FtFv4zB9O7vAuHxsgdLpP0uSRHBF.png, enabled=true
+ * 0 9 * * * songxx.js, tag=松鲜鲜签到, img-url=https://img01.yzcdn.cn/upload_files/2023/07/03/FtFv4zB9O7vAuHxsgdLpP0uSRHBF.png, enabled=true
  * [MITM]
  * hostname = open.youzan.com, h5.youzan.com
  */
@@ -53,10 +53,9 @@ function capture() {
 
   // 从 URL 参数提取 access_token, kdt_id, app_id
   try {
-    var urlObj = new URL(url);
-    var token = urlObj.searchParams.get("access_token");
-    var kdtId = urlObj.searchParams.get("kdt_id");
-    var appId = urlObj.searchParams.get("app_id");
+    var token = getParam(url, "access_token");
+    var kdtId = getParam(url, "kdt_id");
+    var appId = getParam(url, "app_id");
 
     if (token) $prefs.setValueForKey(token, CONFIG.ACCESS_TOKEN);
     if (kdtId) $prefs.setValueForKey(kdtId, CONFIG.KDT_ID);
@@ -103,7 +102,7 @@ function main() {
 
   if (!token || !kdtId) {
     notify("松鲜鲜签到", "缺少 Token 或 kdt_id，请打开小程序捕获");
-    $done();
+    $done({});
     return;
   }
 
@@ -112,7 +111,7 @@ function main() {
     if (err) {
       log("查询失败: " + err);
       notify("松鲜鲜签到失败", err);
-      $done();
+      $done({});
       return;
     }
 
@@ -123,7 +122,7 @@ function main() {
       var today = getToday();
       $prefs.setValueForKey(today, CONFIG.LAST_SIGN);
       notify("松鲜鲜签到", "今日已签到，无需重复");
-      $done();
+      $done({});
       return;
     }
 
@@ -131,7 +130,7 @@ function main() {
     var checkInId = info.data && info.data.checkInId;
     if (!checkInId) {
       notify("松鲜鲜签到失败", "未找到 checkInId");
-      $done();
+      $done({});
       return;
     }
     log("checkInId: " + checkInId);
@@ -153,7 +152,7 @@ function main() {
     doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, function (err2, result) {
       if (err2) {
         notify("松鲜鲜签到失败", err2);
-        $done();
+        $done({});
         return;
       }
 
@@ -168,7 +167,7 @@ function main() {
         var count = parseInt($prefs.valueForKey(CONFIG.SIGN_COUNT) || "0");
         notify("松鲜鲜签到", "今日已签到，累计 " + count + " 天");
       }
-      $done();
+      $done({});
     });
   });
 }
@@ -229,6 +228,16 @@ function doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, callback) 
 }
 
 // ====== 工具函数 ======
+function getParam(url, key) {
+  var qs = url.split("?")[1] || "";
+  var pairs = qs.split("&");
+  for (var i = 0; i < pairs.length; i++) {
+    var pair = pairs[i].split("=");
+    if (decodeURIComponent(pair[0]) === key) return decodeURIComponent(pair[1] || "");
+  }
+  return "";
+}
+
 function getToday() {
   return new Date().toISOString().slice(0, 10);
 }
