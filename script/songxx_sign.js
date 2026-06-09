@@ -1,6 +1,6 @@
 /*
  * 松鲜鲜·签到脚本
- * 2026-06-09 版本: 4.0.0
+ * 2026-06-09 版本: 1.0.0
  * MITM 域名: open.youzan.com, h5.youzan.com
  * 重写规则 (Rewrite): ^https:\/\/(open\.youzan\.com|h5\.youzan\.com)\/.*
  * 算法: MITM 抓取 Cookie/Token → Youzan API 签到
@@ -48,7 +48,7 @@ function capture() {
         $prefs.setValueForKey(extra.sid, CONFIG.ACCESS_TOKEN);
         log("捕获 sid: " + extra.sid);
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // 从 URL 参数提取 access_token, kdt_id, app_id
@@ -61,7 +61,7 @@ function capture() {
     if (token) $prefs.setValueForKey(token, CONFIG.ACCESS_TOKEN);
     if (kdtId) $prefs.setValueForKey(kdtId, CONFIG.KDT_ID);
     if (appId) $prefs.setValueForKey(appId, CONFIG.APP_ID);
-  } catch (e) {}
+  } catch (e) { }
 
   $done({});
 }
@@ -108,7 +108,7 @@ function main() {
   }
 
   // 查询签到状态
-  checkSignInfo(token, kdtId, appId, function(err, info) {
+  checkSignInfo(token, kdtId, appId, function (err, info) {
     if (err) {
       log("查询失败: " + err);
       notify("松鲜鲜签到失败", err);
@@ -136,21 +136,21 @@ function main() {
     }
     log("checkInId: " + checkInId);
 
-  // 从 boxjs 读取 cookie 和 extraData
-  var cookie = "";
-  var extraData = "";
-  if (boxjsData) {
-    try {
-      var data2 = JSON.parse(boxjsData);
-      if (data2.cookie) cookie = data2.cookie;
-      if (data2.extraData) extraData = data2.extraData;
-    } catch (e) {}
-  }
-  log("Cookie: " + (cookie ? "有" : "无"));
-  log("Extra-Data: " + (extraData ? "有" : "无"));
+    // 从 boxjs 读取 cookie 和 extraData
+    var cookie = "";
+    var extraData = "";
+    if (boxjsData) {
+      try {
+        var data2 = JSON.parse(boxjsData);
+        if (data2.cookie) cookie = data2.cookie;
+        if (data2.extraData) extraData = data2.extraData;
+      } catch (e) { }
+    }
+    log("Cookie: " + (cookie ? "有" : "无"));
+    log("Extra-Data: " + (extraData ? "有" : "无"));
 
     // 执行签到
-    doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, function(err2, result) {
+    doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, function (err2, result) {
       if (err2) {
         notify("松鲜鲜签到失败", err2);
         $done();
@@ -177,7 +177,7 @@ function checkSignInfo(token, kdtId, appId, callback) {
     headers: {
       "Content-Type": "application/json"
     }
-  }).then(function(response) {
+  }).then(function (response) {
     log("查询响应: " + response.body);
     try {
       var data = JSON.parse(response.body);
@@ -185,7 +185,7 @@ function checkSignInfo(token, kdtId, appId, callback) {
     } catch (e) {
       callback("解析响应失败");
     }
-  }).catch(function(e) {
+  }).catch(function (e) {
     callback("网络请求失败: " + e);
   });
 }
@@ -203,7 +203,7 @@ function doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, callback) 
       "Cookie": cookie || "",
       "Extra-Data": extraData || ""
     }
-  }).then(function(response) {
+  }).then(function (response) {
     log("签到响应: " + response.body);
     try {
       var data = JSON.parse(response.body);
@@ -216,7 +216,7 @@ function doCheckIn(token, kdtId, appId, checkInId, cookie, extraData, callback) 
     } catch (e) {
       callback("签到请求失败");
     }
-  }).catch(function(e) {
+  }).catch(function (e) {
     callback("签到网络失败: " + e);
   });
 }
