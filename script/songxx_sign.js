@@ -157,10 +157,17 @@ function main() {
         return;
       }
 
-      $prefs.setValueForKey(getToday(), CONFIG.LAST_SIGN);
-      var count = parseInt($prefs.valueForKey(CONFIG.SIGN_COUNT) || "0") + 1;
-      $prefs.setValueForKey(String(count), CONFIG.SIGN_COUNT);
-      notify("松鲜鲜签到成功", "已签到 " + count + " 天");
+      // 只有真正新签到成功才增加计数，已签到(code:1000030071)不重复计数
+      if (result.code === 0) {
+        $prefs.setValueForKey(getToday(), CONFIG.LAST_SIGN);
+        var count = parseInt($prefs.valueForKey(CONFIG.SIGN_COUNT) || "0") + 1;
+        $prefs.setValueForKey(String(count), CONFIG.SIGN_COUNT);
+        notify("松鲜鲜签到成功", "已签到 " + count + " 天");
+      } else {
+        // code:1000030071 已签到
+        var count = parseInt($prefs.valueForKey(CONFIG.SIGN_COUNT) || "0");
+        notify("松鲜鲜签到", "今日已签到，累计 " + count + " 天");
+      }
       $done();
     });
   });
