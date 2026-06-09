@@ -6,14 +6,14 @@
             "repo": "https://github.com/littleanzi/quantumultX/tree/main",
     "apps": [
         {
-            "id": "Bestore_CheckIn",
+            "id": "liangppz_sign",
             "name": "良品铺子签到",
             "keys": [
-                "Bestore_CheckIn_Data"
+                "liangppz_sign_data"
             ],
             "settings": [
                 {
-                    "id": "Bestore_CheckIn_Data",
+                    "id": "liangppz_sign_data",
                     "name": "账号数据",
                     "val": "",
                     "type": "text",
@@ -23,7 +23,7 @@
                     "desc": "包含 uid 和 openId，打开小程序自动捕获"
                 },
                 {
-                    "id": "Bestore_CheckIn_Data.openId",
+                    "id": "liangppz_sign_data.openId",
                     "name": "openId（备用）",
                     "val": "",
                     "type": "text",
@@ -34,8 +34,8 @@
                 }
             ],
             "author": "@any",
-    "repo": "https://github.com/littleanzi/quantumultX/tree/main",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/Bestore_CheckIn.js",
+            "repo": "https://github.com/littleanzi/quantumultX/tree/main",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js",
             "icons": [
                 "https://lppz-xcx.oss-cn-hangzhou.aliyuncs.com/wx/member/default_avatar.png",
                 "https://lppz-xcx.oss-cn-hangzhou.aliyuncs.com/wx/mall/default_thumbnail.png"

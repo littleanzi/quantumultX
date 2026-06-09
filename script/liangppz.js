@@ -7,15 +7,15 @@
  * 重写规则 (Rewrite): ^https:\/\/(exter-sp\.lppz\.com|api-cic-gateway\.lppz\.com)\/.*
  * 算法: MD5(JSON.stringify(body) + &timestamp= + ts + &tenant=cic + &tenantStore=1397 + mall_sign_key)
  * [rewrite_local]
- * ^https:\/\/(exter-sp\.lppz\.com|api-cic-gateway\.lppz\.com)\/.* url script-request-body Bestore_CheckIn.js
+ * ^https:\/\/(exter-sp\.lppz\.com|api-cic-gateway\.lppz\.com)\/.* url script-request-body liangppz.js
  * [task_local]
- * 33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/Bestore_CheckIn.js, tag=良品铺子签到, enabled=true
+ * 33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/liangppz.js, tag=良品铺子签到, enabled=true
  * [MITM]
  * hostname = exter-sp.lppz.com, api-cic-gateway.lppz.com
  */
 
 const VERSION = '1.1.0'
-const ENV_KEY = 'Bestore_CheckIn_Data'
+const ENV_KEY = 'liangppz_sign_data'
 
 const MALL_KEY = 'apoli9pjydaxd156nu839by4t17h2iva'
 const TENANT = 'cic'
@@ -166,19 +166,19 @@ function request(opts) {
       headers: opts.headers || {},
       body: opts.body ? (typeof opts.body === 'string' ? opts.body : JSON.stringify(opts.body)) : undefined,
     }
-    console.log('[Bestore] REQ: ' + opts.url + (o.body ? ' | ' + o.body.substring(0, 200) : ''))
+    console.log('[Liangppz] REQ: ' + opts.url + (o.body ? ' | ' + o.body.substring(0, 200) : ''))
     if (typeof $httpClient !== 'undefined') {
       $httpClient[o.method.toLowerCase()](o, function (e, r, d) {
-        return e ? reject(e) : (console.log('[Bestore] RSP: ' + d), resolve({ status: r.status, body: d }))
+        return e ? reject(e) : (console.log('[Liangppz] RSP: ' + d), resolve({ status: r.status, body: d }))
       })
     } else if (typeof $task !== 'undefined') {
       o.opts = o.opts || {}
       o.opts.timeout = 30
       $task.fetch(o).then(function (r) {
-        console.log('[Bestore] RSP: ' + r.body)
+        console.log('[Liangppz] RSP: ' + r.body)
         resolve({ status: r.statusCode, body: r.body })
       }, function (e) {
-        console.log('[Bestore] ERR: ' + JSON.stringify(e))
+        console.log('[Liangppz] ERR: ' + JSON.stringify(e))
         reject(e)
       })
     } else reject(new Error('no http client'))
@@ -280,12 +280,12 @@ async function taskRun() {
 // ====== Main ======
 async function main() {
   try {
-    console.log('[Bestore] v' + VERSION + ' | ' + (isRequest ? '重写' : '定时'))
+    console.log('[Liangppz] v' + VERSION + ' | ' + (isRequest ? '重写' : '定时'))
     if (isRequest) { await rewriteCapture(); done() }
     else { await taskRun(); done() }
   } catch (e) {
     const msg = (typeof e === 'string' ? e : e.message || e.error || JSON.stringify(e)).substring(0, 500)
-    console.log('[Bestore] 错误: ' + msg)
+    console.log('[Liangppz] 错误: ' + msg)
     notify('良品铺子签到', '脚本错误', msg.substring(0, 200))
     done()
   }
