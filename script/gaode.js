@@ -211,21 +211,11 @@ async function taskRun() {
 // ====== Main ======
 async function main() {
   try {
-    if (isRequest) {
-      console.log('[Gaode] 重写模式 - 捕获签到请求')
-      await rewriteCapture()
-      done()
-    } else if (isTask) {
-      console.log('[Gaode] 定时任务模式')
-      await taskRun()
-      done()
-    } else {
-      console.log('[Gaode] 未知运行模式')
-      notify('高德打车签到', '运行模式错误', '请通过 rewrite 或 cron 触发')
-      done()
-    }
+    console.log('[Gaode] ' + (isRequest ? '重写' : '定时'))
+    if (isRequest) { await rewriteCapture(); done() }
+    else { await taskRun(); done() }
   } catch (e) {
-    console.log('[Gaode] 主错误: ' + (e.message || e))
+    console.log('[Gaode] 错误: ' + (e.message || e))
     notify('高德打车签到', '脚本错误', String(e.message || e))
     done()
   }
