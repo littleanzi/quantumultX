@@ -129,6 +129,32 @@
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/songxx.png",
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/songxx.png"
             ]
+        },
+        {
+            "id": "gaode_sign",
+            "name": "高德打车签到",
+            "keys": [
+                "gaode_checkin_data"
+            ],
+            "settings": [
+                {
+                    "id": "gaode_checkin_data",
+                    "name": "签到请求数据",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "打开小程序后自动捕获",
+                    "autoGrow": true,
+                    "rows": 6,
+                    "desc": "自动捕获 do_sign 请求，包含完整 URL 参数和 Cookie"
+                }
+            ],
+            "author": "@any",
+            "repo": "https://github.com/littleanzi/quantumultX/tree/main",
+            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js",
+            "icons": [
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/anboy.png",
+                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/anboy.png"
+            ]
         }
     ]
 }
