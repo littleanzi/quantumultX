@@ -118,10 +118,22 @@ async function rewriteCapture() {
 async function taskRun() {
   var store = load()
   console.log('[Gaode] 定时任务启动')
+  console.log('[Gaode] store: signUrl=' + (store.signUrl ? '有' : '无') + ' sessionId=' + (store.sessionId || '无') + ' cookie=' + (store.cookie ? '有' : '无'))
 
   if (!store.signUrl) {
     notify('高德打车签到', '缺少请求数据', '请先打开小程序捕获签到请求')
     return
+  }
+
+  // 如果有 signUrl 但没有 sessionId，尝试从 URL 参数提取
+  if (!store.sessionId && store.signUrl.indexOf('?') > -1) {
+    var params = store.signUrl.split('?')[1]
+    params.split('&').forEach(function (p) {
+      var kv = p.split('=')
+      if (kv[0] === 'sessionId' || kv[0] === 'sessionid') {
+        store.sessionId = decodeURIComponent(kv.slice(1).join('='))
+      }
+    })
   }
 
   // 检查是否过期（超过 6 小时）
@@ -131,11 +143,16 @@ async function taskRun() {
   }
 
   try {
+    var cookie = store.cookie || ''
+    if (!cookie && store.sessionId) {
+      cookie = 'sessionid=' + store.sessionId
+    }
     var headers = {
-      'Cookie': store.cookie || '',
+      'Cookie': cookie,
       'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43',
     }
 
+    console.log('[Gaode] Cookie: ' + cookie.substring(0, 50))
     console.log('[Gaode] 重放请求...')
 
     var result = await request({
