@@ -4,10 +4,10 @@
   "raw": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/autoScript/anyTask.json",
   "task": [
     "34 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx.js, tag=松鲜鲜签到,           img-url=, enabled=true",
-    "31 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克wx小程序签到,    img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hxek.png,enabled=true",
-    "32 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js, tag=海信爱家wx小程序签到, img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png,enabled=true",
-    "33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js, tag=良品铺子wx小程序签到,           img-url=,enabled=true",
-    "35 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车wx小程序签到, img-url=,enabled=true",
+    "31 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克签到,    img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hxek.png,enabled=true",
+    "32 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js, tag=海信爱家签到, img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png,enabled=true",
+    "33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js, tag=良品铺子签到,           img-url=,enabled=true",
+    "35 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车签到, img-url=,enabled=true",
     
     "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/historyToday.js, tag=历史上的今天, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/calendar.png,enabled=true",
     "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/oil_price.js, tag=今日油价, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/oil.png, enabled=true",
