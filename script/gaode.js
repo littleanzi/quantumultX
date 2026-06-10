@@ -1,26 +1,16 @@
 /*
  * 高德打车·签到脚本
- * 2026-06-10 版本: 1.2.1
+ * 2026-06-10 版本: 1.4.0
  * 签名密钥 (TEA delta): 0x9E3779B9
  * 算法: TEA加密 + RC4校验 + MD5签名 + HMAC-MD5 (密钥混淆于小程序代码中，无法直接还原)
  * MITM 域名: m5.amap.com, m5-zb.amap.com
- * 重写规则 (Rewrite): ^https:\/\/m5\.amap\.com\/ws\/car-place\/activity\/daily_sign
+ * 重写规则 (Rewrite): ^https:\/\/m5(-zb)?\.amap\.com\/ws\/car-place\/activity\/daily_sign
  * [rewrite_local]
- * Logs:
-
-[Gaode] 定时
-[Gaode] 定时任务启动
-[Gaode] 重放请求...
-[Gaode] 响应: {"code":"14","message":"Not login.(http: named cookie not present)","timestamp":1781108944,"version":"","gsId":"2135fbe817811089440201175e0ce4","data":null,"result":false}
-
-gaode.js
+ * ^https:\/\/m5(-zb)?\.amap\.com\/ws\/car-place\/activity\/daily_sign url script-request-body gaode.js
  * [task_local]
  * 35 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车签到, enabled=true
  * [MITM]
  * hostname = m5.amap.com, m5-zb.amap.com
- *
- * 注意：签到接口使用 TEA+RC4+MD5 复合加密，签名算法高度混淆无法还原，
- * 脚本通过 MITM 拦截完整已签名请求后重放。建议保持小程序活跃以刷新 session。
  */
 
 const ENV_KEY = 'gaode_checkin_data'
@@ -28,23 +18,10 @@ const ENV_KEY = 'gaode_checkin_data'
 const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
-// ====== 持久化 ======
 function load() {
-  var raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
+  const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
-  var store = raw ? JSON.parse(raw) : {}
-
-  // BoxJS 嵌套键读取
-  if (!store.signUrl) {
-    var signUrl = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.signUrl') : ''
-    if (signUrl) store.signUrl = signUrl
-  }
-  if (!store.sessionId) {
-    var sessionId = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.sessionId') : ''
-    if (sessionId) store.sessionId = sessionId
-  }
-
-  return store
+  return raw ? JSON.parse(raw) : {}
 }
 
 function save(store) {
@@ -75,30 +52,15 @@ function request(opts) {
   })
 }
 
-// ====== Rewrite: 拦截签到请求，捕获完整参数 ======
+// ====== Rewrite: 拦截签到请求 ======
 async function rewriteCapture() {
   var store = load()
   var url = $request.url || ''
   var h = $request.headers || {}
 
-  console.log('[Gaode] === 捕获请求 ===')
+  console.log('[Gaode] === 捕获签到请求 ===')
   console.log('[Gaode] URL: ' + url)
 
-  // 从 URL 参数提取
-  var urlParams = {}
-  if (url.indexOf('?') > -1) {
-    var paramStr = url.split('?')[1].split('#')[0]
-    paramStr.split('&').forEach(function (p) {
-      var idx = p.indexOf('=')
-      if (idx > -1) {
-        var key = decodeURIComponent(p.substring(0, idx))
-        var val = decodeURIComponent(p.substring(idx + 1))
-        urlParams[key] = val
-      }
-    })
-  }
-
-  // 从 headers 提取
   var cookie = h['Cookie'] || h['cookie'] || ''
   var sessionId = ''
   if (cookie) {
@@ -106,23 +68,13 @@ async function rewriteCapture() {
     if (matchSid) sessionId = matchSid[1]
   }
 
-  // 从 URL 参数提取 sessionId
-  if (!sessionId && urlParams.sessionId) sessionId = urlParams.sessionId
-  if (!sessionId && urlParams.sessionid) sessionId = urlParams.sessionid
-
-  console.log('[Gaode] sessionid: ' + (sessionId ? sessionId.substring(0, 20) + '...' : '无'))
-  console.log('[Gaode] URL参数: ' + JSON.stringify(Object.keys(urlParams)))
-
-  // 保存完整请求
   store.signUrl = url
   store.cookie = cookie
   store.sessionId = sessionId
-  store.urlParams = urlParams
   store.capturedAt = new Date().toISOString()
   store.timestamp = Date.now()
 
   save(store)
-
   notify('高德打车签到', '已捕获签到请求', 'sessionid=' + (sessionId ? '有' : '无'))
 }
 
@@ -130,37 +82,15 @@ async function rewriteCapture() {
 async function taskRun() {
   var store = load()
   console.log('[Gaode] 定时任务启动')
-  console.log('[Gaode] store: signUrl=' + (store.signUrl ? '有' : '无') + ' sessionId=' + (store.sessionId || '无') + ' cookie=' + (store.cookie ? '有' : '无'))
 
   if (!store.signUrl) {
     notify('高德打车签到', '缺少请求数据', '请先打开小程序捕获签到请求')
     return
   }
 
-  // 如果有 signUrl 但没有 sessionId，尝试从 URL 参数提取
-  if (!store.sessionId && store.signUrl.indexOf('?') > -1) {
-    var params = store.signUrl.split('?')[1]
-    params.split('&').forEach(function (p) {
-      var kv = p.split('=')
-      if (kv[0] === 'sessionId' || kv[0] === 'sessionid') {
-        store.sessionId = decodeURIComponent(kv.slice(1).join('='))
-      }
-    })
-  }
-
-  // 构造完整 Cookie
   var cookie = store.cookie || ''
-  if (store.sessionId) {
-    // 确保 Cookie 中包含 sessionid
-    if (cookie.indexOf('sessionid=') === -1) {
-      cookie = cookie ? cookie + '; sessionid=' + store.sessionId : 'sessionid=' + store.sessionId
-    }
-  }
-
-  // 检查是否过期（超过 6 小时）
-  var elapsed = Date.now() - (store.timestamp || 0)
-  if (elapsed > 6 * 60 * 60 * 1000) {
-    console.log('[Gaode] 请求数据已过期: ' + Math.round(elapsed / 3600000) + ' 小时前捕获')
+  if (store.sessionId && cookie.indexOf('sessionid=') === -1) {
+    cookie = cookie ? cookie + '; sessionid=' + store.sessionId : 'sessionid=' + store.sessionId
   }
 
   try {
@@ -169,7 +99,6 @@ async function taskRun() {
       'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43',
     }
 
-    console.log('[Gaode] Cookie: ' + cookie.substring(0, 100))
     console.log('[Gaode] 重放请求...')
 
     var result = await request({
