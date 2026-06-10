@@ -28,7 +28,7 @@
 
 const ENV_KEY = 'gaode_checkin_data'
 
-const isRequest = typeof $request !== 'undefined' && typeof $response !== 'undefined'
+const isRequest = typeof $request !== 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
 function load() {
