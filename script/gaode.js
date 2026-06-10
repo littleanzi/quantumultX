@@ -6,7 +6,7 @@
  * MITM 域名: m5-zb.amap.com
  * 重写规则 (Rewrite): ^https:\/\/m5-zb\.amap\.com\/ws\/car-place\/activity\/daily_sign\/do_sign
  * [rewrite_local]
- * ^https:\/\/m5-zb\.amap\.com\/ws\/car-place\/activity\/daily_sign\/do_sign url script-request-body gaode.js
+ * ^https:\/\/m5-zb\.amap\.com\/ws\/car-place\/activity\/daily_sign url script-request-body gaode.js
  * [task_local]
  * 35 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车签到, enabled=true
  * [MITM]
@@ -64,7 +64,7 @@ async function rewriteCapture() {
   var method = ($request.method || 'POST').toUpperCase()
   var h = $request.headers || {}
 
-  console.log('[Gaode] === 捕获签到请求 ===')
+  console.log('[Gaode] === 捕获请求 ===')
   console.log('[Gaode] URL: ' + url)
 
   // 解析 URL query 参数
