@@ -138,7 +138,7 @@
                 {
                     "id": "gaode_checkin_data",
                     "name": "签到请求数据",
-                    "val": "",
+                    "val": "{\"sessionid\":\"wjhici6mpf5comywlz55id2e6clsbfgm\"}",
                     "type": "text",
                     "placeholder": "打开小程序后自动捕获",
                     "autoGrow": true,
