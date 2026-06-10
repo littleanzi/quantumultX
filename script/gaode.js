@@ -1,34 +1,24 @@
 /*
- * 高德打车 微信小程序每日签到
- * Quantumult X / Loon / Surge / Stash
- *
+ * 高德打车·签到脚本
+ * 2026-06-10 版本: 1.0.0
+ * 签名密钥 (TEA delta): 0x9E3779B9
+ * 算法: TEA加密 + RC4校验 + MD5签名 + HMAC-MD5 (密钥混淆于小程序代码中，无法直接还原)
+ * MITM 域名: m5-zb.amap.com
+ * 重写规则 (Rewrite): ^https:\/\/m5-zb\.amap\.com\/ws\/car-place\/activity\/daily_sign\/do_sign
  * [rewrite_local]
- * ^https:\/\/m5-zb\.amap\.com\/ws\/car-place\/activity\/daily_sign\/do_sign url script-request-body https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js
- *
+ * ^https:\/\/m5-zb\.amap\.com\/ws\/car-place\/activity\/daily_sign\/do_sign url script-request-body gaode.js
  * [task_local]
  * 35 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车签到, enabled=true
- *
  * [MITM]
  * hostname = m5-zb.amap.com
  *
- * 签名密钥 (TEA delta): 0x9E3779B9 (2654435769)
- * 算法: TEA加密 + RC4校验 + MD5签名 + HMAC-MD5
- * 加密密钥: wechat_mp 渠道密钥 (混淆存储于小程序代码中)
- *
- * 首次使用：
- * 1. 启用 rewrite 和 MITM 规则
- * 2. 打开微信 → 高德打车小程序 → 进入福利中心签到页
- * 3. 手动完成一次签到，脚本自动捕获完整请求
- * 4. 定时任务将尝试重放捕获的请求
- *
- * 注意：由于签到接口使用 TEA+RC4+MD5 复合加密，
- * 每次请求的 xck 和 in 参数基于随机 salt 生成，
- * 直接重放可能因时间戳校验失败。建议保持小程序活跃。
-*/
+ * 注意：签到接口使用 TEA+RC4+MD5 复合加密，签名算法高度混淆无法还原，
+ * 脚本通过 MITM 拦截完整已签名请求后重放。建议保持小程序活跃以刷新 session。
+ */
 
 const ENV_KEY = 'gaode_checkin_data'
 
-const isRequest = typeof $request !== 'undefined'
+const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
 function load() {
