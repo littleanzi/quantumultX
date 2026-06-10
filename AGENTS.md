@@ -41,8 +41,8 @@
 ## 新脚本工作流程
 写完/改完脚本后，需同步更新：
 1. `script/xxx.js` - 脚本代码
-2. `autoScript/anyTask.json` - 添加定时任务
-3. `quan.boxjs.json` - 添加 Boxjs 配置（如有配置项）
+2. `autoScript/anyTask.json` - 添加定时任务,不要添加图标链接除非百分百正确的图标
+3. `quan.boxjs.json` - 添加 Boxjs 配置（如有配置项）,不要添加图标链接除非百分百正确的图标
 4. `icon/apps/` - 添加应用图标（如有）
 
 
