@@ -1,12 +1,19 @@
 /*
  * 高德打车·签到脚本
- * 2026-06-10 版本: 1.2.0
+ * 2026-06-10 版本: 1.2.1
  * 签名密钥 (TEA delta): 0x9E3779B9
  * 算法: TEA加密 + RC4校验 + MD5签名 + HMAC-MD5 (密钥混淆于小程序代码中，无法直接还原)
  * MITM 域名: m5.amap.com, m5-zb.amap.com
  * 重写规则 (Rewrite): ^https:\/\/m5\.amap\.com\/ws\/car-place\/activity\/daily_sign
  * [rewrite_local]
- * ^https:\/\/m5(-zb)?\.amap\.com\/ws\/car-place\/activity\/daily_sign url script-request-body gaode.js
+ * Logs:
+
+[Gaode] 定时
+[Gaode] 定时任务启动
+[Gaode] 重放请求...
+[Gaode] 响应: {"code":"14","message":"Not login.(http: named cookie not present)","timestamp":1781108944,"version":"","gsId":"2135fbe817811089440201175e0ce4","data":null,"result":false}
+
+gaode.js
  * [task_local]
  * 35 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车签到, enabled=true
  * [MITM]
@@ -64,21 +71,41 @@ async function rewriteCapture() {
 
   console.log('[Gaode] === 捕获请求 ===')
   console.log('[Gaode] URL: ' + url)
-  console.log('[Gaode] Headers: ' + JSON.stringify(h).substring(0, 500))
 
-  // 提取 cookie
+  // 从 URL 参数提取
+  var urlParams = {}
+  if (url.indexOf('?') > -1) {
+    var paramStr = url.split('?')[1].split('#')[0]
+    paramStr.split('&').forEach(function (p) {
+      var idx = p.indexOf('=')
+      if (idx > -1) {
+        var key = decodeURIComponent(p.substring(0, idx))
+        var val = decodeURIComponent(p.substring(idx + 1))
+        urlParams[key] = val
+      }
+    })
+  }
+
+  // 从 headers 提取
   var cookie = h['Cookie'] || h['cookie'] || ''
   var sessionId = ''
   if (cookie) {
     var matchSid = cookie.match(/sessionid=([^;]+)/)
     if (matchSid) sessionId = matchSid[1]
-    console.log('[Gaode] sessionid: ' + sessionId.substring(0, 20) + '...')
   }
+
+  // 从 URL 参数提取 sessionId
+  if (!sessionId && urlParams.sessionId) sessionId = urlParams.sessionId
+  if (!sessionId && urlParams.sessionid) sessionId = urlParams.sessionid
+
+  console.log('[Gaode] sessionid: ' + (sessionId ? sessionId.substring(0, 20) + '...' : '无'))
+  console.log('[Gaode] URL参数: ' + JSON.stringify(Object.keys(urlParams)))
 
   // 保存完整请求
   store.signUrl = url
   store.cookie = cookie
   store.sessionId = sessionId
+  store.urlParams = urlParams
   store.capturedAt = new Date().toISOString()
   store.timestamp = Date.now()
 
