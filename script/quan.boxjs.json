@@ -138,12 +138,32 @@
                 {
                     "id": "gaode_checkin_data",
                     "name": "签到请求数据",
-                    "val": "{\"sessionid\":\"wjhici6mpf5comywlz55id2e6clsbfgm\"}",
+                    "val": "",
                     "type": "text",
                     "placeholder": "打开小程序后自动捕获",
                     "autoGrow": true,
                     "rows": 6,
                     "desc": "自动捕获 do_sign 请求，包含完整 URL 参数和 Cookie"
+                },
+                {
+                    "id": "gaode_checkin_data.signUrl",
+                    "name": "签到请求 URL",
+                    "val": "https://m5.amap.com/ws/car-place/activity/daily_sign/do_sign?adiu=oagXW5OMYwAX2Au6FFRmfHyrHDp0&node=wechatMP&env=prod&xck_channel=default&xck=S9FFT64jFrkZzk8JIEpAoQLRRnbHCBs3Z%2FdEPT3vGtzEQcb8FB3SNUthHXKz7uT%2FrMJ2pkPDIyEjGaLvU%2B8Ca7DwoK%2B7OCwEAZgL0rZtbbqGG2stJq1xyacfvP8x73aXZAf8%2FYfnGz%2BbpvyTKJ6lYeQ%2FURBXNGgj%2ByBBd6pajtw%3D&in=60tEoI1qU6onFxU9UIiotKOJlYZzTF4kPj1526u3W%2FRKv2VtAYDWngA6qYc5VaFfM%2B0oxCw%2BvbMLLUcNpZ39dIzvDABRf90Q2NyFy8s0qGaTKw4N",
+                    "type": "text",
+                    "placeholder": "从抓包获取的完整签到 URL",
+                    "autoGrow": true,
+                    "rows": 3,
+                    "desc": "包含 xck、in、sign 等加密参数的完整 URL"
+                },
+                {
+                    "id": "gaode_checkin_data.cookie",
+                    "name": "Cookie (sessionid)",
+                    "val": "sessionid=wjhici6mpf5comywlz55id2e6clsbfgm",
+                    "type": "text",
+                    "placeholder": "sessionid=xxx",
+                    "autoGrow": false,
+                    "rows": 1,
+                    "desc": "从抓包获取的 Cookie"
                 }
             ],
             "author": "@any",
