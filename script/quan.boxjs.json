@@ -132,21 +132,12 @@
             "id": "gaode_sign",
             "name": "高德打车签到",
             "keys": [
-                "gaode_checkin_data"
+                "gaode_checkin_data",
+                "gaode_session_id"
             ],
             "settings": [
                 {
                     "id": "gaode_checkin_data",
-                    "name": "签到数据 (JSON)",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "打开小程序后自动捕获",
-                    "autoGrow": true,
-                    "rows": 6,
-                    "desc": "自动捕获 do_sign 请求，或手动填入下方字段"
-                },
-                {
-                    "id": "gaode_checkin_data.signUrl",
                     "name": "签到请求 URL",
                     "val": "",
                     "type": "text",
@@ -156,14 +147,14 @@
                     "desc": "从抓包获取"
                 },
                 {
-                    "id": "gaode_checkin_data.sessionId",
+                    "id": "gaode_session_id",
                     "name": "Session ID",
                     "val": "",
                     "type": "text",
-                    "placeholder": "从抓包获取",
+                    "placeholder": "从抓包 Cookie 中获取",
                     "autoGrow": false,
                     "rows": 1,
-                    "desc": "从 Cookie 中的 sessionid 字段获取"
+                    "desc": "Cookie 中的 sessionid 值"
                 }
             ],
             "author": "@any",

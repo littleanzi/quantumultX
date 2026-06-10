@@ -23,14 +23,10 @@ function load() {
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
   var store = raw ? JSON.parse(raw) : {}
 
-  // BoxJS 嵌套键读取
-  if (!store.signUrl) {
-    var v = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.signUrl') : ''
-    if (v) store.signUrl = v
-  }
+  // 单独读取 sessionId
   if (!store.sessionId) {
-    var v = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.sessionId') : ''
-    if (v) store.sessionId = v
+    var sid = typeof $persistentStore !== 'undefined' ? $persistentStore.read('gaode_session_id') : ''
+    if (sid) store.sessionId = sid
   }
 
   console.log('[Gaode] store: signUrl=' + (store.signUrl ? '有' : '无') + ' sessionId=' + (store.sessionId || '无'))
