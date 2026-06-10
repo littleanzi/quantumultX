@@ -30,9 +30,21 @@ const isTask = typeof $request === 'undefined' && typeof $notification !== 'unde
 
 // ====== 持久化 ======
 function load() {
-  const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
+  var raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
-  return raw ? JSON.parse(raw) : {}
+  var store = raw ? JSON.parse(raw) : {}
+
+  // BoxJS 嵌套键读取
+  if (!store.signUrl) {
+    var signUrl = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.signUrl') : ''
+    if (signUrl) store.signUrl = signUrl
+  }
+  if (!store.sessionId) {
+    var sessionId = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.sessionId') : ''
+    if (sessionId) store.sessionId = sessionId
+  }
+
+  return store
 }
 
 function save(store) {
@@ -136,6 +148,15 @@ async function taskRun() {
     })
   }
 
+  // 构造完整 Cookie
+  var cookie = store.cookie || ''
+  if (store.sessionId) {
+    // 确保 Cookie 中包含 sessionid
+    if (cookie.indexOf('sessionid=') === -1) {
+      cookie = cookie ? cookie + '; sessionid=' + store.sessionId : 'sessionid=' + store.sessionId
+    }
+  }
+
   // 检查是否过期（超过 6 小时）
   var elapsed = Date.now() - (store.timestamp || 0)
   if (elapsed > 6 * 60 * 60 * 1000) {
@@ -143,16 +164,12 @@ async function taskRun() {
   }
 
   try {
-    var cookie = store.cookie || ''
-    if (!cookie && store.sessionId) {
-      cookie = 'sessionid=' + store.sessionId
-    }
     var headers = {
       'Cookie': cookie,
       'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.43',
     }
 
-    console.log('[Gaode] Cookie: ' + cookie.substring(0, 50))
+    console.log('[Gaode] Cookie: ' + cookie.substring(0, 100))
     console.log('[Gaode] 重放请求...')
 
     var result = await request({
