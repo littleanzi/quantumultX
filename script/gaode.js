@@ -3,10 +3,10 @@
  * Quantumult X / Loon / Surge / Stash
  *
  * [rewrite_local]
- * ^https:\/\/m5-zb\.amap\.com\/ws\/car-place\/activity\/daily_sign\/do_sign url script-response-body https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/gaode.js
+ * ^https:\/\/m5-zb\.amap\.com\/ws\/car-place\/activity\/daily_sign\/do_sign url script-request-body https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js
  *
  * [task_local]
- * 35 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/gaode.js, tag=高德打车签到, enabled=true
+ * 35 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车签到, enabled=true
  *
  * [MITM]
  * hostname = m5-zb.amap.com
