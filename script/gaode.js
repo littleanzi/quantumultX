@@ -1,6 +1,6 @@
 /*
  * 高德打车·签到脚本
- * 2026-06-10 版本: 1.0.0
+ * 2026-06-10 版本: 1.1.0
  * 签名密钥 (TEA delta): 0x9E3779B9
  * 算法: TEA加密 + RC4校验 + MD5签名 + HMAC-MD5 (密钥混淆于小程序代码中，无法直接还原)
  * MITM 域名: m5-zb.amap.com
@@ -21,6 +21,7 @@ const ENV_KEY = 'gaode_checkin_data'
 const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
+// ====== 持久化 ======
 function load() {
   const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
@@ -56,7 +57,7 @@ function request(opts) {
   })
 }
 
-// ====== Rewrite: 拦截签到响应，捕获请求参数 ======
+// ====== Rewrite: 拦截签到请求，捕获完整参数 ======
 async function rewriteCapture() {
   var store = load()
   var url = $request.url || ''
@@ -130,16 +131,6 @@ async function rewriteCapture() {
   })
   if (store.history.length > 30) store.history = store.history.slice(-30)
 
-  // 提取 sign 字段（如果存在）
-  if (urlParams.sign) {
-    store.lastSign = urlParams.sign
-    console.log('[Gaode] sign: ' + urlParams.sign.substring(0, 30) + '...')
-  }
-  if (urlParams.xck) {
-    store.lastXck = urlParams.xck
-    console.log('[Gaode] xck: ' + urlParams.xck.substring(0, 30) + '...')
-  }
-
   save(store)
 
   var summary = 'sessionid=' + (sessionId ? '有' : '无') +
@@ -186,7 +177,6 @@ async function taskRun() {
     var msg = ''
     try {
       var resp = JSON.parse(result.body)
-      // 高德接口一般 code=200 或 code=0 表示成功
       if (resp.code == 200 || resp.code == 0 || resp.status == 'success') {
         success = true
         msg = resp.data ? (resp.data.desc || resp.data.message || '签到成功') : '签到成功'
