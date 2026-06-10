@@ -19,9 +19,22 @@ const isRequest = typeof $request !== 'undefined' && typeof $response === 'undef
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
 function load() {
-  const raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
+  var raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
-  return raw ? JSON.parse(raw) : {}
+  var store = raw ? JSON.parse(raw) : {}
+
+  // BoxJS 嵌套键读取
+  if (!store.signUrl) {
+    var v = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.signUrl') : ''
+    if (v) store.signUrl = v
+  }
+  if (!store.sessionId) {
+    var v = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.sessionId') : ''
+    if (v) store.sessionId = v
+  }
+
+  console.log('[Gaode] store: signUrl=' + (store.signUrl ? '有' : '无') + ' sessionId=' + (store.sessionId || '无'))
+  return store
 }
 
 function save(store) {
