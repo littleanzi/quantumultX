@@ -1,16 +1,22 @@
 /*
  * 高德打车·签到脚本
- * 2026-06-10 版本: 1.4.1
+ * 2026-06-10 版本: 1.6.0
  * 签名密钥 (TEA delta): 0x9E3779B9
  * 算法: TEA加密 + RC4校验 + MD5签名 + HMAC-MD5 (密钥混淆于小程序代码中，无法直接还原)
  * MITM 域名: m5.amap.com, m5-zb.amap.com
- * 重写规则 (Rewrite): ^https:\/\/m5(-zb)?\.amap\.com\/ws\/car-place\/activity\/daily_sign
+ * 重写规则 (Rewrite): ^https:\/\/m5\.amap\.com\/ws\/car-place\/activity\/daily_sign
  * [rewrite_local]
- * ^https:\/\/m5(-zb)?\.amap\.com\/ws\/ url script-request-body gaode.js
+ * ^https:\/\/m5\.amap\.com\/ws\/car-place\/activity\/daily_sign url script-request-body gaode.js
  * [task_local]
  * 35 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车签到, enabled=true
  * [MITM]
  * hostname = m5.amap.com, m5-zb.amap.com
+ *
+ * 使用方式：
+ * 1. 用抓包工具抓取签到请求的完整 URL
+ * 2. 在 BoxJS 中填入 signUrl 和 sessionId
+ * 3. 定时任务会自动签到
+ * 4. signUrl 过期后重新抓取更新即可
  */
 
 const ENV_KEY = 'gaode_checkin_data'
@@ -18,23 +24,27 @@ const ENV_KEY = 'gaode_checkin_data'
 const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
 
+// ====== 持久化 ======
 function load() {
   var raw = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY)
     : typeof $prefs !== 'undefined' ? $prefs.valueForKey(ENV_KEY) : '{}'
   var store = raw ? JSON.parse(raw) : {}
 
-  // 单独读取 sessionId
+  // 读取 BoxJS 单独字段
+  if (!store.signUrl) {
+    var v = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.signUrl') : ''
+    if (v) store.signUrl = v
+  }
   if (!store.sessionId) {
-    var sid = typeof $persistentStore !== 'undefined' ? $persistentStore.read('gaode_session_id') : ''
-    if (sid) store.sessionId = sid
+    var v = typeof $persistentStore !== 'undefined' ? $persistentStore.read(ENV_KEY + '.sessionId') : ''
+    if (v) store.sessionId = v
   }
 
-  console.log('[Gaode] store: signUrl=' + (store.signUrl ? '有' : '无') + ' sessionId=' + (store.sessionId || '无'))
   return store
 }
 
 function save(store) {
-  const str = JSON.stringify(store)
+  var str = JSON.stringify(store)
   if (typeof $persistentStore !== 'undefined') $persistentStore.write(str, ENV_KEY)
   else if (typeof $prefs !== 'undefined') $prefs.setValueForKey(str, ENV_KEY)
 }
@@ -61,39 +71,20 @@ function request(opts) {
   })
 }
 
-// ====== Rewrite: 拦截请求 ======
+// ====== Rewrite: 捕获 sessionid ======
 async function rewriteCapture() {
-  var store = load()
-  var url = $request.url || ''
   var h = $request.headers || {}
-
-  // 从任何请求中提取 sessionid
   var cookie = h['Cookie'] || h['cookie'] || ''
   if (cookie) {
     var matchSid = cookie.match(/sessionid=([^;]+)/)
-    if (matchSid && matchSid[1] !== store.sessionId) {
-      store.sessionId = matchSid[1]
-      store.cookie = cookie
-      store.sessionIdUpdatedAt = new Date().toISOString()
-      save(store)
-      // 同步写入 BoxJS key
+    if (matchSid) {
       if (typeof $persistentStore !== 'undefined') {
-        $persistentStore.write(matchSid[1], 'gaode_session_id')
+        $persistentStore.write(matchSid[1], ENV_KEY + '.sessionId')
       }
-      console.log('[Gaode] 捕获到新 sessionid: ' + matchSid[1].substring(0, 20) + '...')
+      console.log('[Gaode] 捕获 sessionid: ' + matchSid[1].substring(0, 20) + '...')
     }
   }
-
-  // 签到请求，保存完整参数
-  if (url.indexOf('daily_sign') > -1) {
-    console.log('[Gaode] 捕获签到请求')
-    store.signUrl = url
-    store.cookie = cookie
-    store.capturedAt = new Date().toISOString()
-    store.timestamp = Date.now()
-    save(store)
-    notify('高德打车签到', '已捕获签到请求', 'sessionid=' + (store.sessionId ? '有' : '无'))
-  }
+  done()
 }
 
 // ====== Task: 定时签到 ======
@@ -102,14 +93,16 @@ async function taskRun() {
   console.log('[Gaode] 定时任务启动')
 
   if (!store.signUrl) {
-    notify('高德打车签到', '缺少请求数据', '请先打开小程序捕获签到请求')
+    notify('高德打车签到', '缺少 signUrl', '请在 BoxJS 中填入签到请求 URL')
     return
   }
 
-  var cookie = store.cookie || ''
-  if (store.sessionId && cookie.indexOf('sessionid=') === -1) {
-    cookie = cookie ? cookie + '; sessionid=' + store.sessionId : 'sessionid=' + store.sessionId
+  if (!store.sessionId) {
+    notify('高德打车签到', '缺少 sessionId', '请在 BoxJS 中填入 Session ID')
+    return
   }
+
+  var cookie = 'sessionid=' + store.sessionId
 
   try {
     var headers = {
@@ -144,7 +137,7 @@ async function taskRun() {
     if (success) {
       notify('高德打车签到', '✅ 签到成功', msg)
     } else {
-      notify('高德打车签到', '❌ 签到失败', msg + '\n建议重新打开小程序捕获请求')
+      notify('高德打车签到', '❌ 签到失败', msg + '\n建议更新 signUrl')
     }
   } catch (e) {
     console.log('[Gaode] 错误: ' + (e.message || e))
@@ -156,8 +149,9 @@ async function taskRun() {
 async function main() {
   try {
     console.log('[Gaode] ' + (isRequest ? '重写' : '定时'))
-    if (isRequest) { await rewriteCapture(); done() }
-    else { await taskRun(); done() }
+    if (isRequest) { await rewriteCapture() }
+    else { await taskRun() }
+    done()
   } catch (e) {
     console.log('[Gaode] 错误: ' + (e.message || e))
     notify('高德打车签到', '脚本错误', String(e.message || e))

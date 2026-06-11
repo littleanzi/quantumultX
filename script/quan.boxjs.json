@@ -132,22 +132,21 @@
             "id": "gaode_sign",
             "name": "高德打车签到",
             "keys": [
-                "gaode_checkin_data",
-                "gaode_session_id"
+                "gaode_checkin_data"
             ],
             "settings": [
                 {
-                    "id": "gaode_checkin_data",
+                    "id": "gaode_checkin_data.signUrl",
                     "name": "签到请求 URL",
                     "val": "",
                     "type": "text",
-                    "placeholder": "包含 xck、in 等参数的完整 URL",
+                    "placeholder": "用抓包工具获取的完整签到 URL",
                     "autoGrow": true,
                     "rows": 3,
-                    "desc": "从抓包获取"
+                    "desc": "包含 xck、in 等加密参数的完整 URL"
                 },
                 {
-                    "id": "gaode_session_id",
+                    "id": "gaode_checkin_data.sessionId",
                     "name": "Session ID",
                     "val": "",
                     "type": "text",
