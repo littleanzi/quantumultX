@@ -16,21 +16,17 @@
  * 1. 开启重写和 MITM
  * 2. 高德地图 APP → 打车 → 福利中心，自动捕获 Cookie
  * 3. 后续定时任务自动签到，无需手动抓包
- */
+   测试 Quantumult-X, loon, Shadowsrocket, Surge(超时写长点例如200), node, 其他自测
+   获取Cookie方法 ，QX开重写，进入【高德地图/微信/支付宝 小程序[高德打车]，打车，福利中心】，任意一端获取成功即可3端签到
+   ====================================
+   [rewrite_local]
+   ^https?:\/\/(m5(|-zb)|dache)\.amap\.com\/(ws\/yuece\/(act|openapi\/activity\/current)\/query|common\/(alipaymini|wxmini)\?_ENCRYPT=) url script-response-body https://raw.githubusercontent.com/wf021325/qx/master/task/ampDache.js
 
-/*
-测试 Quantumult-X, loon, Shadowsrocket, Surge(超时写长点例如200), node, 其他自测
-获取Cookie方法 ，QX开重写，进入【高德地图/微信/支付宝 小程序[高德打车]，打车，福利中心】，任意一端获取成功即可3端签到
-====================================
-[rewrite_local]
-^https?:\/\/(m5(|-zb)|dache)\.amap\.com\/(ws\/yuece\/(act|openapi\/activity\/current)\/query|common\/(alipaymini|wxmini)\?_ENCRYPT=) url script-response-body https://raw.githubusercontent.com/wf021325/qx/master/task/ampDache.js
+   [task_local]
+   1 0 * * * https://raw.githubusercontent.com/wf021325/qx/master/task/ampDache.js, tag=高德地图打车签到, enabled=true
 
-[task_local]
-1 0 * * * https://raw.githubusercontent.com/wf021325/qx/master/task/ampDache.js, tag=高德地图打车签到, enabled=true
-
-[mitm]
-hostname = *.amap.com
-====================================
+    [mitm]
+    hostname = *.amap.com
  */
 
 const $ = new Env("高德地图签到");
