@@ -3,12 +3,12 @@
   "description": "生成日期:2026-04-25",
   "raw": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/autoScript/anyTask.json",
   "task": [
-    "34 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx.js, tag=松鲜鲜, enabled=true",
-    "31 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克,    img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hxek.png,enabled=true",
-    "32 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js, tag=海信爱家, enabled=true",
-    "33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js, tag=良品铺子, enabled=true",
     "35 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车, enabled=true",
-    
+    "34 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx.js, tag=松鲜鲜, enabled=true",
+    "33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js, tag=良品铺子, enabled=true",
+    "32 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克,    img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hxek.png,enabled=true",
+    "31 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js, tag=海信爱家, img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png,enabled=true",
+   
     "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/historyToday.js, tag=历史上的今天, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/calendar.png,enabled=true",
     "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/oil_price.js, tag=今日油价, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/oil.png, enabled=true",
     "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/pdd_guoyuan.js, tag=拼多多果园, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/pinduoduo.png, enabled=true",
