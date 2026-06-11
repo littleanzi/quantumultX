@@ -3,30 +3,17 @@
  * 2026-06-11 版本: 2.0.0
  * 签名密钥 (RSA Public Key): MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC+8wDPpA9orgXJFrZZXjbETVpdaIlV26Auq46+V3olSimyQBpTfKEKKULcaA+cZ5oXUBZ7o1aDVj7IEadBKOH2eCDUydfJ9PABgLduW668s8jrbqQVM2vzMO6F2sW/23Wc4vas0Rez99OCWgqnEnIvmxQuM4lrKO0wcvX026ic2QIDAQAB
  * 算法: RSA公钥加密(TEA密钥) + TEA加密(请求体) + MD5签名
- * MITM 域名: m5.amap.com, m5-zb.amap.com
- * 重写规则 (Rewrite): ^https?:\/\/(m5(|-zb))\.amap\.com\/ws\/yuece\/(act|openapi\/activity\/current)\/query url script-response-body gaode.js
  * [rewrite_local]
- * ^https?:\/\/(m5(|-zb))\.amap\.com\/ws\/yuece\/(act|openapi\/activity\/current)\/query url script-response-body https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js
+ * ^https?:\/\/(m5(|-zb)|dache)\.amap\.com\/(ws\/yuece\/(act|openapi\/activity\/current)\/query|common\/(alipaymini|wxmini)\?_ENCRYPT=) url script-response-body https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js
  * [task_local]
  * 34 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车, enabled=true
  * [MITM]
  * hostname = *.amap.com
  *
  * 使用方式：
- * 1. 开启重写和 MITM
- * 2. 高德地图 APP → 打车 → 福利中心，自动捕获 Cookie
- * 3. 后续定时任务自动签到，无需手动抓包
-   测试 Quantumult-X, loon, Shadowsrocket, Surge(超时写长点例如200), node, 其他自测
-   获取Cookie方法 ，QX开重写，进入【高德地图/微信/支付宝 小程序[高德打车]，打车，福利中心】，任意一端获取成功即可3端签到
-   ====================================
-   [rewrite_local]
-   ^https?:\/\/(m5(|-zb)|dache)\.amap\.com\/(ws\/yuece\/(act|openapi\/activity\/current)\/query|common\/(alipaymini|wxmini)\?_ENCRYPT=) url script-response-body https://raw.githubusercontent.com/wf021325/qx/master/task/ampDache.js
-
-   [task_local]
-   1 0 * * * https://raw.githubusercontent.com/wf021325/qx/master/task/ampDache.js, tag=高德地图打车签到, enabled=true
-
-    [mitm]
-    hostname = *.amap.com
+ * 1. Quantumult X 开启重写和 MITM
+ * 2. 进入【高德地图 APP / 微信 / 支付宝 小程序】→ 打车 → 福利中心
+ * 3. 自动捕获 Cookie，定时任务自动签到（无需手动抓包）
  */
 
 const $ = new Env("高德地图签到");
