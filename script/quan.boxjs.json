@@ -136,24 +136,14 @@
             ],
             "settings": [
                 {
-                    "id": "gaode_checkin_data.signUrl",
-                    "name": "签到请求 URL",
+                    "id": "gaode_checkin_data",
+                    "name": "账号数据（自动捕获）",
                     "val": "",
                     "type": "text",
-                    "placeholder": "用抓包工具获取的完整签到 URL",
+                    "placeholder": "打开福利中心后自动捕获",
                     "autoGrow": true,
-                    "rows": 3,
-                    "desc": "包含 xck、in 等加密参数的完整 URL"
-                },
-                {
-                    "id": "gaode_checkin_data.sessionId",
-                    "name": "Session ID",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "从抓包 Cookie 中获取",
-                    "autoGrow": false,
-                    "rows": 1,
-                    "desc": "Cookie 中的 sessionid 值"
+                    "rows": 4,
+                    "desc": "包含 userId、adiu、sessionid，打开高德地图APP→打车→福利中心自动捕获"
                 }
             ],
             "author": "@any",
