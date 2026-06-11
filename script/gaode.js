@@ -82,6 +82,10 @@ async function rewriteCapture() {
       store.cookie = cookie
       store.sessionIdUpdatedAt = new Date().toISOString()
       save(store)
+      // 同步写入 BoxJS key
+      if (typeof $persistentStore !== 'undefined') {
+        $persistentStore.write(matchSid[1], 'gaode_session_id')
+      }
       console.log('[Gaode] 捕获到新 sessionid: ' + matchSid[1].substring(0, 20) + '...')
     }
   }
