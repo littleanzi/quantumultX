@@ -14,6 +14,7 @@
  */
 
 const ENV_KEY = 'gaode_checkin_data'
+const DEFAULT_SESSION_ID = 'wjhici6mpf5comywlz55id2e6clsbfgm'
 
 const isRequest = typeof $request !== 'undefined' && typeof $response === 'undefined'
 const isTask = typeof $request === 'undefined' && typeof $notification !== 'undefined'
@@ -27,6 +28,11 @@ function load() {
   if (!store.sessionId) {
     var sid = typeof $persistentStore !== 'undefined' ? $persistentStore.read('gaode_session_id') : ''
     if (sid) store.sessionId = sid
+  }
+
+  // 如果还没有 sessionId，用默认值
+  if (!store.sessionId && DEFAULT_SESSION_ID) {
+    store.sessionId = DEFAULT_SESSION_ID
   }
 
   console.log('[Gaode] store: signUrl=' + (store.signUrl ? '有' : '无') + ' sessionId=' + (store.sessionId || '无'))
