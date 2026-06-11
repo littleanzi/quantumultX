@@ -6,7 +6,7 @@
  * MITM 域名: m5.amap.com, m5-zb.amap.com
  * 重写规则 (Rewrite): ^https:\/\/m5(-zb)?\.amap\.com\/ws\/car-place\/activity\/daily_sign
  * [rewrite_local]
- * ^https:\/\/m5(-zb)?\.amap\.com\/ws\/car-place\/activity\/daily_sign url script-request-body gaode.js
+ * ^https:\/\/m5(-zb)?\.amap\.com\/ws\/ url script-request-body gaode.js
  * [task_local]
  * 35 7 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车签到, enabled=true
  * [MITM]
@@ -67,30 +67,35 @@ function request(opts) {
   })
 }
 
-// ====== Rewrite: 拦截签到请求 ======
+// ====== Rewrite: 拦截请求 ======
 async function rewriteCapture() {
   var store = load()
   var url = $request.url || ''
   var h = $request.headers || {}
 
-  console.log('[Gaode] === 捕获签到请求 ===')
-  console.log('[Gaode] URL: ' + url)
-
+  // 从任何请求中提取 sessionid
   var cookie = h['Cookie'] || h['cookie'] || ''
-  var sessionId = ''
   if (cookie) {
     var matchSid = cookie.match(/sessionid=([^;]+)/)
-    if (matchSid) sessionId = matchSid[1]
+    if (matchSid && matchSid[1] !== store.sessionId) {
+      store.sessionId = matchSid[1]
+      store.cookie = cookie
+      store.sessionIdUpdatedAt = new Date().toISOString()
+      save(store)
+      console.log('[Gaode] 捕获到新 sessionid: ' + matchSid[1].substring(0, 20) + '...')
+    }
   }
 
-  store.signUrl = url
-  store.cookie = cookie
-  store.sessionId = sessionId
-  store.capturedAt = new Date().toISOString()
-  store.timestamp = Date.now()
-
-  save(store)
-  notify('高德打车签到', '已捕获签到请求', 'sessionid=' + (sessionId ? '有' : '无'))
+  // 签到请求，保存完整参数
+  if (url.indexOf('daily_sign') > -1) {
+    console.log('[Gaode] 捕获签到请求')
+    store.signUrl = url
+    store.cookie = cookie
+    store.capturedAt = new Date().toISOString()
+    store.timestamp = Date.now()
+    save(store)
+    notify('高德打车签到', '已捕获签到请求', 'sessionid=' + (store.sessionId ? '有' : '无'))
+  }
 }
 
 // ====== Task: 定时签到 ======
