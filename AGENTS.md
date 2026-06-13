@@ -40,10 +40,8 @@
 ## 新脚本工作流程
 写完/改完脚本后，需同步更新本地quantumultX项目文件夹：
 1. `script/xxx.js` - 脚本代码
-2. `autoScript/anyTask.json` - 添加定时任务,只添加百分百正确的图标
-3. `quan.boxjs.json` - 添加 Boxjs 配置（只写必须项）,只添加百分百正确的图标
-4. `icon/apps/` - 添加应用图标（如有）
-
+2. `autoScript/anyTask.json` - 添加定时任务,不添加图标
+3. `quan.boxjs.json` - 添加 Boxjs 配置，不添加图标
 
 
 
