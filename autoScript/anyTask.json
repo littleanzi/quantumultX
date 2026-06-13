@@ -3,6 +3,7 @@
   "description": "生成日期:2026-04-25",
   "raw": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/autoScript/anyTask.json",
   "task": [
+    "36 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/naixue.js, tag=奈雪的茶, enabled=true",
     "35 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx.js, tag=松鲜鲜, enabled=true",
     "34 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车, enabled=true",
     "33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js, tag=良品铺子, enabled=true",

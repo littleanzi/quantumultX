@@ -38,7 +38,7 @@
 - 每次写 Quantumult X 签到脚本前，先查阅量子重写规则使用文档，了解 `$task.fetch`、`$persistentStore` 等 API 的正确用法
 
 ## 新脚本工作流程
-写完/改完脚本后，需同步更新：
+写完/改完脚本后，需同步更新本地quantumultX项目文件夹：
 1. `script/xxx.js` - 脚本代码
 2. `autoScript/anyTask.json` - 添加定时任务,只添加百分百正确的图标
 3. `quan.boxjs.json` - 添加 Boxjs 配置（只写必须项）,只添加百分百正确的图标
