@@ -1,6 +1,6 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.1
+* 2026-06-14 版本: 1.0.2
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/user/sign/save url script-request-body naixue.js
@@ -63,6 +63,19 @@ function buildRequestBody(signDate) {
 if (isRequest) {
     const body = JSON.parse($request.body);
     const signDate = body.params?.signDate || new Date().toISOString().slice(0, 10);
+    const openId = body.common?.openId;
+    const accessToken = $request.headers['Authorization'] || '';
+    
+    // 保存抓取到的数据
+    if (openId) {
+        $.setdata(openId, 'nayuki_openId');
+    }
+    if (accessToken) {
+        $.setdata(accessToken, 'nayuki_accessToken');
+    }
+    
+    // 显示抓取通知
+    $.notify('奈雪的茶', '✅ 抓取成功', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
     
     const requestBody = buildRequestBody(signDate);
     
@@ -95,6 +108,9 @@ function Env(name) {
     this.name = name;
     this.msg = (title, subtitle, message) => {
         console.log(`${title}\n${subtitle}\n${message}`);
+    };
+    this.notify = (title, subtitle, message) => {
+        $notify(title, subtitle, message);
     };
     this.getdata = (key) => {
         return $.persistentStore.get(key);
