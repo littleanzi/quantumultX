@@ -63,34 +63,18 @@ function buildRequestBody(signDate) {
 // ====== 签到逻辑 ======
 if (isRequest) {
     const url = $request.url;
-    const body = JSON.parse($request.body);
+    let body;
+    try {
+        body = JSON.parse($request.body);
+    } catch (e) {
+        body = {};
+    }
     
     // 拦截登录接口，获取openId和accessToken
     if (url.includes('/passport/authenticate/wxapp/verify/grc')) {
-        // 登录接口，转发请求并保存响应中的数据
-        $task.fetch({
-            url: url,
-            method: 'POST',
-            headers: $request.headers,
-            body: $request.body
-        }).then(response => {
-            try {
-                const result = JSON.parse(response.body);
-                if (result.code === 0 && result.data) {
-                    const { accessToken, openId, unionId } = result.data;
-                    if (openId) $.setdata(openId, 'nayuki_openId');
-                    if (accessToken) $.setdata(accessToken, 'nayuki_accessToken');
-                    if (unionId) $.setdata(unionId, 'nayuki_unionId');
-                    $.notify('奈雪的茶', '✅ 登录成功', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
-                }
-            } catch (e) {
-                $.log(`登录响应解析失败: ${e.message}`);
-            }
-            $.done({ response });
-        }).catch(err => {
-            $.notify('奈雪的茶', '❌ 登录请求失败', err);
-            $.done({});
-        });
+        // 登录接口，直接放行，不转发
+        $.notify('奈雪的茶', '🔍 检测到登录请求', '正在获取用户信息...');
+        $.done({});
     }
     // 拦截签到接口
     else if (url.includes('/user/sign/save')) {
@@ -116,11 +100,15 @@ if (isRequest) {
             },
             body: JSON.stringify(requestBody)
         }).then(response => {
-            const result = JSON.parse(response.body);
-            if (result.code === 0) {
-                $.msg($.name, '✅ 签到成功', `日期: ${signDate}`);
-            } else {
-                $.msg($.name, '❌ 签到失败', result.message || '未知错误');
+            try {
+                const result = JSON.parse(response.body);
+                if (result.code === 0) {
+                    $.msg($.name, '✅ 签到成功', `日期: ${signDate}`);
+                } else {
+                    $.msg($.name, '❌ 签到失败', result.message || '未知错误');
+                }
+            } catch (e) {
+                $.msg($.name, '❌ 签到失败', '响应解析失败');
             }
             $.done({ response });
         }).catch(err => {
