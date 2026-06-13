@@ -1,13 +1,12 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.8
+* 2026-06-14 版本: 1.0.9
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
-* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/user/(base-userinfo|sign/save) url script-request-body naixue.js
+* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/passport/authenticate/wxapp/verify/grc url script-response-body naixue.js
 * 算法: HmacSHA1签名
 * [rewrite_local]
-* https://tm-api.pin-dao.cn/user/base-userinfo url script-request-body naixue.js
-* https://tm-api.pin-dao.cn/user/sign/save url script-request-body naixue.js
+* https://tm-api.pin-dao.cn/passport/authenticate/wxapp/verify/grc url script-response-body naixue.js
 * [task_local]
 * 0 9 * * * naixue.js
 * [MITM]
@@ -15,7 +14,7 @@
 */
 
 const $ = new Env('奈雪的茶签到');
-const isRequest = typeof $request !== "undefined";
+const isResponse = typeof $response !== "undefined";
 
 // ====== 配置项 ======
 const CONFIG = {
@@ -61,25 +60,17 @@ function buildRequestBody(signDate) {
 }
 
 // ====== 签到逻辑 ======
-if (isRequest) {
-    const url = $request.url;
-    let body;
+if (isResponse) {
+    // 拦截登录响应：从响应中抓取数据
     try {
-        body = JSON.parse($request.body);
-    } catch (e) {
-        body = {};
-    }
-    
-    // 拦截任意API请求：只抓取数据，原样放行
-    const openId = body.common?.openId;
-    const accessToken = $request.headers['Authorization'] || '';
-    
-    if (openId && accessToken) {
-        $.setdata(openId, 'nayuki_openId');
-        $.setdata(accessToken, 'nayuki_accessToken');
-        $.notify('奈雪的茶', '✅ 数据已抓取', `openId: 已获取\naccessToken: 已获取`);
-    }
-    
+        const result = JSON.parse($response.body);
+        if (result.code === 0 && result.data) {
+            const { accessToken, openId } = result.data;
+            if (openId) $.setdata(openId, 'nayuki_openId');
+            if (accessToken) $.setdata(accessToken, 'nayuki_accessToken');
+            $.notify('奈雪的茶', '✅ 登录数据已抓取', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
+        }
+    } catch (e) {}
     $.done({});
 } else {
     // 定时任务：自动签到
