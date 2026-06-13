@@ -1,6 +1,6 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.4
+* 2026-06-14 版本: 1.0.5
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/user/sign/save url script-request-body naixue.js
@@ -69,50 +69,60 @@ if (isRequest) {
         body = {};
     }
     
-    // 拦截签到接口
+    // 拦截签到接口：只抓取数据，原样放行
     if (url.includes('/user/sign/save')) {
-        const signDate = body.params?.signDate || new Date().toISOString().slice(0, 10);
         const openId = body.common?.openId;
         const accessToken = $request.headers['Authorization'] || '';
         
-        // 保存抓取到的数据
         if (openId) $.setdata(openId, 'nayuki_openId');
         if (accessToken) $.setdata(accessToken, 'nayuki_accessToken');
         
-        // 显示抓取通知
-        $.notify('奈雪的茶', '✅ 抓取成功', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
+        $.notify('奈雪的茶', '✅ 数据已抓取', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
         
-        const requestBody = buildRequestBody(signDate);
-        
-        $task.fetch({
-            url: CONFIG.baseUrl + CONFIG.signUrl,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': $request.headers['Authorization'] || ''
-            },
-            body: JSON.stringify(requestBody)
-        }).then(response => {
-            try {
-                const result = JSON.parse(response.body);
-                if (result.code === 0) {
-                    $.msg($.name, '✅ 签到成功', `日期: ${signDate}`);
-                } else {
-                    $.msg($.name, '❌ 签到失败', result.message || '未知错误');
-                }
-            } catch (e) {
-                $.msg($.name, '❌ 签到失败', '响应解析失败');
-            }
-            $.done({ response });
-        }).catch(err => {
-            $.msg($.name, '❌ 请求失败', err);
-            $.done({});
-        });
+        // 原样放行，不修改请求
+        $.done({});
     } else {
         $.done({});
     }
 } else {
-    $.done({});
+    // 定时任务：自动签到
+    const openId = $.getdata('nayuki_openId');
+    const accessToken = $.getdata('nayuki_accessToken');
+    
+    if (!openId || !accessToken) {
+        $.notify('奈雪的茶', '❌ 签到失败', '请先打开小程序触发签到以抓取数据');
+        $.done({});
+        return;
+    }
+    
+    const now = new Date();
+    const signDate = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+    const requestBody = buildRequestBody(signDate);
+    
+    $task.fetch({
+        url: CONFIG.baseUrl + CONFIG.signUrl,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': accessToken
+        },
+        body: JSON.stringify(requestBody)
+    }).then(response => {
+        try {
+            const result = JSON.parse(response.body);
+            if (result.code === 0) {
+                $.msg($.name, '✅ 签到成功', `日期: ${signDate}`);
+            } else {
+                $.msg($.name, '❌ 签到失败', result.message || '未知错误');
+            }
+        } catch (e) {
+            $.msg($.name, '❌ 签到失败', '响应解析失败');
+        }
+        $.done({});
+    }).catch(err => {
+        $.msg($.name, '❌ 请求失败', err);
+        $.done({});
+    });
 }
 
 // ====== Environment Class ======
