@@ -1,12 +1,11 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.3
+* 2026-06-14 版本: 1.0.4
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
-* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/(passport/authenticate/wxapp/verify/grc|user/sign/save) url script-request-body naixue.js
+* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/user/sign/save url script-request-body naixue.js
 * 算法: HmacSHA1签名
 * [rewrite_local]
-* https://tm-api.pin-dao.cn/passport/authenticate/wxapp/verify/grc url script-request-body naixue.js
 * https://tm-api.pin-dao.cn/user/sign/save url script-request-body naixue.js
 * [task_local]
 * 0 9 * * * naixue.js
@@ -70,14 +69,8 @@ if (isRequest) {
         body = {};
     }
     
-    // 拦截登录接口，获取openId和accessToken
-    if (url.includes('/passport/authenticate/wxapp/verify/grc')) {
-        // 登录接口，直接放行，不转发
-        $.notify('奈雪的茶', '🔍 检测到登录请求', '正在获取用户信息...');
-        $.done({});
-    }
     // 拦截签到接口
-    else if (url.includes('/user/sign/save')) {
+    if (url.includes('/user/sign/save')) {
         const signDate = body.params?.signDate || new Date().toISOString().slice(0, 10);
         const openId = body.common?.openId;
         const accessToken = $request.headers['Authorization'] || '';
@@ -115,6 +108,8 @@ if (isRequest) {
             $.msg($.name, '❌ 请求失败', err);
             $.done({});
         });
+    } else {
+        $.done({});
     }
 } else {
     $.done({});
