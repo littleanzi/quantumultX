@@ -1,12 +1,13 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.7
+* 2026-06-14 版本: 1.0.8
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
-* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn url script-request-body naixue.js
+* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/user/(base-userinfo|sign/save) url script-request-body naixue.js
 * 算法: HmacSHA1签名
 * [rewrite_local]
-* https://tm-api.pin-dao.cn url script-request-body naixue.js
+* https://tm-api.pin-dao.cn/user/base-userinfo url script-request-body naixue.js
+* https://tm-api.pin-dao.cn/user/sign/save url script-request-body naixue.js
 * [task_local]
 * 0 9 * * * naixue.js
 * [MITM]
