@@ -1,6 +1,6 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.9
+* 2026-06-14 版本: 1.1.0
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/passport/authenticate/wxapp/verify/grc url script-response-body naixue.js
@@ -26,7 +26,7 @@ const CONFIG = {
 // ====== 签名算法 ======
 function generateSignature(nonce, openId, timestamp) {
     const data = `nonce=${nonce}&openId=${openId}&timestamp=${timestamp}`;
-    return $.HmacSHA1(data, CONFIG.signKey).toString($.enc.Base64);
+    return $crypto.HmacSHA1(data, CONFIG.signKey);
 }
 
 // ====== 请求体构建 ======
@@ -130,12 +130,5 @@ function Env(name) {
     };
     this.done = () => {
         $done({});
-    };
-    this.HmacSHA1 = (message, key) => {
-        const CryptoJS = require('crypto');
-        return CryptoJS.createHmac('sha1', key).update(message);
-    };
-    this.enc = {
-        Base64: 'base64'
     };
 }
