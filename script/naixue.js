@@ -44,7 +44,7 @@ function SHA1(text) {
     }
     text = unescape(encodeURIComponent(text));
     var S = text.length, O = [], V, X, H = 0x67452301, L1 = 0xEFCDAB89, J = 0x98BADCFE, x = 0x10325476, C = 0xC3D2E1F0;
-    var A, B = S * 8;
+    var A = 0, B = S * 8;
     while (A % 56 != 56) { O[A] = 0; A++; }
     O[A >> 2] |= 0x80 << (A * 8) % 32;
     O[(A + 8 >> 2) - 1] = B;
