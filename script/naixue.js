@@ -1,6 +1,6 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.5
+* 2026-06-14 版本: 1.0.6
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/user/sign/save url script-request-body naixue.js
@@ -135,13 +135,13 @@ function Env(name) {
         $notify(title, subtitle, message);
     };
     this.getdata = (key) => {
-        return $.persistentStore.get(key);
+        return $prefs.valueForKey(key);
     };
     this.setdata = (val, key) => {
-        $.persistentStore.set(val, key);
+        $prefs.setValueForKey(val, key);
     };
     this.done = () => {
-        $.done();
+        $done({});
     };
     this.HmacSHA1 = (message, key) => {
         const CryptoJS = require('crypto');
