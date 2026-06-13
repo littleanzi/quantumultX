@@ -155,7 +155,7 @@
         },
         {
             "id": "naixue_sign",
-            "name": "奈雪的茶签到",
+            "name": "奈雪点单签到",
             "keys": [
                 "nayuki_openId"
             ],
