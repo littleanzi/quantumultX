@@ -1,11 +1,12 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.2
+* 2026-06-14 版本: 1.0.3
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
-* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/user/sign/save url script-request-body naixue.js
+* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/(passport/authenticate/wxapp/verify/grc|user/sign/save) url script-request-body naixue.js
 * 算法: HmacSHA1签名
 * [rewrite_local]
+* https://tm-api.pin-dao.cn/passport/authenticate/wxapp/verify/grc url script-request-body naixue.js
 * https://tm-api.pin-dao.cn/user/sign/save url script-request-body naixue.js
 * [task_local]
 * 0 9 * * * naixue.js
@@ -61,44 +62,72 @@ function buildRequestBody(signDate) {
 
 // ====== 签到逻辑 ======
 if (isRequest) {
+    const url = $request.url;
     const body = JSON.parse($request.body);
-    const signDate = body.params?.signDate || new Date().toISOString().slice(0, 10);
-    const openId = body.common?.openId;
-    const accessToken = $request.headers['Authorization'] || '';
     
-    // 保存抓取到的数据
-    if (openId) {
-        $.setdata(openId, 'nayuki_openId');
+    // 拦截登录接口，获取openId和accessToken
+    if (url.includes('/passport/authenticate/wxapp/verify/grc')) {
+        // 登录接口，转发请求并保存响应中的数据
+        $task.fetch({
+            url: url,
+            method: 'POST',
+            headers: $request.headers,
+            body: $request.body
+        }).then(response => {
+            try {
+                const result = JSON.parse(response.body);
+                if (result.code === 0 && result.data) {
+                    const { accessToken, openId, unionId } = result.data;
+                    if (openId) $.setdata(openId, 'nayuki_openId');
+                    if (accessToken) $.setdata(accessToken, 'nayuki_accessToken');
+                    if (unionId) $.setdata(unionId, 'nayuki_unionId');
+                    $.notify('奈雪的茶', '✅ 登录成功', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
+                }
+            } catch (e) {
+                $.log(`登录响应解析失败: ${e.message}`);
+            }
+            $.done({ response });
+        }).catch(err => {
+            $.notify('奈雪的茶', '❌ 登录请求失败', err);
+            $.done({});
+        });
     }
-    if (accessToken) {
-        $.setdata(accessToken, 'nayuki_accessToken');
+    // 拦截签到接口
+    else if (url.includes('/user/sign/save')) {
+        const signDate = body.params?.signDate || new Date().toISOString().slice(0, 10);
+        const openId = body.common?.openId;
+        const accessToken = $request.headers['Authorization'] || '';
+        
+        // 保存抓取到的数据
+        if (openId) $.setdata(openId, 'nayuki_openId');
+        if (accessToken) $.setdata(accessToken, 'nayuki_accessToken');
+        
+        // 显示抓取通知
+        $.notify('奈雪的茶', '✅ 抓取成功', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
+        
+        const requestBody = buildRequestBody(signDate);
+        
+        $task.fetch({
+            url: CONFIG.baseUrl + CONFIG.signUrl,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': $request.headers['Authorization'] || ''
+            },
+            body: JSON.stringify(requestBody)
+        }).then(response => {
+            const result = JSON.parse(response.body);
+            if (result.code === 0) {
+                $.msg($.name, '✅ 签到成功', `日期: ${signDate}`);
+            } else {
+                $.msg($.name, '❌ 签到失败', result.message || '未知错误');
+            }
+            $.done({ response });
+        }).catch(err => {
+            $.msg($.name, '❌ 请求失败', err);
+            $.done({});
+        });
     }
-    
-    // 显示抓取通知
-    $.notify('奈雪的茶', '✅ 抓取成功', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
-    
-    const requestBody = buildRequestBody(signDate);
-    
-    $task.fetch({
-        url: CONFIG.baseUrl + CONFIG.signUrl,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': $request.headers['Authorization'] || ''
-        },
-        body: JSON.stringify(requestBody)
-    }).then(response => {
-        const result = JSON.parse(response.body);
-        if (result.code === 0) {
-            $.msg($.name, '✅ 签到成功', `日期: ${signDate}`);
-        } else {
-            $.msg($.name, '❌ 签到失败', result.message || '未知错误');
-        }
-        $.done({ response });
-    }).catch(err => {
-        $.msg($.name, '❌ 请求失败', err);
-        $.done({});
-    });
 } else {
     $.done({});
 }
