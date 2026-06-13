@@ -1,12 +1,12 @@
 /**
 * 奈雪的茶·签到脚本
-* 2026-06-14 版本: 1.0.6
+* 2026-06-14 版本: 1.0.7
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
-* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/user/sign/save url script-request-body naixue.js
+* 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn url script-request-body naixue.js
 * 算法: HmacSHA1签名
 * [rewrite_local]
-* https://tm-api.pin-dao.cn/user/sign/save url script-request-body naixue.js
+* https://tm-api.pin-dao.cn url script-request-body naixue.js
 * [task_local]
 * 0 9 * * * naixue.js
 * [MITM]
@@ -69,21 +69,17 @@ if (isRequest) {
         body = {};
     }
     
-    // 拦截签到接口：只抓取数据，原样放行
-    if (url.includes('/user/sign/save')) {
-        const openId = body.common?.openId;
-        const accessToken = $request.headers['Authorization'] || '';
-        
-        if (openId) $.setdata(openId, 'nayuki_openId');
-        if (accessToken) $.setdata(accessToken, 'nayuki_accessToken');
-        
-        $.notify('奈雪的茶', '✅ 数据已抓取', `openId: ${openId ? '已获取' : '未获取'}\naccessToken: ${accessToken ? '已获取' : '未获取'}`);
-        
-        // 原样放行，不修改请求
-        $.done({});
-    } else {
-        $.done({});
+    // 拦截任意API请求：只抓取数据，原样放行
+    const openId = body.common?.openId;
+    const accessToken = $request.headers['Authorization'] || '';
+    
+    if (openId && accessToken) {
+        $.setdata(openId, 'nayuki_openId');
+        $.setdata(accessToken, 'nayuki_accessToken');
+        $.notify('奈雪的茶', '✅ 数据已抓取', `openId: 已获取\naccessToken: 已获取`);
     }
+    
+    $.done({});
 } else {
     // 定时任务：自动签到
     const openId = $.getdata('nayuki_openId');
