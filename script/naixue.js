@@ -63,7 +63,7 @@ function sha1(msg) {
 }
 
 // ====== HmacSHA1 实现 ======
-function hmac_sha1(msg, key) {
+function HmacSHA1(msg, key) {
     function sha1(msg) {
         function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)); }
         function AddUnsigned(lX, lY) {
