@@ -1,6 +1,6 @@
 /**
 * 奈雪点单·签到脚本
-* 2026-06-14 版本: 1.1.0
+* 2026-06-14 版本: 1.1.9
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/passport/authenticate/wxapp/verify/grc url script-response-body naixue.js
@@ -114,21 +114,6 @@ function generateSignature(nonce, openId, timestamp) {
     return hex2b64(sign);
 }
 
-// ====== 请求体构建 ======
-function buildRequestBody(signDate) {
-    var nonce = Math.floor(Math.random() * 1000000);
-    var openId = CONFIG.signOpenId;
-    var timestamp = Math.floor(Date.now() / 1000);
-    return {
-        common: {
-            platform: "wxapp", version: "1.0.0", imei: "", osn: "iPhone", sv: "iOS 15.0",
-            lat: "", lng: "", lang: "zh-CN", currency: "CNY", timeZone: "",
-            nonce: nonce, openId: openId, timestamp: timestamp, signature: generateSignature(nonce, openId, timestamp)
-        },
-        params: { signDate: signDate }
-    };
-}
-
 // ====== 签到逻辑 ======
 if (isResponse) {
     try {
@@ -136,14 +121,12 @@ if (isResponse) {
         if (result.code === 0 && result.data) {
             if (result.data.openId) $.setdata(result.data.openId, 'nayuki_openId');
             if (result.data.accessToken) $.setdata(result.data.accessToken, 'nayuki_accessToken');
-            $.notify('奈雪点单', '✅ 登录数据已抓取', 'openId: 已获取\naccessToken: 已获取');
         }
     } catch (e) {}
     $.done({});
 } else {
-    var openId = $.getdata('nayuki_openId');
     var accessToken = $.getdata('nayuki_accessToken');
-    if (!openId || !accessToken) {
+    if (!accessToken) {
         $.notify('奈雪点单', '❌ 签到失败', '请先打开小程序触发签到以抓取数据');
         $.done({}); return;
     }
@@ -151,7 +134,6 @@ if (isResponse) {
     var signDate = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
     var reqNonce = Math.floor(Math.random() * 1000000);
     var reqTimestamp = Math.floor(Date.now() / 1000);
-    var reqOpenId = $.getdata('nayuki_openId');
     var reqBody = {
         common: {
             platform: "wxapp", version: "6.0.47", imei: "", osn: "iPhone", sv: "iOS 26.3",
@@ -166,9 +148,6 @@ if (isResponse) {
             signDate: signDate
         }
     };
-    console.log('signData=nonce=' + reqNonce + '&openId=' + reqOpenId + '&timestamp=' + reqTimestamp);
-    console.log('signature=' + reqBody.common.signature);
-    console.log('accessToken=' + accessToken);
     $task.fetch({
         url: CONFIG.baseUrl + CONFIG.signUrl, method: 'POST',
         headers: {

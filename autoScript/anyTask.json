@@ -1,20 +1,10 @@
-{
-  "name": "any_myself",
-  "description": "生成日期:2026-04-25",
-  "raw": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/autoScript/anyTask.json",
-  "task": [
-    "36 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/naixue.js, tag=奈雪点单, enabled=true",
-    "35 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx.js, tag=松鲜鲜, enabled=true",
-    "34 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车, enabled=true",
-    "33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js, tag=良品铺子, enabled=true",
-    "32 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克, enabled=true",
-    "31 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js, tag=海信爱家, img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png,enabled=true",
-   
-    "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/historyToday.js, tag=历史上的今天, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/calendar.png,enabled=true",
-    "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/oil_price.js, tag=今日油价, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/oil.png, enabled=true",
-    "0 7,11,17 * * * https://gist.githubusercontent.com/Sliverkiss/33800a98dcd029ba09f8b6fc6f0f5162/raw/aliyun.js, tag=阿里云盘签到, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/AliYunDrive.png, enabled=true",
-    "17 7 * * * https://raw.githubusercontent.com/FoKit/Scripts/main/scripts/jhsh_checkIn.js, tag=建行生活签到, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/ccbLife.jpg, enabled=true",
-    "30 8 * * * https://raw.githubusercontent.com/Yuheng0101/X/main/Tasks/60s.js, tag=每天60s读懂世界, img-url=https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/friDay.png, enabled=true",
-    "2 8 * * * https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/freeAppsToday.js, tag=今日限免APP, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/chxm1023/AppStore.png, enabled=true"
-    ] 
-}
+[
+  {
+    "name": "奈雪的茶签到",
+    "script": "naixue.js",
+    "icon": "nayuki.png",
+    "cron": "0 9 * * *",
+    "desc": "每日自动签到",
+    "type": "定时任务"
+  }
+]
