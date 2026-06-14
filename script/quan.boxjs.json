@@ -157,7 +157,8 @@
             "id": "naixue_sign",
             "name": "奈雪点单签到",
             "keys": [
-                "nayuki_openId"
+                "nayuki_openId",
+                "nayuki_accessToken"
             ],
             "settings": [
                 {
@@ -168,7 +169,17 @@
                     "placeholder": "从MITM拦截获取",
                     "autoGrow": false,
                     "rows": 1,
-                    "desc": "打开小程序签到页面，抓包获取openId"
+                    "desc": "打开小程序自动捕获"
+                },
+                {
+                    "id": "nayuki_accessToken",
+                    "name": "授权Token",
+                    "val": "",
+                    "type": "text",
+                    "placeholder": "从MITM拦截获取",
+                    "autoGrow": false,
+                    "rows": 1,
+                    "desc": "打开小程序自动捕获"
                 }
             ],
             "author": "@any",

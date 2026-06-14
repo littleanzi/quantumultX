@@ -1,6 +1,6 @@
 /**
 * 奈雪点单·签到脚本
-* 2026-06-14 版本: 1.1.7
+* 2026-06-14 版本: 1.1.8
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/passport/authenticate/wxapp/verify/grc url script-response-body naixue.js
@@ -20,50 +20,72 @@ var isResponse = typeof $response !== "undefined";
 var CONFIG = {
     baseUrl: 'https://tm-api.pin-dao.cn',
     signUrl: '/user/sign/save',
-    signKey: 'sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA'
+    signKey: 'sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA',
+    signOpenId: 'QL6ZOftGzbziPlZwfiXM'
 };
 
-// ====== SHA1 ======
-function SHA1(str) {
-    var RotateLeft = function(n, s) { return (n << s) | (n >>> (32 - s)); };
-    var Hex = function(n) { var s = "", v; for (var i = 7; i >= 0; i--) { v = (n >>> (i * 4)) & 0x0F; s += v.toString(16); } return s; };
-    str = unescape(encodeURIComponent(str));
-    var n = str.length, W = [], H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
-    var a = [];
-    for (var i = 0; i < n; i++) a[i >> 2] |= str.charCodeAt(i) << (8 * (3 - (i % 4)));
-    a[i >> 2] |= 0x80 << (8 * (3 - (i % 4)));
-    if (i > 55) { a.push(0); a[i >> 2] |= n << 3; } else { a[(n >> 2) + 1] = n << 3; }
-    for (var j = 0; j < a.length; j += 16) {
-        for (var i = 0; i < 16; i++) W[i] = a[j + i] || 0;
-        for (var i = 16; i < 80; i++) W[i] = RotateLeft(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);
+// ====== SHA1 (operates on byte array) ======
+function SHA1_bytes(bytes) {
+    function rol(n, s) { return (n << s) | (n >>> (32 - s)); }
+    var blen = bytes.length, words = [], H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
+    for (var i = 0; i < blen; i++) words[i >> 2] |= (bytes[i] & 0xFF) << (24 - (i % 4) * 8);
+    words[i >> 2] |= 0x80 << (24 - (i % 4) * 8);
+    var wlen = (((blen + 8) >> 6) + 1) * 16;
+    for (var i = words.length; i < wlen; i++) words[i] = 0;
+    var bitLen = blen * 8;
+    words[wlen - 2] = Math.floor(bitLen / 0x100000000) || 0;
+    words[wlen - 1] = (bitLen >>> 0);
+    for (var block = 0; block < wlen; block += 16) {
+        var W = [];
+        for (var i = 0; i < 16; i++) W[i] = words[block + i];
+        for (var i = 16; i < 80; i++) W[i] = rol(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);
         var A = H[0], B = H[1], C = H[2], D = H[3], E = H[4];
         for (var i = 0; i < 80; i++) {
-            var f, K;
-            if (i < 20) { f = (B & C) | ((~B) & D); K = 0x5A827999; }
-            else if (i < 40) { f = B ^ C ^ D; K = 0x6ED9EBA1; }
-            else if (i < 60) { f = (B & C) | (B & D) | (C & D); K = 0x8F1BBCDC; }
-            else { f = B ^ C ^ D; K = 0xCA62C1D6; }
-            var T = (RotateLeft(A, 5) + f + E + K + W[i]) | 0;
-            E = D; D = C; C = RotateLeft(B, 30); B = A; A = T;
+            var f, k;
+            if (i < 20) { f = (B & C) | ((~B) & D); k = 0x5A827999; }
+            else if (i < 40) { f = B ^ C ^ D; k = 0x6ED9EBA1; }
+            else if (i < 60) { f = (B & C) | (B & D) | (C & D); k = 0x8F1BBCDC; }
+            else { f = B ^ C ^ D; k = 0xCA62C1D6; }
+            var tmp = (rol(A, 5) + f + E + k + W[i]) | 0;
+            E = D; D = C; C = rol(B, 30); B = A; A = tmp;
         }
         H[0] = (H[0] + A) | 0; H[1] = (H[1] + B) | 0; H[2] = (H[2] + C) | 0; H[3] = (H[3] + D) | 0; H[4] = (H[4] + E) | 0;
     }
+    function Hex(n) { var s = ""; for (var i = 7; i >= 0; i--) { var v = (n >>> (i * 4)) & 0x0F; s += v.toString(16); } return s; }
     return Hex(H[0]) + Hex(H[1]) + Hex(H[2]) + Hex(H[3]) + Hex(H[4]);
+}
+
+// ====== string to byte array ======
+function strToBytes(s) {
+    var bytes = [];
+    for (var i = 0; i < s.length; i++) bytes.push(s.charCodeAt(i) & 0xFF);
+    return bytes;
+}
+
+// ====== hex string to byte array ======
+function hexToBytes(hex) {
+    var bytes = [];
+    for (var i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16));
+    return bytes;
 }
 
 // ====== HMAC-SHA1 ======
 function HmacSHA1(text, key) {
-    if (key.length > 64) key = SHA1(key);
-    var bKey = [], bText = [], bResult = [];
-    for (var i = 0; i < 64; i++) bKey[i] = i < key.length ? key.charCodeAt(i) : 0;
-    for (var i = 0; i < text.length; i++) bText[i] = text.charCodeAt(i);
+    var keyBytes = strToBytes(key);
+    if (keyBytes.length > 64) {
+        var hashed = SHA1_bytes(keyBytes);
+        keyBytes = hexToBytes(hashed);
+    }
+    var paddedKey = [];
+    for (var i = 0; i < 64; i++) paddedKey[i] = i < keyBytes.length ? keyBytes[i] : 0;
     var ipad = [], opad = [];
-    for (var i = 0; i < 64; i++) { ipad[i] = bKey[i] ^ 0x36; opad[i] = bKey[i] ^ 0x5C; }
-    var inner = SHA1(String.fromCharCode.apply(null, ipad) + text);
-    var innerBytes = [];
-    for (var i = 0; i < inner.length; i += 2) innerBytes.push(parseInt(inner.substr(i, 2), 16));
-    var outer = SHA1(String.fromCharCode.apply(null, opad) + String.fromCharCode.apply(null, innerBytes));
-    return outer;
+    for (var i = 0; i < 64; i++) { ipad[i] = paddedKey[i] ^ 0x36; opad[i] = paddedKey[i] ^ 0x5C; }
+    var textBytes = strToBytes(text);
+    var innerInput = ipad.concat(textBytes);
+    var innerHex = SHA1_bytes(innerInput);
+    var innerBytes = hexToBytes(innerHex);
+    var outerInput = opad.concat(innerBytes);
+    return SHA1_bytes(outerInput);
 }
 
 // ====== Hex to Base64 ======
@@ -95,7 +117,7 @@ function generateSignature(nonce, openId, timestamp) {
 // ====== 请求体构建 ======
 function buildRequestBody(signDate) {
     var nonce = Math.floor(Math.random() * 1000000);
-    var openId = $.getdata('nayuki_openId');
+    var openId = CONFIG.signOpenId;
     var timestamp = Math.floor(Date.now() / 1000);
     return {
         common: {
