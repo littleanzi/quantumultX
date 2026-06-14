@@ -160,10 +160,10 @@ if (isResponse) {
     }).then(function(response) {
         try {
             var result = JSON.parse(response.body);
-            $.msg($.name, result.code === 0 ? '✅ 签到成功' : '❌ 签到失败', result.code === 0 ? ('日期: ' + signDate) : (result.message || '未知错误'));
-        } catch (e) { $.msg($.name, '❌ 签到失败', '响应解析失败'); }
+            $.notify($.name, result.code === 0 ? '✅ 签到成功' : '❌ 签到失败', result.code === 0 ? ('日期: ' + signDate) : (result.message || '未知错误'));
+        } catch (e) { $.notify($.name, '❌ 签到失败', '响应解析失败'); }
         $.done({});
-    }).catch(function(err) { $.msg($.name, '❌ 请求失败', err); $.done({}); });
+    }).catch(function(err) { $.notify($.name, '❌ 请求失败', err); $.done({}); });
 }
 
 // ====== Environment Class ======
