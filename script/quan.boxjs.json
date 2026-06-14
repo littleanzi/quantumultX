@@ -7,7 +7,7 @@
     "apps": [
         {
             "id": "liangppz_sign",
-            "name": "良品铺子签到",
+            "name": "良品铺子",
             "keys": [
                 "liangppz_sign_data"
             ],
@@ -42,7 +42,7 @@
         },
         {
             "id": "erke_sign",
-            "name": "鸿星尔克签到",
+            "name": "鸿星尔克",
             "keys": [
                 "erke_data"
             ],
@@ -68,7 +68,7 @@
         },
         {
             "id": "hisense_sign",
-            "name": "海信爱家签到",
+            "name": "海信爱家",
             "keys": [
                 "hisense_data",
                 "hisense_sign_key"
@@ -105,7 +105,7 @@
         },
         {
             "id": "songxx_sign",
-            "name": "松鲜鲜签到",
+            "name": "松鲜鲜",
             "keys": [
                 "songxx_sign_data"
             ],
@@ -131,7 +131,7 @@
         },
         {
             "id": "gaode_sign",
-            "name": "高德打车签到",
+            "name": "高德打车",
             "keys": [
                 "gaode_checkin_data"
             ],
@@ -156,7 +156,7 @@
         },
         {
             "id": "naixue_sign",
-            "name": "奈雪点单签到",
+            "name": "奈雪点单",
             "keys": [
                 "nayuki_openId",
                 "nayuki_accessToken"
