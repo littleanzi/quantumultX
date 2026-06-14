@@ -1,6 +1,6 @@
 /**
 * 奈雪点单·签到脚本
-* 2026-06-14 版本: 1.1.8
+* 2026-06-14 版本: 1.1.0
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/passport/authenticate/wxapp/verify/grc url script-response-body naixue.js
