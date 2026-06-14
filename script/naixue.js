@@ -149,10 +149,25 @@ if (isResponse) {
     }
     var now = new Date();
     var signDate = now.getFullYear() + "-" + (now.getMonth() + 1) + "-" + now.getDate();
+    var reqNonce = Math.floor(Math.random() * 1000000);
+    var reqTimestamp = Math.floor(Date.now() / 1000);
+    var reqBody = {
+        common: {
+            platform: "wxapp", version: "1.0.0", imei: "", osn: "iPhone", sv: "iOS 15.0",
+            lat: "", lng: "", lang: "zh-CN", currency: "CNY", timeZone: "",
+            nonce: reqNonce, openId: CONFIG.signOpenId, timestamp: reqTimestamp,
+            signature: generateSignature(reqNonce, CONFIG.signOpenId, reqTimestamp)
+        },
+        params: { signDate: signDate }
+    };
+    console.log('signData=nonce=' + reqNonce + '&openId=' + CONFIG.signOpenId + '&timestamp=' + reqTimestamp);
+    console.log('signature=' + reqBody.common.signature);
+    console.log('accessToken=' + accessToken);
+    console.log('openId(stored)=' + $.getdata('nayuki_openId'));
     $task.fetch({
         url: CONFIG.baseUrl + CONFIG.signUrl, method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': accessToken },
-        body: JSON.stringify(buildRequestBody(signDate))
+        body: JSON.stringify(reqBody)
     }).then(function(response) {
         try {
             var result = JSON.parse(response.body);
