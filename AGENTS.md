@@ -4,6 +4,7 @@
 ## Quantumult X 脚本开发
 - 每次写 Quantumult X 签到脚本前，先查阅量子重写规则使用文档，了解 `$task.fetch`、`$persistentStore` 等 API 的正确用法
 - Quantumult X没有内置加密函数，需要纯JS实现
+— 使用与erke.js相同的可靠SHA1实现
 
 ## 新脚本工作流程
 写完/改完脚本后，需同步更新本地quantumultX项目文件夹：
