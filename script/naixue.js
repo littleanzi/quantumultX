@@ -1,6 +1,6 @@
 /**
 * 奈雪点单·签到脚本
-* 2026-06-14 版本: 1.1.6
+* 2026-06-14 版本: 1.1.7
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/passport/authenticate/wxapp/verify/grc url script-response-body naixue.js
@@ -23,89 +23,73 @@ var CONFIG = {
     signKey: 'sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA'
 };
 
-// ====== SHA1（参考erke.js可靠实现）======
-function SHA1(msg) {
-    function RotateLeft(lValue, iShiftBits) { return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits)); }
-    function AddUnsigned(lX, lY) {
-        var lX4, lY4, lX8, lY8, lResult;
-        lX8 = (lX & 0x80000000); lY8 = (lY & 0x80000000);
-        lX4 = (lX & 0x40000000); lY4 = (lY & 0x40000000);
-        lResult = (lX & 0x3FFFFFFF) + (lY & 0x3FFFFFFF);
-        if (lX4 & lY4) return lResult ^ 0x80000000 ^ lX8 ^ lY8;
-        if (lX4 | lY4) { if (lResult & 0x40000000) return lResult ^ 0xC0000000 ^ lX8 ^ lY8; else return lResult ^ 0x40000000 ^ lX8 ^ lY8; }
-        else return lResult ^ lX8 ^ lY8;
-    }
-    function f(t, b, c, d) { if (t <= 19) return (b & c) | ((~b) & d); if (t <= 39) return (b ^ c ^ d); if (t <= 59) return (b & c) | (b & d) | (c & d); return (b ^ c ^ d); }
-    function K(t) { if (t <= 19) return 0x5A827999; if (t <= 39) return 0x6ED9EBA1; if (t <= 59) return 0x8F1BBCDC; return 0xCA62C1D6; }
-    function Hex(t) { var s = ""; for (var i = 7; i >= 0; i--) s += ((t >>> (i * 4)) & 0x0F).toString(16); return s; }
-    function ConvertToWordArray(string) {
-        var lWordCount, lMessageLength = string.length, lNumberOfWords_temp1 = lMessageLength + 8;
-        var lNumberOfWords_temp2 = (lNumberOfWords_temp1 - (lNumberOfWords_temp1 % 64)) / 64;
-        var lNumberOfWords = (lNumberOfWords_temp2 + 1) * 16, lWordArray = [], lBytePosition = 0, lByteCount = 0;
-        while (lByteCount < lMessageLength) { lWordCount = (lByteCount - (lByteCount % 4)) / 4; lBytePosition = (lByteCount % 4) * 8; lWordArray[lWordCount] = (lWordArray[lWordCount] | (string.charCodeAt(lByteCount) << lBytePosition)); lByteCount++; }
-        lWordCount = (lByteCount - (lByteCount % 4)) / 4; lBytePosition = (lByteCount % 4) * 8;
-        lWordArray[lWordCount] = lWordArray[lWordCount] | (0x80 << lBytePosition);
-        lWordArray[lNumberOfWords - 2] = lMessageLength << 3; lWordArray[lNumberOfWords - 1] = lMessageLength >>> 29;
-        return lWordArray;
-    }
-    function Utf8Encode(string) {
-        string = string.replace(/\r\n/g, "\n"); var utftext = "";
-        for (var n = 0; n < string.length; n++) {
-            var c = string.charCodeAt(n);
-            if (c < 128) utftext += String.fromCharCode(c);
-            else if ((c > 127) && (c < 2048)) { utftext += String.fromCharCode((c >> 6) | 192); utftext += String.fromCharCode((c & 63) | 128); }
-            else { utftext += String.fromCharCode((c >> 12) | 224); utftext += String.fromCharCode(((c >> 6) & 63) | 128); utftext += String.fromCharCode((c & 63) | 128); }
+// ====== SHA1 ======
+function SHA1(str) {
+    var RotateLeft = function(n, s) { return (n << s) | (n >>> (32 - s)); };
+    var Hex = function(n) { var s = "", v; for (var i = 7; i >= 0; i--) { v = (n >>> (i * 4)) & 0x0F; s += v.toString(16); } return s; };
+    str = unescape(encodeURIComponent(str));
+    var n = str.length, W = [], H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
+    var a = [];
+    for (var i = 0; i < n; i++) a[i >> 2] |= str.charCodeAt(i) << (8 * (3 - (i % 4)));
+    a[i >> 2] |= 0x80 << (8 * (3 - (i % 4)));
+    if (i > 55) { a.push(0); a[i >> 2] |= n << 3; } else { a[(n >> 2) + 1] = n << 3; }
+    for (var j = 0; j < a.length; j += 16) {
+        for (var i = 0; i < 16; i++) W[i] = a[j + i] || 0;
+        for (var i = 16; i < 80; i++) W[i] = RotateLeft(W[i-3] ^ W[i-8] ^ W[i-14] ^ W[i-16], 1);
+        var A = H[0], B = H[1], C = H[2], D = H[3], E = H[4];
+        for (var i = 0; i < 80; i++) {
+            var f, K;
+            if (i < 20) { f = (B & C) | ((~B) & D); K = 0x5A827999; }
+            else if (i < 40) { f = B ^ C ^ D; K = 0x6ED9EBA1; }
+            else if (i < 60) { f = (B & C) | (B & D) | (C & D); K = 0x8F1BBCDC; }
+            else { f = B ^ C ^ D; K = 0xCA62C1D6; }
+            var T = (RotateLeft(A, 5) + f + E + K + W[i]) | 0;
+            E = D; D = C; C = RotateLeft(B, 30); B = A; A = T;
         }
-        return utftext;
+        H[0] = (H[0] + A) | 0; H[1] = (H[1] + B) | 0; H[2] = (H[2] + C) | 0; H[3] = (H[3] + D) | 0; H[4] = (H[4] + E) | 0;
     }
-    msg = Utf8Encode(msg);
-    var W = [], H0 = 0x67452301, H1 = 0xEFCDAB89, H2 = 0x98BADCFE, H3 = 0x10325476, H4 = 0xC3D2E1F0, A, B, C, D, E, T;
-    var x = ConvertToWordArray(msg);
-    for (var k = 0; k < x.length; k += 16) {
-        for (var i = 0; i < 16; i++) W[i] = x[k + i];
-        for (i = 16; i <= 79; i++) W[i] = RotateLeft(W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16], 1);
-        A = H0; B = H1; C = H2; D = H3; E = H4;
-        for (i = 0; i <= 19; i++) { T = AddUnsigned(AddUnsigned(AddUnsigned(AddUnsigned(RotateLeft(A, 5), f(i, B, C, D)), E), W[i]), K(i)); E = D; D = C; C = RotateLeft(B, 30); B = A; A = T; }
-        for (i = 20; i <= 39; i++) { T = AddUnsigned(AddUnsigned(AddUnsigned(AddUnsigned(RotateLeft(A, 5), f(i, B, C, D)), E), W[i]), K(i)); E = D; D = C; C = RotateLeft(B, 30); B = A; A = T; }
-        for (i = 40; i <= 59; i++) { T = AddUnsigned(AddUnsigned(AddUnsigned(AddUnsigned(RotateLeft(A, 5), f(i, B, C, D)), E), W[i]), K(i)); E = D; D = C; C = RotateLeft(B, 30); B = A; A = T; }
-        for (i = 60; i <= 79; i++) { T = AddUnsigned(AddUnsigned(AddUnsigned(AddUnsigned(RotateLeft(A, 5), f(i, B, C, D)), E), W[i]), K(i)); E = D; D = C; C = RotateLeft(B, 30); B = A; A = T; }
-        H0 = AddUnsigned(H0, A); H1 = AddUnsigned(H1, B); H2 = AddUnsigned(H2, C); H3 = AddUnsigned(H3, D); H4 = AddUnsigned(H4, E);
-    }
-    return Hex(H0) + Hex(H1) + Hex(H2) + Hex(H3) + Hex(H4);
+    return Hex(H[0]) + Hex(H[1]) + Hex(H[2]) + Hex(H[3]) + Hex(H[4]);
 }
 
-// ====== HmacSHA1 ======
-function HmacSHA1(message, key) {
-    var bs = 64;
-    if (key.length > bs) key = SHA1(key);
-    var k = [], ipad = [], opad = [];
-    for (var i = 0; i < bs; i++) { k[i] = i < key.length ? key.charCodeAt(i) : 0; ipad[i] = k[i] ^ 0x36; opad[i] = k[i] ^ 0x5C; }
-    var inner = SHA1(String.fromCharCode.apply(null, ipad) + message);
-    var iHashBytes = [];
-    for (var i = 0; i < inner.length; i += 2) { iHashBytes.push(parseInt(inner.substr(i, 2), 16)); }
-    return SHA1(String.fromCharCode.apply(null, opad) + String.fromCharCode.apply(null, iHashBytes));
+// ====== HMAC-SHA1 ======
+function HmacSHA1(text, key) {
+    if (key.length > 64) key = SHA1(key);
+    var bKey = [], bText = [], bResult = [];
+    for (var i = 0; i < 64; i++) bKey[i] = i < key.length ? key.charCodeAt(i) : 0;
+    for (var i = 0; i < text.length; i++) bText[i] = text.charCodeAt(i);
+    var ipad = [], opad = [];
+    for (var i = 0; i < 64; i++) { ipad[i] = bKey[i] ^ 0x36; opad[i] = bKey[i] ^ 0x5C; }
+    var inner = SHA1(String.fromCharCode.apply(null, ipad) + text);
+    var innerBytes = [];
+    for (var i = 0; i < inner.length; i += 2) innerBytes.push(parseInt(inner.substr(i, 2), 16));
+    var outer = SHA1(String.fromCharCode.apply(null, opad) + String.fromCharCode.apply(null, innerBytes));
+    return outer;
 }
 
-// ====== Hex转Base64 ======
-function hexToBase64(hex) {
-    var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-    var bytes = [];
-    for (var i = 0; i < hex.length; i += 2) { bytes.push(parseInt(hex.substr(i, 2), 16)); }
-    var output = "";
-    for (var i = 0; i < bytes.length; i += 3) {
-        var chr1 = bytes[i], chr2 = i + 1 < bytes.length ? bytes[i + 1] : 0, chr3 = i + 2 < bytes.length ? bytes[i + 2] : 0;
-        var enc1 = chr1 >> 2, enc2 = ((chr1 & 3) << 4) | (chr2 >> 4), enc3 = ((chr2 & 15) << 2) | (chr3 >> 6), enc4 = chr3 & 63;
-        if (i + 1 >= bytes.length) { enc3 = 64; enc4 = 64; }
-        else if (i + 2 >= bytes.length) { enc4 = 64; }
-        output += _keyStr.charAt(enc1) + _keyStr.charAt(enc2) + (enc3 == 64 ? '=' : _keyStr.charAt(enc3)) + (enc4 == 64 ? '=' : _keyStr.charAt(enc4));
+// ====== Hex to Base64 ======
+function hex2b64(hex) {
+    var b64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var s = "";
+    for (var i = 0; i < hex.length; i += 2) {
+        var c = parseInt(hex.substr(i, 2), 16);
+        s += String.fromCharCode(c);
     }
-    return output;
+    var result = "";
+    for (var i = 0; i < s.length; i += 3) {
+        var b1 = s.charCodeAt(i), b2 = i + 1 < s.length ? s.charCodeAt(i + 1) : 0, b3 = i + 2 < s.length ? s.charCodeAt(i + 2) : 0;
+        result += b64.charAt(b1 >> 2);
+        result += b64.charAt(((b1 & 3) << 4) | (b2 >> 4));
+        result += (i + 1 < s.length) ? b64.charAt(((b2 & 15) << 2) | (b3 >> 6)) : '=';
+        result += (i + 2 < s.length) ? b64.charAt(b3 & 63) : '=';
+    }
+    return result;
 }
 
 // ====== 签名算法 ======
 function generateSignature(nonce, openId, timestamp) {
     var data = "nonce=" + nonce + "&openId=" + openId + "&timestamp=" + timestamp;
-    return hexToBase64(HmacSHA1(data, CONFIG.signKey));
+    var sign = HmacSHA1(data, CONFIG.signKey);
+    return hex2b64(sign);
 }
 
 // ====== 请求体构建 ======
