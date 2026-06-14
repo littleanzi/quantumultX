@@ -3,12 +3,752 @@
     "description": "Desing By any.",
     "icons": [
         {
-            "name": "匹克",
-            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/pk.png"
+            "name": "10086",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/10086.png"
+        },
+        {
+            "name": "Adjd",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Adjd.png"
+        },
+        {
+            "name": "永旺",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/aeon.png"
+        },
+        {
+            "name": "安徽电信",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/ahdx.png"
+        },
+        {
+            "name": "阿里云",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/aliyun.png"
+        },
+        {
+            "name": "阿里云Web",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/aliyunWeb.png"
+        },
+        {
+            "name": "alq",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/alq.png"
+        },
+        {
+            "name": "Anboy",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/anboy.png"
+        },
+        {
+            "name": "傲游",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/aoliao.png"
+        },
+        {
+            "name": "BGPS",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/bgps.png"
+        },
+        {
+            "name": "B站破签",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/bilibiliCrack.png"
+        },
+        {
+            "name": "bjxh",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/bjxh.png"
+        },
+        {
+            "name": "保利影业",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Blyy.png"
+        },
+        {
+            "name": "Bnmdhg",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Bnmdhg.png"
+        },
+        {
+            "name": "BSK",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/bsk.png"
+        },
+        {
+            "name": "Bwcj",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Bwcj.png"
+        },
+        {
+            "name": "Calgary",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Calgary.jpg"
+        },
+        {
+            "name": "CBD",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/cbd.png"
+        },
+        {
+            "name": "CFB",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/cfb.png"
+        },
+        {
+            "name": "Checkbox",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Checkbox.png"
+        },
+        {
+            "name": "奇瑞",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Chery.png"
+        },
+        {
+            "name": "Cheryl's",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Cheryl’s.png"
+        },
+        {
+            "name": "中国移动",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/cmcc.png"
+        },
+        {
+            "name": "Cqxhsd",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Cqxhsd.png"
+        },
+        {
+            "name": "高铁",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/crh.png"
+        },
+        {
+            "name": "CST",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/cst.png"
+        },
+        {
+            "name": "Cwm",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Cwm.png"
+        },
+        {
+            "name": "Czfa",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Czfa.png"
+        },
+        {
+            "name": "dachao",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/dachao.png"
+        },
+        {
+            "name": "Ddnsto",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Ddnsto.png"
+        },
+        {
+            "name": "Dlm",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Dlm.png"
+        },
+        {
+            "name": "动漫之家",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Dmzj.png"
+        },
+        {
+            "name": "多纳",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/duona.png"
+        },
+        {
+            "name": "Dxqd",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Dxqd.png"
+        },
+        {
+            "name": "饿了么",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Elm.png"
+        },
+        {
+            "name": "风信",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/fengxin.png"
+        },
+        {
+            "name": "Ffit",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Ffit.png"
+        },
+        {
+            "name": "FFQC",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/ffqc.png"
+        },
+        {
+            "name": "Firework",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Firework.png"
+        },
+        {
+            "name": "花",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/flower.png"
+        },
+        {
+            "name": "花2",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/flower2.png"
+        },
+        {
+            "name": "fmgj",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/fmgj.png"
+        },
+        {
+            "name": "fqchwl",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/fqchwl.png"
+        },
+        {
+            "name": "ftej",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/ftej.png"
+        },
+        {
+            "name": "fxsh",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/fxsh.png"
+        },
+        {
+            "name": "Gddt",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Gddt.png"
+        },
+        {
+            "name": "广东",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/gdong.png"
+        },
+        {
+            "name": "吉利",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/geely.png"
+        },
+        {
+            "name": "GitHub",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/github.png"
+        },
+        {
+            "name": "gjjj",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/gjjj.png"
+        },
+        {
+            "name": "GLaDOS",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Glados.png"
+        },
+        {
+            "name": "gqft",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/gqft.png"
+        },
+        {
+            "name": "Gril",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/gril.png"
+        },
+        {
+            "name": "Hapi",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hapi.png"
+        },
+        {
+            "name": "Harbor",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/harbor.png"
+        },
+        {
+            "name": "Hax",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hax.png"
+        },
+        {
+            "name": "hbapp",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hbapp.png"
+        },
+        {
+            "name": "海底捞",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hdl.png"
+        },
+        {
+            "name": "喜茶",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/heytea.png"
+        },
+        {
+            "name": "hgds",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hgds.png"
+        },
+        {
+            "name": "海信",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png"
+        },
+        {
+            "name": "Hldc",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hldc.png"
+        },
+        {
+            "name": "hqzl",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hqzl.png"
+        },
+        {
+            "name": "Hsay",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hsay.png"
+        },
+        {
+            "name": "htmwg",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/htmwg.png"
+        },
+        {
+            "name": "Htx",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Htx.png"
+        },
+        {
+            "name": "哗啦啦",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hualahuala.png"
+        },
+        {
+            "name": "鸿星尔克",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hxek.png"
+        },
+        {
+            "name": "Hxsy",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hxsy.jpg"
+        },
+        {
+            "name": "hzh_2",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hzh_2.png"
+        },
+        {
+            "name": "Hzh",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hzh.png"
+        },
+        {
+            "name": "hzlt",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hzlt.png"
+        },
+        {
+            "name": "Iios",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Iios.png"
+        },
+        {
+            "name": "IMG_3486",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/IMG_3486.jpeg"
+        },
+        {
+            "name": "爱奇艺",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Iqiyi.png"
+        },
+        {
+            "name": "jhsh",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/jhsh.png"
+        },
+        {
+            "name": "jlqc",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/jlqc.png"
+        },
+        {
+            "name": "jryc",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/jryc.png"
+        },
+        {
+            "name": "jsb",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/jsb.png"
+        },
+        {
+            "name": "Jtc",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Jtc.png"
+        },
+        {
+            "name": "Kbj",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Kbj.png"
+        },
+        {
+            "name": "联想",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/lenovo.png"
+        },
+        {
+            "name": "轻文",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Linovel.png"
+        },
+        {
+            "name": "ljl",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/ljl.png"
+        },
+        {
+            "name": "Luobook",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/luobook.png"
+        },
+        {
+            "name": "lzft",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/lzft.png"
+        },
+        {
+            "name": "慢慢买",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/manmanbuy.png"
+        },
+        {
+            "name": "米其林",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Michelin.png"
+        },
+        {
+            "name": "美的",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Midea.png"
+        },
+        {
+            "name": "Mini",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/mini.png"
+        },
+        {
+            "name": "猫耳FM",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/missevan.png"
+        },
+        {
+            "name": "Mtmc",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Mtmc.png"
+        },
+        {
+            "name": "美图秀秀",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/mtxx.png"
+        },
+        {
+            "name": "蜜雪冰城",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/mxbc.png"
+        },
+        {
+            "name": "MyBox",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/mybox.png"
         },
         {
             "name": "奈雪",
             "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/naixue.png"
+        },
+        {
+            "name": "雀巢",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Nestle.png"
+        },
+        {
+            "name": "Netflix观察",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/netflixgc.png"
+        },
+        {
+            "name": "nfsq",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/nfsq.png"
+        },
+        {
+            "name": "日产",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/nissan.png"
+        },
+        {
+            "name": "NodeSeek",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/nodeseek.png"
+        },
+        {
+            "name": "pgsh",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/pgsh.png"
+        },
+        {
+            "name": "Pic",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Pic.png"
+        },
+        {
+            "name": "中国人保",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/picc.png"
+        },
+        {
+            "name": "匹克",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/pk.png"
+        },
+        {
+            "name": "PP停车",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/pp_parking.png"
+        },
+        {
+            "name": "泡泡玛特",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/ppmt.png"
+        },
+        {
+            "name": "Prw",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Prw.png"
+        },
+        {
+            "name": "pskj",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/pskj.png"
+        },
+        {
+            "name": "qdsnmc",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/qdsnmc.png"
+        },
+        {
+            "name": "qdxw",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/qdxw.png"
+        },
+        {
+            "name": "青龙",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/qinglong.png"
+        },
+        {
+            "name": "qtx",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/qtx.png"
+        },
+        {
+            "name": "夸克",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Quark.png"
+        },
+        {
+            "name": "rbxj",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/rbxj.png"
+        },
+        {
+            "name": "红牛",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/redbull.png"
+        },
+        {
+            "name": "RPA",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/rpa.png"
+        },
+        {
+            "name": "rqsp",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/rqsp.png"
+        },
+        {
+            "name": "樱花",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/sakura.png"
+        },
+        {
+            "name": "SDL",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/sdl.png"
+        },
+        {
+            "name": "顺丰速运",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Sfsy.png"
+        },
+        {
+            "name": "Silly",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/silly.png"
+        },
+        {
+            "name": "sjxzs",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/sjxzs.png"
+        },
+        {
+            "name": "smqnw",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/smqnw.png"
+        },
+        {
+            "name": "什么值得买",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Smzdm.png"
+        },
+        {
+            "name": "松鲜鲜",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/songxx.png"
+        },
+        {
+            "name": "索尼",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/sony.png"
+        },
+        {
+            "name": "Spotify",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/spotify.png"
+        },
+        {
+            "name": "签到",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/sqdz.png"
+        },
+        {
+            "name": "Stlxz",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Stlxz.png"
+        },
+        {
+            "name": "Sunline",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/sunline.png"
+        },
+        {
+            "name": "Switch",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Switch.png"
+        },
+        {
+            "name": "Sxios",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Sxios.jpg"
+        },
+        {
+            "name": "Talkatone",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/talkatone.png"
+        },
+        {
+            "name": "奶茶",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/teaMilk.png"
+        },
+        {
+            "name": "腾讯视频",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/tenvideo.png"
+        },
+        {
+            "name": "thyc",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/thyc.png"
+        },
+        {
+            "name": "Tmkk",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Tmkk.png"
+        },
+        {
+            "name": "tpt",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/tpt.png"
+        },
+        {
+            "name": "腾讯视频",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/txsp.png"
+        },
+        {
+            "name": "txty",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/txty.png"
+        },
+        {
+            "name": "Tyyp",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Tyyp.png"
+        },
+        {
+            "name": "V2EX",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/v2ex.png"
+        },
+        {
+            "name": "沃尔沃",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/volvo.png"
+        },
+        {
+            "name": "wamgchao",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/wamgchao.png"
+        },
+        {
+            "name": "Wbzj",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Wbzj.png"
+        },
+        {
+            "name": "wgttd",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/wgttd.png"
+        },
+        {
+            "name": "唯品会",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/wph.png"
+        },
+        {
+            "name": "Wsgw",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Wsgw.jpg"
+        },
+        {
+            "name": "网易云破签",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/wyy_crack.png"
+        },
+        {
+            "name": "网易云",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/wyyyy.png"
+        },
+        {
+            "name": "Wzyd",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Wzyd.png"
+        },
+        {
+            "name": "Xbox",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Xbox.png"
+        },
+        {
+            "name": "星巴克",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/xcbwc.png"
+        },
+        {
+            "name": "Xdm",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Xdm.png"
+        },
+        {
+            "name": "xjb",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/xjb.png"
+        },
+        {
+            "name": "小米",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/xmApp.png"
+        },
+        {
+            "name": "xstl",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/xstl.png"
+        },
+        {
+            "name": "xsy",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/xsy.png"
+        },
+        {
+            "name": "xwy",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/xwy.png"
+        },
+        {
+            "name": "xxxx",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/xxxx.jpg"
+        },
+        {
+            "name": "xxyx",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/xxyx.png"
+        },
+        {
+            "name": "ydyp",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/ydyp.png"
+        },
+        {
+            "name": "yhlm",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/yhlm.png"
+        },
+        {
+            "name": "yhss",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/yhss.png"
+        },
+        {
+            "name": "yht",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/yht.png"
+        },
+        {
+            "name": "yky",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/yky.png"
+        },
+        {
+            "name": "YMK",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/YMK.jpg"
+        },
+        {
+            "name": "ymxk",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/ymxk.png"
+        },
+        {
+            "name": "yongpai",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/yongpai.png"
+        },
+        {
+            "name": "优酷",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/youku.jpg"
+        },
+        {
+            "name": "yrh",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/yrh.png"
+        },
+        {
+            "name": "云闪付",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Ysf.png"
+        },
+        {
+            "name": "yuchenios",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/yuchenios.png"
+        },
+        {
+            "name": "zbs",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zbs.png"
+        },
+        {
+            "name": "极氪",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zeekr.png"
+        },
+        {
+            "name": "中国日报",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zgrb.png"
+        },
+        {
+            "name": "正佳",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zhengjia.png"
+        },
+        {
+            "name": "Zippo",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zippo.png"
+        },
+        {
+            "name": "Zmhy",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Zmhy.png"
+        },
+        {
+            "name": "Zsej",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Zsej.png"
+        },
+        {
+            "name": "Zsfc",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Zsfc.png"
+        },
+        {
+            "name": "zsjd",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zsjd.png"
+        },
+        {
+            "name": "zswy",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zswy.png"
+        },
+        {
+            "name": "中兴",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zte.png"
+        },
+        {
+            "name": "Zxcs",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Zxcs.png"
+        },
+        {
+            "name": "zxjl",
+            "url": "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/zxjl.png"
         }
     ]
 }
