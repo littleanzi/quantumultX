@@ -7,7 +7,7 @@
     "35 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx.js, tag=松鲜鲜, img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/songxx.png, enabled=true",
     "34 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/gaode.js, tag=高德打车, enabled=true",
     "33 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js, tag=良品铺子, enabled=true",
-    "32 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克, img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/Hxek.png, enabled=true",
+    "32 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/erke.js, tag=鸿星尔克, img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hxek.png, enabled=true",
     "31 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/hisense.js, tag=海信爱家, img-url=https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png,enabled=true",
    
     "20 5 * * * https://raw.githubusercontent.com/littleanzi/quantumultX/main/script/historyToday.js, tag=历史上的今天, img-url=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/calendar.png,enabled=true",
