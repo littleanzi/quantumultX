@@ -1,6 +1,6 @@
 /**
 * 奈雪点单·签到脚本
-* 2026-06-14 版本: 1.1.9
+* 2026-06-14 版本: 1.2.0
 * 签名密钥 (HmacSHA1): sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA
 * MITM 域名: tm-api.pin-dao.cn
 * 重写规则 (Rewrite): ^https://tm-api\.pin-dao\.cn/passport/authenticate/wxapp/verify/grc url script-response-body naixue.js
@@ -143,7 +143,7 @@ if (isResponse) {
         },
         params: {
             businessType: 1, brand: 26000252, tenantId: 1, channel: "",
-            stallType: 0, storeId: "", storeType: "", cityId: "", districtId: "",
+            stallType: 0, storeId: "26075099", storeType: "", cityId: "", districtId: "",
             appId: "wxab7430e6e8b9a4ab", dAId: "",
             signDate: signDate
         }
@@ -154,7 +154,7 @@ if (isResponse) {
             'content-type': 'application/json',
             'Authorization': 'Bearer ' + accessToken,
             'iv': 'bEZd3soOfZvFptks',
-            'storeId': ''
+            'storeId': '26075099'
         },
         body: JSON.stringify(reqBody)
     }).then(function(response) {
