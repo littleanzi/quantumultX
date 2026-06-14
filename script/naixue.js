@@ -20,7 +20,8 @@ var isResponse = typeof $response !== "undefined";
 var CONFIG = {
     baseUrl: 'https://tm-api.pin-dao.cn',
     signUrl: '/user/sign/save',
-    signKey: 'sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA'
+    signKey: 'sArMTldQ9tqU19XIRDMWz7BO5WaeBnrezA',
+    signOpenId: 'QL6ZOftGzbziPlZwfiXM'
 };
 
 // ====== SHA1 (operates on byte array) ======
@@ -153,19 +154,29 @@ if (isResponse) {
     var reqOpenId = $.getdata('nayuki_openId');
     var reqBody = {
         common: {
-            platform: "wxapp", version: "1.0.0", imei: "", osn: "iPhone", sv: "iOS 15.0",
-            lat: "", lng: "", lang: "zh-CN", currency: "CNY", timeZone: "",
-            nonce: reqNonce, openId: reqOpenId, timestamp: reqTimestamp,
-            signature: generateSignature(reqNonce, reqOpenId, reqTimestamp)
+            platform: "wxapp", version: "6.0.47", imei: "", osn: "iPhone", sv: "iOS 26.3",
+            lat: "", lng: "", lang: "zh_CN", currency: "CNY", timeZone: "",
+            nonce: reqNonce, openId: CONFIG.signOpenId, timestamp: reqTimestamp,
+            signature: generateSignature(reqNonce, CONFIG.signOpenId, reqTimestamp)
         },
-        params: { signDate: signDate }
+        params: {
+            businessType: 1, brand: 26000252, tenantId: 1, channel: "",
+            stallType: 0, storeId: "", storeType: "", cityId: "", districtId: "",
+            appId: "wxab7430e6e8b9a4ab", dAId: "",
+            signDate: signDate
+        }
     };
     console.log('signData=nonce=' + reqNonce + '&openId=' + reqOpenId + '&timestamp=' + reqTimestamp);
     console.log('signature=' + reqBody.common.signature);
     console.log('accessToken=' + accessToken);
     $task.fetch({
         url: CONFIG.baseUrl + CONFIG.signUrl, method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': accessToken },
+        headers: {
+            'content-type': 'application/json',
+            'Authorization': 'Bearer ' + accessToken,
+            'iv': 'bEZd3soOfZvFptks',
+            'storeId': ''
+        },
         body: JSON.stringify(reqBody)
     }).then(function(response) {
         try {
