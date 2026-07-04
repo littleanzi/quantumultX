@@ -6,41 +6,6 @@
     "repo": "https://github.com/littleanzi/quantumultX/tree/main",
     "apps": [
         {
-            "id": "liangppz_sign",
-            "name": "良品铺子",
-            "keys": [
-                "liangppz_sign_data"
-            ],
-            "settings": [
-                {
-                    "id": "liangppz_sign_data",
-                    "name": "账号数据",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "打开小程序后自动捕获",
-                    "autoGrow": true,
-                    "rows": 4,
-                    "desc": "包含 uid 和 openId，打开小程序自动捕获"
-                },
-                {
-                    "id": "liangppz_sign_data.openId",
-                    "name": "openId（备用）",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "若自动捕获不到，手动填入",
-                    "autoGrow": false,
-                    "rows": 1,
-                    "desc": "从抓包 userSignIn 请求体中获取"
-                }
-            ],
-            "author": "@any",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/liangppz.js",
-            "icons": [
-                ""
-            ]
-        },
-        {
             "id": "erke_sign",
             "name": "鸿星尔克",
             "keys": [
@@ -101,32 +66,6 @@
             "icons": [
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png",
                 "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/hisense.png"
-            ]
-        },
-        {
-            "id": "songxx_sign",
-            "name": "松鲜鲜",
-            "keys": [
-                "songxx_sign_data"
-            ],
-            "settings": [
-                {
-                    "id": "songxx_sign_data",
-                    "name": "access_token",
-                    "val": "",
-                    "type": "text",
-                    "placeholder": "从抓包 access_token 参数获取",
-                    "autoGrow": false,
-                    "rows": 1,
-                    "desc": "打开小程序签到页面，抓包获取 access_token"
-                }
-            ],
-            "author": "@any",
-            "repo": "https://github.com/littleanzi/quantumultX/tree/main",
-            "script": "https://raw.githubusercontent.com/littleanzi/quantumultX/refs/heads/main/script/songxx.js",
-            "icons": [
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/songxx.png",
-                "https://raw.githubusercontent.com/littleanzi/quantumultX/main/icon/apps/songxx.png"
             ]
         },
         {
